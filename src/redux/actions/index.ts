@@ -1,0 +1,4 @@
+export{
+  doRegister
+}
+from './userManager'

@@ -1,0 +1,13 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 50px;
+  background: var(--pink-2);
+}
+
+.navbar .title {
+  font-family: SetoFont;
+  font-size: 40px;
+  width: fit-content;
+}
