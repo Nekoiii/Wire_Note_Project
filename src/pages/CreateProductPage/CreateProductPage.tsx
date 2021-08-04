@@ -6,6 +6,7 @@ import React, {
   useRef,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import axios from 'axios';
 import Layout from '../../components/Layout/Layout';
 
 import './CreateProductPage.scss';
@@ -18,11 +19,21 @@ const CreateProductPage = (props: any) => {
   const initState = {};
   const [state, setState] = useState(initState);
   const [imgs, setImgs] = useState<any>({
-    original: [], //用户传的图
+    plain: [], //未修的图
   });
   const ref_inputImg = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    let path = 'http://127.0.0.1:5000/get-imgs';
+    axios
+      .get(path)
+      .then(function (res) {
+        console.log('res-', res);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, []);
 
   const handleClick = (way: string, e?: any) => {
     switch (way) {
@@ -54,14 +65,40 @@ const CreateProductPage = (props: any) => {
         } else if (window.webkitURL != undefined) {
           url = window.webkitURL.createObjectURL(file);
         }
-        return url;
+        return {
+          name: file.name,
+          url: url,
+        };
       })
     );
     await setImgs({
       ...imgs,
-      original: result,
+      plain: result.map((it) => {
+        return it.url;
+      }),
     });
-    console.log('img_url-t');
+    result.forEach((it) => {
+      // axios({
+      //   method: 'post',
+      //   url: 'http://127.0.0.1:5000/post-imgs',
+      //   data: {
+      //     name: it.name,
+      //     url: it.url,
+      //   },
+      // })
+      axios
+        .post('http://127.0.0.1:5000/post-imgs', {
+          name: it.name,
+          url: it.url,
+        })
+        .then(function (response) {
+          console.log('response', response);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    });
+
     console.log('img_url', result);
   };
 
@@ -80,8 +117,8 @@ const CreateProductPage = (props: any) => {
         onChange={(e) => loadImg(e)}
       />
       <div className="img_gallery">
-        {imgs.original && imgs.original.length > 0 && (
-          <img src={imgs.original[0]} alt="" />
+        {imgs.plain && imgs.plain.length > 0 && (
+          <img src={imgs.plain[0]} alt="" />
         )}
       </div>
     </Layout>
