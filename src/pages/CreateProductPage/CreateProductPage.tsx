@@ -2,8 +2,11 @@ import React, { Component, useState, useReducer, useEffect, useRef } from 'react
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import Layout from '../../components/Layout/Layout';
-
 import './CreateProductPage.scss';
+import img_plain from '../../static/imgs_temp/plain.jpg';
+import img_sketch from '../../static/imgs_temp/sketch.jpg';
+import img_contours from '../../static/imgs_temp/contours.jpg';
+import img_anime from '../../static/imgs_temp/anime.jpg';
 
 // import * as cv from 'opencv4nodejs';
 // var cv = require('opencv.js');
@@ -12,6 +15,7 @@ import './CreateProductPage.scss';
 const CreateProductPage = (props: any) => {
   const initState = {};
   const [state, setState] = useState(initState);
+  // const [t, setT] = useState<any>(null);
   const [imgs, setImgs] = useState<{
     plain: string;
     sketch: string;
@@ -20,21 +24,22 @@ const CreateProductPage = (props: any) => {
   }>({
     plain: '', //未修的图
     sketch: '', //素描风
+    // sketch: require('../../static/imgs_temp/sketch.jpg').default, //素描风
     contours: '', //线稿
     anime: '', //动画风
   });
   const ref_inputImg = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    let path = 'http://127.0.0.1:5000/get-imgs';
-    axios
-      .get(path)
-      .then(function (res) {
-        console.log('res-', res);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    // let path = 'http://127.0.0.1:5000/get-imgs';
+    // axios
+    //   .get(path)
+    //   .then(function (res) {
+    //     console.log('res-', res);
+    //   })
+    //   .catch(function (error) {
+    //     console.log(error);
+    //   });
   }, []);
 
   const handleClick = (way: string, e?: any) => {
@@ -52,56 +57,69 @@ const CreateProductPage = (props: any) => {
     if (!(e && e.target && e.target.files && e.target.files.length > 0)) {
       return;
     }
-
-    // //多图的方法：
-    // const files = [...e.target.files];
-    // let result = await Promise.all(
-    //   files.map(file => {
-    //      let url = window.URL.createObjectURL(file);
-    //      return {
-    //       name: file.name,
-    //       url: url,
-    //     };
-    //   })
-    // );
+    /*//多图的方法：
+    const files = [...e.target.files];
+    let result = await Promise.all(
+      files.map(file => {
+         let url = window.URL.createObjectURL(file);
+         return {
+          name: file.name,
+          url: url,
+        };
+      })
+    );
+    */
 
     let file = e.target.files[0];
-    console.log('file', file);
     let objUrl = window.URL.createObjectURL(file);
+    console.log('file', file, 'objUrl', objUrl);
 
-    console.log('objUrl', objUrl);
+    // await setImgs({
+    //   ...imgs,
+    //   plain: objUrl,
+    // });
 
-    await setImgs({
-      ...imgs,
-      plain: objUrl,
-    });
-
+    //图片发到后端处理
     let formData = new FormData();
     formData.append('file', file);
     console.log('formData', formData.get('file')); //*console.log FormData() 时要用.get() 否则输出会为空
-    // result.forEach((it) => {
-    // axios({
-    //   method: 'post',
-    //   url: 'http://127.0.0.1:5000/post-imgs',
-    //   data: {
-    //     name: it.name,
-    //     url: it.ur,l
-    //   },
-    // })
     axios
-      .post('http://127.0.0.1:5000/post-imgs', formData)
-      .then(function (response) {
+      // .post('http://127.0.0.1:5000/post-imgs', formData)
+      .post('http://127.0.0.1:5000/upload', formData)
+      .then(response => {
         console.log('response', response);
+        if (!(response && response.data && response.data.img_paths)) {
+          return;
+        }
+        let img_paths = response.data.img_paths;
+        let base_path = '../../static/imgs_temp/';
+        console.log('img_paths', img_paths);
+        //*problem 这里是在手动等后端写入文件，否则会显示旧文件
+        setTimeout(() => {
+          setImgs({
+            ...imgs,
+            plain: objUrl,
+            // sketch: require(base_path + response.data.img_paths.sketch.split('/').slice(-1)).default,
+            // contours: base_path + response.data.img_paths.contours.split('/').slice(-1),
+            // anime: base_path + response.data.img_paths.anime.split('/').slice(-1),
+            sketch: require('../../static/imgs_temp/sketch.jpg').default,
+            contours: require('../../static/imgs_temp/sketch.jpg').default,
+            anime: require('../../static/imgs_temp/sketch.jpg').default,
+          });
+        }, 500);
+        // console.log('sketch_path', sketch_path);
+        // setT(require('../../static/imgs_temp/sketch.jpg'));
+        // setT(require('' + sketch_path));
       })
-      .catch(function (error) {
-        console.log(error);
+      .catch(err => {
+        console.log(err);
       });
-    // });
-
-    // console.log('img_url', result);
   };
 
-  console.log('t', imgs.plain);
+  // const x = require('../../static/imgs_temp/sketch.jpg');
+  // const x = require(`${imgs.sketch}`);
+  // console.log('imgs.sketch', imgs.sketch);
+  // console.log('t', t);
 
   return (
     <Layout className={'create_product_page '.concat(props.className)}>
@@ -120,11 +138,11 @@ const CreateProductPage = (props: any) => {
         </div>
         <div className='an_img'>
           <div>线稿：</div>
-          {imgs.contours.length > 0 && <img src={imgs.contours} alt='' />}
+          {imgs.contours.length > 0 && <img src={img_contours} alt='' />}
         </div>
         <div className='an_img'>
           <div>动画风：</div>
-          {imgs.anime.length > 0 && <img src={imgs.anime} alt='' />}
+          {imgs.anime.length > 0 && <img src={img_anime} alt='' />}
         </div>
       </div>
     </Layout>
