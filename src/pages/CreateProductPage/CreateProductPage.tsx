@@ -22,11 +22,14 @@ const CreateProductPage = (props: any) => {
     contours: string;
     anime: string;
   }>({
-    plain: '', //未修的图
-    sketch: '', //素描风
-    // sketch: require('../../static/imgs_temp/sketch.jpg').default, //素描风
-    contours: '', //线稿
-    anime: '', //动画风
+    // plain: '', //未修的图
+    // sketch: '', //素描风
+    // contours: '', //线稿
+    // anime: '', //动画风
+    plain: require('../../static/imgs_temp/plain.jpg').default,
+    sketch: require('../../static/imgs_temp/sketch.jpg').default,
+    contours: require('../../static/imgs_temp/sketch.jpg').default,
+    anime: require('../../static/imgs_temp/sketch.jpg').default,
   });
   const ref_inputImg = useRef<HTMLInputElement>(null);
 
@@ -106,7 +109,7 @@ const CreateProductPage = (props: any) => {
             contours: require('../../static/imgs_temp/sketch.jpg').default,
             anime: require('../../static/imgs_temp/sketch.jpg').default,
           });
-        }, 500);
+        }, 1000);
         // console.log('sketch_path', sketch_path);
         // setT(require('../../static/imgs_temp/sketch.jpg'));
         // setT(require('' + sketch_path));

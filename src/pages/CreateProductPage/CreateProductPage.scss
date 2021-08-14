@@ -9,6 +9,14 @@
   visibility: hidden;
 }
 
+//img_gallery
+.create_product_page .img_gallery {
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+}
+
 .create_product_page .img_gallery img {
+  flex: 1;
   width: 30%;
 }

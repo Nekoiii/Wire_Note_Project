@@ -8,6 +8,17 @@ from flask_cors import CORS
 # from controller.img_process import do_sobel
 import controller.img_process as img_process
 import asyncio
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+cred = credentials.Certificate("./maocaostalls-firebase-adminsdk-xzize-5b108061df.json")
+firebase_admin.initialize_app(cred)
+# db = firestore.client()
+db = firestore.client()
+# ref = db.reference("/")
+imgs_ref = db.collection(u'temp').document(u'R3OzWuCFEpgpd82b7sXa')
+info = imgs_ref.get()
+print(u'Document data: {}'.format(info.to_dict())) #转变为字典对象后输出
 
 # 设置允许的文件格式
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'JPG', 'PNG', 'bmp'}
@@ -23,6 +34,8 @@ app = Flask(__name__)
 app.send_file_max_age_default = timedelta(seconds=1)
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
+
+
 
 
 # 接收上传图片后的初处理
@@ -50,6 +63,7 @@ async def upload_img():
                                      secure_filename('anime.' + basename))
 
         f.save(upload_path)
+        f.save('gs: // maocaostalls.appspot.com / imgs_temp')
         f_uploaded = cv.imread(upload_path)  # 转为jpg格式
         cv.imwrite(upload_path_1, f_uploaded, [int(cv.IMWRITE_JPEG_QUALITY), 100])
 
@@ -59,8 +73,8 @@ async def upload_img():
         f_contours = img_process.do_find_contours(upload_path_1)
         cv.imwrite(upload_path_3, f_contours, [int(cv.IMWRITE_JPEG_QUALITY), 100])
 
-        f_anime=img_process.convert_to_anime(upload_path_1)
-        cv.imwrite(upload_path_4,f_anime, [int(cv.IMWRITE_JPEG_QUALITY), 100])
+        f_anime = img_process.convert_to_anime(upload_path_1)
+        cv.imwrite(upload_path_4, f_anime, [int(cv.IMWRITE_JPEG_QUALITY), 100])
 
         response_obj['message'] = 'imgs added!'
 
