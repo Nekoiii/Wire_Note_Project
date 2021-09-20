@@ -1,9 +1,16 @@
-.navbar {
+.navbar {}
+
+.navbar .navbar_content {
   display: flex;
   align-items: center;
   justify-content: space-around;
   height: 50px;
-  background: var(--pink-2);
+  // background: var(--pink-2);
+}
+
+.navbar .home_icon {
+  display: block;
+  width: 50PX;
 }
 
 .navbar .title {

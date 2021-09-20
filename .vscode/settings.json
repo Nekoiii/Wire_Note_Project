@@ -1,4 +1,5 @@
 {
   "editor.accessibilitySupport": "on",
-  "prettier.printWidth": 800
+  "prettier.printWidth": 800,
+  "C_Cpp.errorSquiggles": "Enabled"
 }
