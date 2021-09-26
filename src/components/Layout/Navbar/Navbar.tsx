@@ -18,7 +18,7 @@ const Navbar = (props: any) => {
   return (
     <div className={'navbar '.concat(props.className)}>
       <div className='navbar_content'>
-        <Link to='/stroll'>
+        <Link to='/home-page'>
           <img className='home_icon' src={home_icon} alt='' />
         </Link>
 

@@ -8,6 +8,8 @@ import img_sketch from '../../static/imgs_temp/sketch.jpg';
 import img_contours from '../../static/imgs_temp/contours.jpg';
 import img_anime from '../../static/imgs_temp/anime.jpg';
 
+import './CreateProductPage.scss';
+
 // import * as cv from 'opencv4nodejs';
 // var cv = require('opencv.js');
 // console.log('cv', cv);
