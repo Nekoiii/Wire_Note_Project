@@ -7,6 +7,7 @@ import StrollPage from './pages/StrollPage/StrollPage';
 import LoginPage from './pages/LoginPage/LoginPage';
 import CreateProductPage from './pages/CreateProductPage/CreateProductPage';
 import CoronaPredictPage from './pages/CoronaPredictPage/CoronaPredictPage';
+import ChatRecordPage from './pages/ChatRecordPage/ChatRecordPage';
 
 import configStore from './redux/store';
 
@@ -22,8 +23,10 @@ function App() {
         <Redirect to="/login" /> */}
         {/* <Redirect to="/create-products" /> */}
         {/* <Redirect to='/corona-predict' /> */}
-        <Redirect to='/home-page' />
+        {/* <Redirect to='/home-page' /> */}
+        <Redirect to='/bilili-20211024' />
 
+        <Route path='/bilili-20211024' component={ChatRecordPage} />
         <Route path='/home-page' component={HomePage} />
         <Route path='/stroll' component={StrollPage} />
         <Route path='/login' component={LoginPage} />

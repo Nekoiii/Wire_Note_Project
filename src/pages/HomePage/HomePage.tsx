@@ -31,7 +31,7 @@ const HomePage = (props: any) => {
     <Layout className='home_page'>
       <div className='info_box'>
         <img className='my_icon' src={home_icon} alt='' />
-        <div>猫草</div>
+        <div className='my_name'>猫草</div>
         <div className='platforms_box'>
           <div>bilili(主要驻地, 能找到所有视频作品): 东京打工人猫草</div>
           <div>抖音(只发手绘动画): 东京打工人猫草</div>
