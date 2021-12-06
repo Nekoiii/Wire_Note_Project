@@ -9,9 +9,12 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 import numpy as np
+import asyncio
+import re
 
 url = 'https://www.homes.co.jp/kodate/chuko/list/'
-header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)',#*注: 不设置这个会被拒绝访问
+header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)',
+          # *注: 不设置这个会被拒绝访问
           'origin': 'https://www.homes.co.jp',
           'referer': 'https://www.homes.co.jp/kodate/chuko/list/',
           }
@@ -28,71 +31,87 @@ last_page_li = soup.find('li', {'class': 'lastPage'})  # 总页数
 if last_page_li:
     last_page_a = last_page_li.find('a')
     last_page_num = int(last_page_a.attrs['data-page'])
-    print(last_page_num)
-# 总物件数
-'''totalhits_input = soup.find('input', id='totalhits')
-if totalhits_input:
-    totalhits_value = totalhits_input.attrs['value']
-    print( totalhits_value)'''
+    # print(last_page_num)
+
+
+# 总物件数 #*problem:不知为何会比网页里的少
+# totalhits_input = soup.find('input', id='totalhits')
+# if totalhits_input:
+#     totalhits_value = totalhits_input.attrs['value']
+#     print( totalhits_value)
+
+# 检查是否为数字or小数点
+def check_num(string):
+    return (string.isdigit() or string == '.')
 
 
 # 获取单个物件的详细信息
 # 返回price,space,BCR,FAR
-def get_house_details(house_obj):
-    res = requests.post(house_obj['herf'], headers=header)
+async def get_house_details(house_obj):
+    if (pd.isna(house_obj['href'])): return house_obj
+    res = requests.post(house_obj['href'], headers=header)
     soup = BeautifulSoup(res.text, 'lxml')
 
-    priceLabel_ele = soup.find(class_='price')  # 价格
-    price_ele = soup.find(class_='num') if priceLabel_ele else None
-    house_obj['price'] = price_ele.text.replace(',', '').replace('万円', '') if price_ele else np.NaN
+    price_ele = soup.find(id='chk-bkc-moneyroom')  # 价格
+    house_obj['price'] = price_ele.text.split('～')[0].split('(')[0].split('（')[0].replace(',', '').replace('万円','') if price_ele else np.NaN
     land_area_ele = soup.find(id='chk-bkc-landarea')  # 土地面积
-    house_obj['land_area'] = land_area_ele.text.split('m')[0] \
-        if (land_area_ele and len(land_area_ele.text.split('m')) > 1) else np.NaN
+    house_obj['land_area'] = ''.join(filter(check_num, re.split('[mｍ]', land_area_ele.text.split('～')[0])[0])) \
+        if (land_area_ele and len(re.split('[mｍ]', land_area_ele.text.split('～')[0])) > 1) else np.NaN
     house_area_ele = soup.find(id='chk-bkc-housearea')  # 建物面积
-    house_obj['house_area'] = house_area_ele.text.split('m')[0] \
-        if (house_area_ele and len(house_area_ele.text.split('m')) > 1) else np.NaN
+    house_obj['house_area'] = ''.join(filter(check_num, re.split('[mｍ]', house_area_ele.text.split('～')[0])[0])) \
+        if (house_area_ele and len(re.split('[mｍ]', house_area_ele.text.split('～')[0])) > 1) else np.NaN
     BCR_FAR_ele = soup.find(id='chk-bkd-landkenpeiyoseki')  # 建蔽率/容積率
     if BCR_FAR_ele:
-        BCR_FAR_text_list = href_ele.text.split('／')
-        house_obj['BCR'] = BCR_FAR_text_list[0].replace('%')
-        house_obj['FAR'] = BCR_FAR_text_list[1].replace('%') if len(BCR_FAR_text_list) > 1 else np.NaN
-    station_ele = j.find(class_='trafficText')  # 最近车站/徒步距离
+        BCR_FAR_text_list = re.split('[／/・\u3000\s{1}]', BCR_FAR_ele.text.replace('建ぺい率・容積率', ''))
+        print('ele', BCR_FAR_ele.text, BCR_FAR_text_list)
+        house_obj['BCR'] = ''.join(filter(check_num, BCR_FAR_text_list[0].replace('%', '')))
+        house_obj['FAR'] = ''.join(filter(check_num, BCR_FAR_text_list[1].replace('%', ''))) if len(
+            BCR_FAR_text_list) > 1 else np.NaN
+    station_ele = soup.find(class_='trafficText')  # 最近车站/徒步距离
     if station_ele:
         house_obj['nearest_station'] = station_ele.text.split('」')[0].split('「')[1]
-        house_obj['station_dist'] = filter(str.isdigit, station_ele.text.split('徒歩')[1]) \
-            if len(station_ele.text.split('徒歩')) > 0 else np.NaN
+        house_obj['station_dist'] = ''.join(filter(str.isdigit, station_ele.text.split('徒歩')[1])) \
+            if len(station_ele.text.split('徒歩')) > 1 else np.NaN
     age_ele = soup.find(id='chk-bkc-kenchikudate')  # 建筑年数
-    house_obj['age'] = filter(str.isdigit, age_ele.text.split('築')[1]) \
-        if (age_ele and len(age_ele.text.split('築')) > 0) else np.NaN
+    house_obj['age'] = filter(check_num, age_ele.text.split('築')[1]) \
+        if (age_ele and len(age_ele.text.split('築')) > 1) else np.NaN
     can_not_be_rebuilt_ele = soup.body.findAll(text='再建築不可')  # 是否再建筑不可
     house_obj['can_not_be_rebuilt'] = True if len(can_not_be_rebuilt_ele) > 0 else False
-
     # _ele = soup.find(class_='')  #*模板
     # house_obj[''] = _ele.text if _ele else np.NaN
+    print('house_obj-1 --', house_obj)
+    return house_obj
 
 
 # 遍历全部页面，获取所有物件
-house_list = []
-last_page_num = 2  # *for test
-for i in range(last_page_num - 1):
-    res = requests.post(url + '?page=' + str(int(i + 1)) + '?' + encodeData, headers=header)
-    soup = BeautifulSoup(res.text, 'lxml')
-    house_ele = soup.find_all(class_='moduleInner')  # 一个物件的整大块元素
-    for j in house_ele:
-        # 种类,链接,池袋时间,价格,土地面积,建物面积,建蔽率,容積率,最近车站,最近车站徒步距离,建筑年数,是否再建筑不可
-        house_obj = {'type': np.NaN, 'herf': np.NaN, 'ike_dist': np.NaN, 'price': np.NaN,
-                     'land_area': np.NaN, 'house_area': np.NaN, 'BCR': np.NaN, 'FAR': np.NaN,
-                     'nearest_station': np.NaN, 'station_dist': np.NaN,
-                     'age': np.NaN, 'price': np.NaN, 'can_not_be_rebuilt': False}
-        type_ele = j.find(class_='bType')  # 种类(土地/新筑一户建/中古一户建)
-        house_obj['type'] = type_ele.text if type_ele else np.NaN
-        ike_dist_ele = j.find(class_='time')  # 去池袋所需时间
-        house_obj['ike_dist'] = ike_dist_ele.text if ike_dist_ele else np.NaN
-        if pd.isna(house_obj['ike_dist']):  # Homes会显示pr物件,这里把它们筛选掉
-            continue
-        href_ele = j.find(class_='prg-bukkenNameAnchor')  # 物件链接
-        house_obj['href'] = href_ele.attrs['href'] if href_ele else np.NaN
-        if href_ele:
-            get_house_details(house_obj)
+async def get_house_list():
+    house_list = []
+    last_page_num = 2  # *for test
+    for i in range(last_page_num - 1):
+        res = requests.post(url + '?page=' + str(int(i + 1)) + '?' + encodeData, headers=header)
+        soup = BeautifulSoup(res.text, 'lxml')
+        house_ele = soup.find_all(class_='moduleInner')  # 一个物件的整大块元素
+        print(res)
+        for j in house_ele:
+            # 种类,链接,池袋时间,价格,土地面积,建物面积,建蔽率,容積率,最近车站,最近车站徒步距离,建筑年数,是否再建筑不可
+            house_obj = {'id': np.NaN, 'type': np.NaN, 'href': np.NaN, 'ike_dist': np.NaN, 'price': np.NaN,
+                         'land_area': np.NaN, 'house_area': np.NaN, 'BCR': np.NaN, 'FAR': np.NaN,
+                         'nearest_station': np.NaN, 'station_dist': np.NaN,
+                         'age': np.NaN, 'price': np.NaN, 'can_not_be_rebuilt': False}
+            type_ele = j.find(class_='bType')  # 种类(土地/新筑一户建/中古一户建)
+            house_obj['type'] = type_ele.text if type_ele else np.NaN
+            ike_dist_ele = j.find(class_='time')  # 去池袋所需时间
+            house_obj['ike_dist'] = ike_dist_ele.text.replace('分', '') if ike_dist_ele else np.NaN
+            if pd.isna(house_obj['ike_dist']):  # Homes会显示pr物件,这里把它们筛选掉
+                continue
+            href_ele = j.find(class_='prg-bukkenNameAnchor')  # 物件链接
+            if href_ele:
+                house_obj['href'] = href_ele.attrs['href']
+                house_obj['id'] = 'b-' + href_ele.attrs['href'].split('b-')[-1].replace('/', '')
+                house_obj = await get_house_details(house_obj)
+                house_list.append(house_obj)
+    return house_list
 
-print(house_list)
+
+house_list = asyncio.run(get_house_list())
+print('house_list: ', house_list)
