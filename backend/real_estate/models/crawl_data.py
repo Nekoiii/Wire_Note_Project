@@ -63,7 +63,6 @@ async def get_house_details(house_obj):
     BCR_FAR_ele = soup.find(id='chk-bkd-landkenpeiyoseki')  # 建蔽率/容積率
     if BCR_FAR_ele:
         BCR_FAR_text_list = re.split('[／/・\u3000\s{1}]', BCR_FAR_ele.text.replace('建ぺい率・容積率', ''))
-        print('ele', BCR_FAR_ele.text, BCR_FAR_text_list)
         house_obj['BCR'] = ''.join(filter(check_num, BCR_FAR_text_list[0].replace('%', '')))
         house_obj['FAR'] = ''.join(filter(check_num, BCR_FAR_text_list[1].replace('%', ''))) if len(
             BCR_FAR_text_list) > 1 else np.NaN
@@ -77,10 +76,10 @@ async def get_house_details(house_obj):
         if (age_ele and len(age_ele.text.split('築')) > 1) else np.NaN
     can_not_be_rebuilt_ele = soup.body.findAll(text='再建築不可')  # 是否再建筑不可
     house_obj['can_not_be_rebuilt'] = True if len(can_not_be_rebuilt_ele) > 0 else False
+    # print('house_obj---', house_obj)
+    return house_obj
     # _ele = soup.find(class_='')  #*模板
     # house_obj[''] = _ele.text if _ele else np.NaN
-    print('house_obj-1 --', house_obj)
-    return house_obj
 
 
 # 遍历全部页面，获取所有物件
@@ -113,5 +112,5 @@ async def get_house_list():
     return house_list
 
 
-house_list = asyncio.run(get_house_list())
-print('house_list: ', house_list)
+# house_list = asyncio.run(get_house_list())
+# print('house_list: ', house_list)
