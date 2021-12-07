@@ -30,7 +30,7 @@ header = {
 
 # 新筑/中古一戶建/土地，池袋40min以内，车站15min以内，土地所有权，除去价格未定，价格低到高
 # *注:encodeData字符串不能换行不然会失效!!!!
-encodeData = 'cond%5Bsortby%5D=fee&cond%5Bprecond%5D=1003&referer=list&landingRouteAttr=a%3A2%3A%7Bs%3A8%3A%22category%22%3Bs%3A6%3A%22kodate%22%3Bs%3A6%3A%22_route%22%3Bs%3A20%3A%22bukken_list_category%22%3B%7D&totalhits=1%2C087&cond%5Bmbg%5D%5B1003%5D=1003&cond%5Bmbg%5D%5B1004%5D=1004&cond%5Bmbg%5D%5B1005%5D=1005&cond%5Bmoneyroom%5D=0&cond%5Bmoneyroomh%5D=0&cond%5Bhousearea%5D=0&cond%5Bhouseareah%5D=0&cond%5Blandarea%5D=0&cond%5Blandareah%5D=0&cond%5Bwalkminutesh%5D=15&cond%5Bcommute_eki%5D%5B0%5D=%E6%B1%A0%E8%A2%8B&cond%5Bcommute_time%5D%5B0%5D=40&cond%5Bcommute_transfer_count%5D%5B0%5D=0&cond%5Bhouseageh%5D=0&cond%5Bmcf%5D%5B120301%5D=120301&cond%5Bnewdate%5D=0&cond%5Bfreeword%5D=&cond%5Bfwtype%5D=1'
+encodeData = 'cond%5Bsortby%5D=fee&cond%5Bprecond%5D=1003&referer=list&landingRouteAttr=a%3A2%3A%7Bs%3A8%3A%22category%22%3Bs%3A6%3A%22kodate%22%3Bs%3A6%3A%22_route%22%3Bs%3A20%3A%22bukken_list_category%22%3B%7D&totalhits=1%2C038&cond%5Bmbg%5D%5B1003%5D=1003&cond%5Bmbg%5D%5B1004%5D=1004&cond%5Bmbg%5D%5B1005%5D=1005&cond%5Bmoneyroom%5D=0&cond%5Bmoneyroomh%5D=0&cond%5Bfee_option_mitei%5D=1&cond%5Bhousearea%5D=0&cond%5Bhouseareah%5D=0&cond%5Blandarea%5D=0&cond%5Blandareah%5D=0&cond%5Bwalkminutesh%5D=15&cond%5Bcommute_eki%5D%5B0%5D=%E6%B1%A0%E8%A2%8B&cond%5Bcommute_time%5D%5B0%5D=40&cond%5Bcommute_transfer_count%5D%5B0%5D=0&cond%5Bhouseageh%5D=0&cond%5Bmcf%5D%5B120301%5D=120301&cond%5Bnewdate%5D=0&cond%5Bfreeword%5D=&cond%5Bfwtype%5D=1'
 # *注:encodeData不能直接加在url后不然后面翻页会失效啊啊啊啊!!!!
 res = requests.post(url, headers=header, data=encodeData)
 
@@ -108,7 +108,7 @@ async def get_house_details(house_obj):
 # 遍历全部页面，获取所有物件
 async def get_house_list():
     house_list = []
-    # last_page_num = 2  # *for test
+    last_page_num = 2  # *for test
     for i in range(last_page_num - 1):
         # *注:encodeData不能直接加在这里啊啊啊啊
         # complete_url = url + '?page=' + str(int(i + 1)) + '&' + encodeData
@@ -128,7 +128,7 @@ async def get_house_list():
                          'nearest_station': np.NaN, 'station_dist': np.NaN,
                          'age': np.NaN, 'price': np.NaN, 'can_not_be_rebuilt': False}
             type_ele = j.find(class_='bType')  # 种类(土地/新筑一户建/中古一户建)
-            house_obj['type'] = type_ele.text if type_ele else np.NaN
+            house_obj['type'] = type_ele.text.replace(' ', '').replace('\n', '') if type_ele else np.NaN
             ike_dist_ele = j.find(class_='time')  # 去池袋所需时间
             house_obj['ike_dist'] = ike_dist_ele.text.replace('分', '') if ike_dist_ele else np.NaN
             if pd.isna(house_obj['ike_dist']):  # Homes会显示pr物件,这里把它们筛选掉
