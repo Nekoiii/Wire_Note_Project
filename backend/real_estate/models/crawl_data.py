@@ -90,7 +90,7 @@ async def get_house_details(house_obj):
             house_obj['nearest_station'] = station_ele.text.split('」')[0].split('「')[1]
         elif len(re.compile('[駅.+線]').findall(station_ele.text)) > 0:
             house_obj['nearest_station'] = station_ele.text.split('駅')[0].split('線')[-1].replace(' ', '').replace('\n', '').replace('\r', '')
-        house_obj['station_dist'] = ''.join(filter(str.isdigit, station_ele.text.split('徒歩')[1])) \
+        house_obj['station_dist'] = ''.join(filter(str.isdigit, station_ele.text.split('徒歩')[1].split('分')[0])) \
             if len(station_ele.text.split('徒歩')) > 1 else np.NaN
         # print('station_ele.text--',house_obj['id'] ,station_ele.text,'---',house_obj['nearest_station'])
 
