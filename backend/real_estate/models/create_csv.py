@@ -19,11 +19,16 @@ def create_new_csv(file_name, header):
         f_writer.writerow(header)
     return
 
-
 house_list = asyncio.run(get_house_list())
 print('house_list: ', house_list)
 if len(house_list) > 0:
     keys_list = list(house_list[0].keys())
     print(keys_list)
-
-create_new_csv('houses_data_1', keys_list)
+    create_new_csv('houses_data_1', keys_list)
+    value_list=[]
+    for it in house_list:
+        value_list.append(list(it.values()))
+    print(value_list)
+    with open('houses_data_1.csv', 'a') as f:  # 'a': 从尾部添加
+        f_writer = csv.writer(f)
+        f_writer.writerows(value_list)
