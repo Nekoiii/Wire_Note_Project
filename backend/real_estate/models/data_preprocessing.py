@@ -19,31 +19,43 @@ import csv
 
 #dataset_csv='houses_data_1.csv'
 
-'''dataset=pd.read_csv('XXX.csv')
-dataset['type']=dataset['type'].str.replace('xxx','中古一戸建て')
-dataset.to_csv('XXX.csv', index=False) '''   
+'''df=pd.read_csv('XXX.csv')
+df['type']=df['type'].str.replace('xxx','中古一戸建て')
+df.to_csv('XXX.csv', index=False) '''   
 
+#去空格和换行符
 
 #去除空格或换行符\n
 def remove_space(dataset_csv):
-    dataset=pd.read_csv(dataset_csv)
-    #*注: 一定要加.str才能用啊啊啊啊
-    #dataset['type']=dataset['type'].str.replace(' ','').str.replace('\n', '').str.replace('\r', '')
-    dataset['nearest_station']=dataset['nearest_station'].str.replace(' ','').str.replace('\n', '').str.replace('\r', '')
-    dataset.to_csv('remove_space.csv', index=False)
+    df=pd.read_csv(dataset_csv)
+    #*注: pandas中操作字符串一定要加.str啊啊啊啊
+    #df['type']=df['type'].str.replace(' ','').str.replace('\n', '').str.replace('\r', '')
+    df['nearest_station']=df['nearest_station'].str.replace(' ','').str.replace('\n', '').str.replace('\r', '')
+    df.to_csv('remove_space.csv', index=False)
     return
 #remove_space()
 
-#导入dataset,返回x,y
+#数据去重
+def data_deduplication():
+    dataset_csv='houses_data_1.csv'
+    df=pd.read_csv(dataset_csv)
+    usecols=['type','ike_dist','price','land_area','house_area', 'BCR', 'FAR','nearest_station', 'station_dist','age', 'can_not_be_rebuilt']
+    df_deduplication=df.drop_duplicates(usecols) 
+    print (df.size,df_deduplication.size)
+    df_deduplication.to_csv('data_deduplication.csv', index=False)
+
+
+#导入df,返回x,y
 def import_dataset(dataset_csv):
-    dataset=pd.read_csv(dataset_csv)
+    df=pd.read_csv(dataset_csv)
     #*注:X中就算只取单列也不能不能[:, 1],一定要[:, 1:2]!!!!
-    X=np.hstack((dataset.iloc[:, 1:2].values,dataset.iloc[:, 3:4].values,dataset.iloc[:, 5:9].values,dataset.iloc[:, 10:].values))
-    y=dataset.iloc[:, 4].values
+    X=np.hstack((df.iloc[:, 1:2].values,df.iloc[:, 3:4].values,df.iloc[:, 5:9].values,df.iloc[:, 10:].values))
+    y=df.iloc[:, 4].values
     print(X[1])
     print(y)
     return(X,y)
 #X,y=import_dataset()
+
 
 #处理缺失数据,返回补全的数据
 def process_missing_data(data):

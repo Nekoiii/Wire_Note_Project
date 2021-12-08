@@ -72,7 +72,7 @@ async def get_house_details(house_obj):
         if (house_area_ele and len(re.split('[mｍ]', house_area_ele.text.split('～')[0])) > 1) else np.NaN
     BCR_FAR_ele = soup.find(id='chk-bkd-landkenpeiyoseki')  # 建蔽率/容積率
     if BCR_FAR_ele:
-        BCR_FAR_text_list = re.split('%', BCR_FAR_ele.text)
+        BCR_FAR_text_list = re.split('[%％]', BCR_FAR_ele.text)
         house_obj['BCR'] = ''.join(filter(check_num, BCR_FAR_text_list[0]))
         house_obj['FAR'] = ''.join(filter(check_num, BCR_FAR_text_list[1])) \
             if len(BCR_FAR_text_list) > 1 else np.NaN
@@ -128,7 +128,7 @@ async def get_house_list():
             house_obj = {'id': np.NaN, 'type': np.NaN, 'href': np.NaN, 'ike_dist': np.NaN, 'price': np.NaN,
                          'land_area': np.NaN, 'house_area': np.NaN, 'BCR': np.NaN, 'FAR': np.NaN,
                          'nearest_station': np.NaN, 'station_dist': np.NaN,
-                         'age': np.NaN, 'price': np.NaN, 'can_not_be_rebuilt': False}
+                         'age': np.NaN,  'can_not_be_rebuilt': False}
             type_ele = j.find(class_='bType')  # 种类(土地/新筑一户建/中古一户建)
             house_obj['type'] = type_ele.text.replace(' ', '').replace('\n', '').replace('\r',
                                                                                          '') if type_ele else np.NaN
