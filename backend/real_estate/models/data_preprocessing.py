@@ -17,25 +17,25 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import csv
 
-dataset_csv='houses_data_1.csv'
+#dataset_csv='houses_data_1.csv'
 
-dataset=pd.read_csv('XXX.csv')
+'''dataset=pd.read_csv('XXX.csv')
 dataset['type']=dataset['type'].str.replace('xxx','中古一戸建て')
-dataset.to_csv('XXX.csv', index=False)    
+dataset.to_csv('XXX.csv', index=False) '''   
 
 
 #去除空格或换行符\n
-def remove_space():
+def remove_space(dataset_csv):
     dataset=pd.read_csv(dataset_csv)
     #*注: 一定要加.str才能用啊啊啊啊
     #dataset['type']=dataset['type'].str.replace(' ','').str.replace('\n', '').str.replace('\r', '')
     dataset['nearest_station']=dataset['nearest_station'].str.replace(' ','').str.replace('\n', '').str.replace('\r', '')
     dataset.to_csv('remove_space.csv', index=False)
     return
-remove_space()
+#remove_space()
 
 #导入dataset,返回x,y
-def import_dataset():
+def import_dataset(dataset_csv):
     dataset=pd.read_csv(dataset_csv)
     #*注:X中就算只取单列也不能不能[:, 1],一定要[:, 1:2]!!!!
     X=np.hstack((dataset.iloc[:, 1:2].values,dataset.iloc[:, 3:4].values,dataset.iloc[:, 5:9].values,dataset.iloc[:, 10:].values))
@@ -43,7 +43,15 @@ def import_dataset():
     print(X[1])
     print(y)
     return(X,y)
-X,y=import_dataset()
+#X,y=import_dataset()
+
+#处理缺失数据,返回补全的数据
+def process_missing_data(data):
+    imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
+    imputer.fit(data)
+    data=imputer.transform(data)
+    return(data)
+#X[:, 1:-1]=process_missing_data(X[:, 1:-1])
 
 #分类型数据用OneHotEncoder进行标准化
 def do_OneHotEncoder(data,col_i):
@@ -53,26 +61,27 @@ def do_OneHotEncoder(data,col_i):
     #防止虚拟变量陷阱,去掉第一列
     data=data[:,1:]
     return(data)
-print(X[0])
-X=do_OneHotEncoder(X,0)
-X=do_OneHotEncoder(X,-1)
+#print(X[0])
+#X=do_OneHotEncoder(X,0)
+#X=do_OneHotEncoder(X,-1)
 
-#处理缺失数据,返回补全的数据
-def process_missing_data(data):
-    imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
-    imputer.fit(data)
-    data=imputer.transform(data)
-    return(data)
+#分为训练集、测试集
+def split_training_and_test(X,y,test_size=0.2,random_state=0):
+    X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=random_state)
+    return(X_train,X_test,y_train,y_test)
 
+#X_train,X_test,y_train,y_test=split_training_and_test(X,y)
+#print(X_train[0],X_test[0],y_train[0],y_test[0])
 
+#归一化
+def do_standrad_scaler(data):
+    sc=StandardScaler()
+    data=sc.fit_transform(data)
+    return(sc,data)
 
-
-
-
-
-
-
-
+#画图
+def draw_plot(x_train,y_train):
+    plt.scatter(x_train,y_train,color='red')
 
 
 

@@ -62,8 +62,8 @@ async def get_house_details(house_obj):
     soup = BeautifulSoup(res.text, 'lxml')
 
     price_ele = soup.find(id='chk-bkc-moneyroom')  # 价格
-    house_obj['price'] = price_ele.text.split('～')[0].split('(')[0].split('（')[0].replace(',', '').replace('万円',
-                                                                                                           '') if price_ele else np.NaN
+    house_obj['price'] = ''.join(filter(check_num,price_ele.text.split('～')[0].split('(')[0].split('（')[0].split('・')[0].split('、')[0] \
+        .replace(',', '').replace('，', '').replace('万円', ''))) if price_ele else np.NaN
     land_area_ele = soup.find(id='chk-bkc-landarea')  # 土地面积
     house_obj['land_area'] = ''.join(filter(check_num, re.split('[mｍ]', land_area_ele.text.split('～')[0])[0])) \
         if (land_area_ele and len(re.split('[mｍ]', land_area_ele.text.split('～')[0])) > 1) else np.NaN
@@ -89,7 +89,9 @@ async def get_house_details(house_obj):
         if station_ele.text.find('」') > 0:
             house_obj['nearest_station'] = station_ele.text.split('」')[0].split('「')[1]
         elif len(re.compile('[駅.+線]').findall(station_ele.text)) > 0:
-            house_obj['nearest_station'] = station_ele.text.split('駅')[0].split('線')[-1].replace(' ', '').replace('\n', '').replace('\r', '')
+            house_obj['nearest_station'] = station_ele.text.split('駅')[0].split('線')[-1].replace(' ', '').replace('\n',
+                                                                                                                  '').replace(
+                '\r', '')
         house_obj['station_dist'] = ''.join(filter(str.isdigit, station_ele.text.split('徒歩')[1].split('分')[0])) \
             if len(station_ele.text.split('徒歩')) > 1 else np.NaN
         # print('station_ele.text--',house_obj['id'] ,station_ele.text,'---',house_obj['nearest_station'])
@@ -128,9 +130,10 @@ async def get_house_list():
                          'nearest_station': np.NaN, 'station_dist': np.NaN,
                          'age': np.NaN, 'price': np.NaN, 'can_not_be_rebuilt': False}
             type_ele = j.find(class_='bType')  # 种类(土地/新筑一户建/中古一户建)
-            house_obj['type'] = type_ele.text.replace(' ', '').replace('\n', '').replace('\r', '') if type_ele else np.NaN
-            if house_obj['type'] =='一戸建て':
-                house_obj['type']='中古一戸建て'
+            house_obj['type'] = type_ele.text.replace(' ', '').replace('\n', '').replace('\r',
+                                                                                         '') if type_ele else np.NaN
+            if house_obj['type'] == '一戸建て':
+                house_obj['type'] = '中古一戸建て'
             ike_dist_ele = j.find(class_='time')  # 去池袋所需时间
             house_obj['ike_dist'] = ike_dist_ele.text.replace('分', '') if ike_dist_ele else np.NaN
             if pd.isna(house_obj['ike_dist']):  # Homes会显示pr物件,这里把它们筛选掉
