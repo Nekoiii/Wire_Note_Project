@@ -72,7 +72,7 @@ async def get_house_details(house_obj):
         if (house_area_ele and len(re.split('[mｍ]', house_area_ele.text.split('～')[0])) > 1) else np.NaN
     BCR_FAR_ele = soup.find(id='chk-bkd-landkenpeiyoseki')  # 建蔽率/容積率
     if BCR_FAR_ele:
-        BCR_FAR_text_list = re.split('[%％]', BCR_FAR_ele.text)
+        BCR_FAR_text_list = re.split('[%％/]', BCR_FAR_ele.text)
         house_obj['BCR'] = ''.join(filter(check_num, BCR_FAR_text_list[0]))
         house_obj['FAR'] = ''.join(filter(check_num, BCR_FAR_text_list[1])) \
             if len(BCR_FAR_text_list) > 1 else np.NaN
@@ -110,7 +110,7 @@ async def get_house_details(house_obj):
 # 遍历全部页面，获取所有物件
 async def get_house_list():
     house_list = []
-    last_page_num = 2  # *for test
+    #last_page_num = 3  # *for test
     for i in range(last_page_num - 1):
         # *注:encodeData不能直接加在这里啊啊啊啊
         # complete_url = url + '?page=' + str(int(i + 1)) + '&' + encodeData

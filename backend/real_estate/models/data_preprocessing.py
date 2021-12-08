@@ -35,11 +35,33 @@ def remove_space(dataset_csv):
     return
 #remove_space()
 
+def convert_to_helf_width(string):
+    new_string_list=[]
+    for char in string:
+                num=ord(char)
+                if num==0x3000:
+                    num=32
+                elif 0xFF01 <= num <= 0xFF5E:
+                    num -= 0xfee0
+                num = chr(num)
+                new_string_list.append(num)
+    new_string=''.join(new_string_list)
+    return new_string
+#全角转半角
+def do_convert_to_helf_width():
+    dataset_csv='houses_data_1.csv'           
+    df=pd.read_csv(dataset_csv)
+    df['price']=df['price'].apply(convert_to_helf_width)
+    print(df['price'])            
+    df.to_csv('convert_to_helf_width.csv', index=False)
+    return
+
+
 #数据去重
 def data_deduplication():
     dataset_csv='houses_data_1.csv'
     df=pd.read_csv(dataset_csv)
-    usecols=['type','ike_dist','price','land_area','house_area', 'BCR', 'FAR','nearest_station', 'station_dist','age', 'can_not_be_rebuilt']
+    usecols=['type','price','land_area','house_area', 'BCR', 'FAR','nearest_station', 'station_dist','age', 'can_not_be_rebuilt']
     df_deduplication=df.drop_duplicates(usecols) 
     print (df.size,df_deduplication.size)
     df_deduplication.to_csv('data_deduplication.csv', index=False)

@@ -6,7 +6,9 @@
 """
 import sys
 sys.path.append('/Users/nekosa/code/maocaoStalls/backend/real_estate/models')
+sys.path.append('/Users/nekosa/code/maocaoStalls/backend/real_estate/models/plot')
 import data_preprocessing
+import plot_charts
 from sklearn.metrics import r2_score
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -32,9 +34,9 @@ def do_data_preprocessing():
 # 简单线性回归(Simple Linear Regression)
 # X:土地面积
 def do_simple_linear_regression():
-    dataset = pd.read_csv(dataset_csv)
-    X = dataset.iloc[:, 5:6].values
-    y = dataset.iloc[:, 4].values
+    df = pd.read_csv(dataset_csv)
+    X = df.iloc[:, 5:6].values
+    y = df.iloc[:, 4].values
 
     X_train, X_test, y_train, y_test = data_preprocessing.split_training_and_test(
         X, y)
@@ -60,8 +62,8 @@ def do_multiple_linear_regression():
     regressor = LinearRegression()
     regressor.fit(X_train, y_train)
 
-    #X_test[:, 5:] = sc_X.transform(X_test[:, 5:])
-    #y_pred = sc_y.inverse_transform(regressor.predict(X_test))
+    X_test[:, 5:] = sc_X.transform(X_test[:, 5:])
+    y_pred = sc_y.inverse_transform(regressor.predict(X_test))
     np.set_printoptions(precision=2)
     print(np.concatenate((y_pred.reshape(len(y_pred), 1),
           y_test.reshape(len(y_test), 1)), 1))
@@ -121,9 +123,9 @@ def do_support_vector_regression():
 #决策树回归( Decision Tree Regression）'''
 # X:土地面积
 def do_decision_tree_regression():
-    dataset = pd.read_csv(dataset_csv)
-    X = dataset.iloc[:, 5:6].values
-    y = dataset.iloc[:, 4].values
+    df = pd.read_csv(dataset_csv)
+    X = df.iloc[:, 5:6].values
+    y = df.iloc[:, 4].values
 
 
     from sklearn.tree import DecisionTreeRegressor
@@ -136,12 +138,11 @@ def do_decision_tree_regression():
     print(np.concatenate((y_pred.reshape(len(y_pred), 1),
           y_test.reshape(len(y_test), 1)), 1))
     '''X_grid = np.arange(min(X), max(X), 0.01)
-    X_grid = X_grid.reshape((len(X_grid), 1))
     plt.scatter(X, y, color = 'red')
     plt.plot(X_grid, regressor.predict(X_grid), color = 'blue')
-    plt.title('Truth or Bluff (Decision Tree Regression)')
-    plt.xlabel('Date')
-    plt.ylabel('Newly Confirmed')
+    plt.title('Decision Tree Regression')
+    plt.xlabel('Land Area')
+    plt.ylabel('Price')
     plt.show()'''
     score=r2_score(y_test, y_pred)
     print(score)
