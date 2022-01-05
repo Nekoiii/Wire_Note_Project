@@ -23,7 +23,7 @@ import csv
 df['type']=df['type'].str.replace('xxx','中古一戸建て')
 df.to_csv('XXX.csv', index=False) '''   
 
-#去空格和换行符
+
 
 #去除空格或换行符\n
 def remove_space(dataset_csv):
@@ -35,6 +35,7 @@ def remove_space(dataset_csv):
     return
 #remove_space()
 
+#全角转半角
 def convert_to_helf_width(string):
     new_string_list=[]
     for char in string:
@@ -47,7 +48,7 @@ def convert_to_helf_width(string):
                 new_string_list.append(num)
     new_string=''.join(new_string_list)
     return new_string
-#全角转半角
+#执行全角转半角
 def do_convert_to_helf_width():
     dataset_csv='houses_data_1.csv'           
     df=pd.read_csv(dataset_csv)

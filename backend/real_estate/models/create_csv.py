@@ -24,7 +24,7 @@ print('house_list: ', house_list)
 if len(house_list) > 0:
     keys_list = list(house_list[0].keys())
     print(keys_list)
-    file_name='houses_data_2.csv'
+    file_name='houses_data_1.csv'
     create_new_csv(file_name, keys_list)
     value_list=[]
     for it in house_list:

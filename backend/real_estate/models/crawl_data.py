@@ -14,6 +14,7 @@ import re
 
 url = 'https://www.homes.co.jp/list/'
 # *注: 不设置User-Agent会被拒绝访问
+# *problem:header里有些东西去掉后拿回来的数据会不一样,不知道哪些要哪些不要
 header = {
     'accept': 'application/json, text/javascript',
     'content-type': 'application/x-www-form-urlencoded',
@@ -34,15 +35,15 @@ encodeData = 'cond%5Bsortby%5D=fee&cond%5Bprecond%5D=1003&referer=list&landingRo
 # *注:encodeData不能直接加在url后不然后面翻页会失效啊啊啊啊!!!!
 res = requests.post(url, headers=header, data=encodeData)
 
-# 获取总页数 #*problem:不知为何和网页里的数不一样
+# 获取总页数
 soup = BeautifulSoup(res.text, 'lxml')
-last_page_li = soup.find('li', {'class': 'lastPage'})  # 总页数
+last_page_li = soup.find('li', {'class': 'lastPage'})
 if last_page_li:
     last_page_a = last_page_li.find('a')
     last_page_num = int(last_page_a.attrs['data-page'])
     print('last_page_num--', last_page_num)
 
-# 总物件数
+# 总物件数   #*problem:不知为何和网页里的数不一样
 totalhits_input = soup.find('input', id='totalhits')
 if totalhits_input:
     totalhits_value = totalhits_input.attrs['value']
@@ -62,8 +63,9 @@ async def get_house_details(house_obj):
     soup = BeautifulSoup(res.text, 'lxml')
 
     price_ele = soup.find(id='chk-bkc-moneyroom')  # 价格
-    house_obj['price'] = ''.join(filter(check_num,price_ele.text.split('～')[0].split('(')[0].split('（')[0].split('・')[0].split('、')[0] \
-        .replace(',', '').replace('，', '').replace('万円', ''))) if price_ele else np.NaN
+    house_obj['price'] = ''.join(
+        filter(check_num, price_ele.text.split('～')[0].split('(')[0].split('（')[0].split('・')[0].split('、')[0] \
+               .replace(',', '').replace('，', '').replace('万円', ''))) if price_ele else np.NaN
     land_area_ele = soup.find(id='chk-bkc-landarea')  # 土地面积
     house_obj['land_area'] = ''.join(filter(check_num, re.split('[mｍ]', land_area_ele.text.split('～')[0])[0])) \
         if (land_area_ele and len(re.split('[mｍ]', land_area_ele.text.split('～')[0])) > 1) else np.NaN
@@ -110,7 +112,7 @@ async def get_house_details(house_obj):
 # 遍历全部页面，获取所有物件
 async def get_house_list():
     house_list = []
-    #last_page_num = 3  # *for test
+    # last_page_num = 3  # *for test
     for i in range(last_page_num - 1):
         # *注:encodeData不能直接加在这里啊啊啊啊
         # complete_url = url + '?page=' + str(int(i + 1)) + '&' + encodeData
@@ -128,7 +130,7 @@ async def get_house_list():
             house_obj = {'id': np.NaN, 'type': np.NaN, 'href': np.NaN, 'ike_dist': np.NaN, 'price': np.NaN,
                          'land_area': np.NaN, 'house_area': np.NaN, 'BCR': np.NaN, 'FAR': np.NaN,
                          'nearest_station': np.NaN, 'station_dist': np.NaN,
-                         'age': np.NaN,  'can_not_be_rebuilt': False}
+                         'age': np.NaN, 'can_not_be_rebuilt': False}
             type_ele = j.find(class_='bType')  # 种类(土地/新筑一户建/中古一户建)
             house_obj['type'] = type_ele.text.replace(' ', '').replace('\n', '').replace('\r',
                                                                                          '') if type_ele else np.NaN
