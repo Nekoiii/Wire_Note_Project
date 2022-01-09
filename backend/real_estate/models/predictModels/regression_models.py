@@ -4,30 +4,36 @@
 回归模型 regression_models
 
 """
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.metrics import r2_score
+import plot_charts
+import data_preprocessing
 import sys
 sys.path.append('/Users/nekosa/code/maocaoStalls/backend/real_estate/models')
-sys.path.append('/Users/nekosa/code/maocaoStalls/backend/real_estate/models/plot')
-import data_preprocessing
-import plot_charts
-from sklearn.metrics import r2_score
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
+sys.path.append(
+    '/Users/nekosa/code/maocaoStalls/backend/real_estate/models/plot')
 
-dataset_csv='houses_data_1.csv'
+dataset_csv = 'houses_data_1.csv'
 
-#数据预处理
+# 数据预处理
+
+
 def do_data_preprocessing():
-    X,y=data_preprocessing.import_dataset(dataset_csv)
-    print(X,y)
-    y = y.reshape(len(y),1)
-    X[:, 1:-1]=data_preprocessing.process_missing_data(X[:, 1:-1])
-    print(X[0])
-    X=data_preprocessing.do_OneHotEncoder(X,0)
-    X=data_preprocessing.do_OneHotEncoder(X,-1)
-    X_train,X_test,y_train,y_test=data_preprocessing.split_training_and_test(X,y)
-    print(X_train[0],X_test[0],y_train[0],y_test[0])
-    sc_X, X_train[:, 5:] = data_preprocessing.do_standrad_scaler(X_train[:, 5:])
+    X, y = data_preprocessing.import_dataset(dataset_csv)
+    # print(X,y)
+    y = y.reshape(len(y), 1)
+    X[:, 1:-1] = data_preprocessing.process_missing_data(X[:, 1:-1])
+    # print(X[0])
+    X = data_preprocessing.do_OneHotEncoder(X, 0)
+    X = data_preprocessing.do_OneHotEncoder(X, -1)
+    X_train, X_test, y_train, y_test = data_preprocessing.split_training_and_test(
+        X, y)
+    # print(X_train[0],X_test[0],y_train[0],y_test[0])
+    # *注:这里其实概率模型（树形模型）不需要归一化，只是为了方便一起用了
+    sc_X, X_train[:, 5:] = data_preprocessing.do_standrad_scaler(
+        X_train[:, 5:])
     sc_y, y_train = data_preprocessing.do_standrad_scaler(y_train)
     return(X, y, sc_X, sc_y, X_train, X_test, y_train, y_test)
 
@@ -48,13 +54,14 @@ def do_simple_linear_regression():
           y_test.reshape(len(y_test), 1)), 1))
 
     score = r2_score(y_test, y_pred)
-    print('score',score)
+    print('score', score)
+    plot_charts.plot_predict_result(y_test, y_pred, score)
 
-    return( score)
+    return(y_test, y_pred, score)
 
 
-#多元线性回归（Multiple Linear Regression）
-#problem: y_pred出现了负数，不知是哪出了问题？？？
+# 多元线性回归（Multiple Linear Regression）
+# problem: y_pred出现了负数，不知是哪出了问题？？？
 def do_multiple_linear_regression():
     X, y, sc_X, sc_y, X_train, X_test, y_train, y_test = do_data_preprocessing()
 
@@ -69,20 +76,21 @@ def do_multiple_linear_regression():
           y_test.reshape(len(y_test), 1)), 1))
 
     score = r2_score(y_test, y_pred)
-    print('score',score)
-    
-    return(score)
+    print('score', score)
+    plot_charts.plot_predict_result(y_test, y_pred, score)
+
+    return(y_test, y_pred, score)
 
 
-#多项式回归（Polynomial Regression） 
-#problem: y_pred出现了负数，不知是哪出了问题？？？
+# 多项式回归（Polynomial Regression）
+# problem: y_pred出现了负数，不知是哪出了问题？？？
 def do_polynomial_regression():
     X, y, sc_X, sc_y, X_train, X_test, y_train, y_test = do_data_preprocessing()
 
     from sklearn.linear_model import LinearRegression
     from sklearn.preprocessing import PolynomialFeatures
     # degree太高了会死机,千万别试!!!!
-    poly_reg = PolynomialFeatures(degree=1)
+    poly_reg = PolynomialFeatures(degree=2)
     X_poly = poly_reg.fit_transform(X_train)
     regressor = LinearRegression()
     regressor.fit(X_poly, y_train)
@@ -92,21 +100,23 @@ def do_polynomial_regression():
     y_pred = sc_y.inverse_transform(
         regressor.predict(poly_reg.transform(X_test)))
     np.set_printoptions(precision=2)
-    print(np.concatenate((y_pred.reshape(len(y_pred),1), y_test.reshape(len(y_test),1)),1))
+    print(np.concatenate((y_pred.reshape(len(y_pred), 1),
+          y_test.reshape(len(y_test), 1)), 1))
 
     score = r2_score(y_test, y_pred)
     print(score)
+    plot_charts.plot_predict_result(y_test, y_pred, score)
 
-    return(score)
+    return(y_test, y_pred, score)
 
 
-#支持向量回归 (SVR) (Support Vector Regression)'''
+# 支持向量回归 (SVR) (Support Vector Regression)'''
 def do_support_vector_regression():
     X, y, sc_X, sc_y, X_train, X_test, y_train, y_test = do_data_preprocessing()
 
     from sklearn.svm import SVR
     regressor = SVR(kernel='rbf')
-    regressor.fit(X_train, y_train.ravel())#*记得加.ravel()
+    regressor.fit(X_train, y_train.ravel())  # *记得加.ravel()
 
     X_test[:, 5:] = sc_X.transform(X_test[:, 5:])
     y_pred = sc_y.inverse_transform(regressor.predict(X_test))
@@ -116,17 +126,17 @@ def do_support_vector_regression():
 
     score = r2_score(y_test, y_pred)
     print(score)
+    plot_charts.plot_predict_result(y_test, y_pred, score)
 
-    return(score)
+    return(y_test, y_pred, score)
 
 
-#决策树回归( Decision Tree Regression）'''
+# 决策树回归( Decision Tree Regression）'''
 # X:土地面积
 def do_decision_tree_regression():
     df = pd.read_csv(dataset_csv)
     X = df.iloc[:, 5:6].values
     y = df.iloc[:, 4].values
-
 
     from sklearn.tree import DecisionTreeRegressor
     regressor = DecisionTreeRegressor(random_state=0)
@@ -144,13 +154,14 @@ def do_decision_tree_regression():
     plt.xlabel('Land Area')
     plt.ylabel('Price')
     plt.show()'''
-    score=r2_score(y_test, y_pred)
+    score = r2_score(y_test, y_pred)
     print(score)
+    plot_charts.plot_predict_result(y_test, y_pred, score)
 
-    return(score)
+    return(y_test, y_pred, score)
 
 
-#随机森林回归（Random Forest Regression）'''
+# 随机森林回归（Random Forest Regression）'''
 def do_random_forest_regression():
     X, y, sc_X, sc_y, X_train, X_test, y_train, y_test = do_data_preprocessing()
 
@@ -165,5 +176,7 @@ def do_random_forest_regression():
 
     score = r2_score(y_test, y_pred)
     print(score)
+    plot_charts.plot_predict_result(y_test, y_pred, score)
 
-    return(score)
+    return(y_test, y_pred, score)
+

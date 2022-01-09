@@ -13,8 +13,6 @@ from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 import csv
 
 #dataset_csv='houses_data_1.csv'
@@ -23,6 +21,17 @@ import csv
 df['type']=df['type'].str.replace('xxx','中古一戸建て')
 df.to_csv('XXX.csv', index=False) '''   
 
+#分析数据
+def data_analysis():
+    df=pd.read_csv('houses_data_1.csv')
+    #观察数据集概况
+    df.info()
+    #列出表头
+    df.columns
+    #查看某一列数据的详细情况
+    df['price'].describe()
+    df['land_area'].describe()
+    df['nearest_station'].describe()
 
 
 #去除空格或换行符\n
@@ -102,6 +111,7 @@ def do_OneHotEncoder(data,col_i):
 
 #分为训练集、测试集
 def split_training_and_test(X,y,test_size=0.2,random_state=0):
+    from sklearn.model_selection import train_test_split
     X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=random_state)
     return(X_train,X_test,y_train,y_test)
 
@@ -110,6 +120,7 @@ def split_training_and_test(X,y,test_size=0.2,random_state=0):
 
 #归一化
 def do_standrad_scaler(data):
+    from sklearn.preprocessing import StandardScaler
     sc=StandardScaler()
     data=sc.fit_transform(data)
     return(sc,data)
