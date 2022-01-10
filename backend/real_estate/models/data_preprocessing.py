@@ -9,9 +9,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
 import seaborn as sns
-from sklearn.impute import SimpleImputer
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
 import csv
 
@@ -77,20 +74,9 @@ def data_deduplication():
     df_deduplication.to_csv('data_deduplication.csv', index=False)
 
 
-#导入df,返回x,y
-def import_dataset(dataset_csv):
-    df=pd.read_csv(dataset_csv)
-    #*注:X中就算只取单列也不能不能[:, 1],一定要[:, 1:2]!!!!
-    X=np.hstack((df.iloc[:, 1:2].values,df.iloc[:, 3:4].values,df.iloc[:, 5:9].values,df.iloc[:, 10:].values))
-    y=df.iloc[:, 4].values
-    print(X[1])
-    print(y)
-    return(X,y)
-#X,y=import_dataset()
-
-
 #处理缺失数据,返回补全的数据
 def process_missing_data(data):
+    from sklearn.impute import SimpleImputer
     imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
     imputer.fit(data)
     data=imputer.transform(data)
@@ -99,9 +85,11 @@ def process_missing_data(data):
 
 #分类型数据用OneHotEncoder进行标准化
 def do_OneHotEncoder(data,col_i):
+    from sklearn.compose import ColumnTransformer
+    from sklearn.preprocessing import OneHotEncoder
     ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(), [col_i])], remainder='passthrough')
     data=np.array(ct.fit_transform(data))
-    #data=ct.fit_transform(data).toarray()#problem:不知为何有时上面那条不能用要用这个,有时候下面这个用不了只能用上面的
+    #data=ct.fit_transform(data).toarray()#*problem:不知为何有时上面那条不能用要用这个,有时候下面这个用不了只能用上面的
     #防止虚拟变量陷阱,去掉第一列
     data=data[:,1:]
     return(data)
