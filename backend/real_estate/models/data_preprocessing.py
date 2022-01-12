@@ -75,6 +75,7 @@ def data_deduplication():
 
 
 #处理缺失数据,返回补全的数据
+#data:numpy.ndarray
 def process_missing_data(data):
     from sklearn.impute import SimpleImputer
     imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
@@ -87,7 +88,8 @@ def process_missing_data(data):
 def do_OneHotEncoder(data,col_i):
     from sklearn.compose import ColumnTransformer
     from sklearn.preprocessing import OneHotEncoder
-    ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(), [col_i])], remainder='passthrough')
+    ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(), 
+                            [col_i])], remainder='passthrough')
     data=np.array(ct.fit_transform(data))
     #data=ct.fit_transform(data).toarray()#*problem:不知为何有时上面那条不能用要用这个,有时候下面这个用不了只能用上面的
     #防止虚拟变量陷阱,去掉第一列
@@ -100,7 +102,8 @@ def do_OneHotEncoder(data,col_i):
 #分为训练集、测试集
 def split_training_and_test(X,y,test_size=0.2,random_state=0):
     from sklearn.model_selection import train_test_split
-    X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=random_state)
+    X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,
+                                        random_state=0)
     return(X_train,X_test,y_train,y_test)
 
 #X_train,X_test,y_train,y_test=split_training_and_test(X,y)
