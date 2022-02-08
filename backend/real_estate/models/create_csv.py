@@ -73,7 +73,7 @@ def add_affordable_col():
     dataset_csv='houses_data_1.csv'           
     df=pd.read_csv(dataset_csv)
     affordable_list=[]
-    thr=3000#价钱阈值
+    thr=2000#价钱阈值
     for i,row in df.iterrows():
         #print(i,row['price'])
         affordable=False
@@ -81,8 +81,8 @@ def add_affordable_col():
             affordable=True
         print(affordable)
         affordable_list.append(affordable)
-    print(df['affordable'])
     df['affordable']=affordable_list
+    print(df['affordable'])
     df.to_csv('add_affordable.csv', index=False)
 add_affordable_col()
     
