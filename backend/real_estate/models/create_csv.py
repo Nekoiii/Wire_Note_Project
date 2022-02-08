@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-制作csv文件
+制作、处理csv文件
 """
 import os
 import csv
@@ -33,3 +33,61 @@ if len(house_list) > 0:
     with open(file_name, 'a') as f:  # 'a': 从尾部添加
         f_writer = csv.writer(f)
         f_writer.writerows(value_list)
+        
+        
+#全角转半角
+def convert_to_helf_width(string):
+    new_string_list=[]
+    for char in string:
+                num=ord(char)
+                if num==0x3000:
+                    num=32
+                elif 0xFF01 <= num <= 0xFF5E:
+                    num -= 0xfee0
+                num = chr(num)
+                new_string_list.append(num)
+    new_string=''.join(new_string_list)
+    return new_string
+#执行全角转半角
+def do_convert_to_helf_width():
+    dataset_csv='houses_data_1.csv'           
+    df=pd.read_csv(dataset_csv)
+    df['price']=df['price'].apply(convert_to_helf_width)
+    print(df['price'])            
+    df.to_csv('convert_to_helf_width.csv', index=False)
+    return
+
+
+#去除空格或换行符\n
+def remove_space(dataset_csv):
+    df=pd.read_csv(dataset_csv)
+    #*注: pandas中操作字符串一定要加.str啊啊啊啊
+    #df['type']=df['type'].str.replace(' ','').str.replace('\n', '').str.replace('\r', '')
+    df['nearest_station']=df['nearest_station'].str.replace(' ','').str.replace('\n', '').str.replace('\r', '')
+    df.to_csv('remove_space.csv', index=False)
+    return
+#remove_space()
+
+#添加'affordable'列
+def add_affordable_col():
+    dataset_csv='houses_data_1.csv'           
+    df=pd.read_csv(dataset_csv)
+    affordable_list=[]
+    thr=3000#价钱阈值
+    for i,row in df.iterrows():
+        #print(i,row['price'])
+        affordable=False
+        if not(row['price']>thr):
+            affordable=True
+        print(affordable)
+        affordable_list.append(affordable)
+    print(df['affordable'])
+    df['affordable']=affordable_list
+    df.to_csv('add_affordable.csv', index=False)
+add_affordable_col()
+    
+
+
+
+
+

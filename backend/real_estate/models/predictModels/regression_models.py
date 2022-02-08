@@ -97,28 +97,8 @@ def do_regression_predict(model):
     # 决策树回归(Decision Tree Regression）'''
     # X:土地面积
     elif model=='DecisionTreeRegression':
-        X = df.iloc[:, 5:6].values
-        y = df.iloc[:, 4].values
-        X_train, X_test, y_train, y_test = data_preprocessing.split_training_and_test(
-        X, y)
         from sklearn.tree import DecisionTreeRegressor
         regressor = DecisionTreeRegressor(random_state=0)
-        regressor.fit(X_train, y_train)
-        y_pred = regressor.predict(X_test)
-        print(np.concatenate((y_pred.reshape(len(y_pred), 1),
-              y_test.reshape(len(y_test), 1)), 1))
-        score = r2_score(y_test, y_pred)
-        print(score)
-        '''X_grid = np.arange(min(X), max(X), 0.01)
-        plt.scatter(X, y, color = 'red')
-        plt.plot(X_grid, regressor.predict(X_grid.reshape(-1,1)), color = 'blue')
-        plt.title('Decision Tree Regression')
-        plt.xlabel('Land Area')
-        plt.ylabel('Price')
-        plt.show()'''
-        plot_charts.plot_predict_result(y_test, y_pred, score)
-        return(y_test, y_pred, score)
-
     # 随机森林回归（Random Forest Regression）
     elif model=='RandomForestRegression':
         from sklearn.ensemble import RandomForestRegressor

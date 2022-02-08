@@ -30,40 +30,6 @@ def data_analysis():
     df['land_area'].describe()
     df['nearest_station'].describe()
 
-
-#去除空格或换行符\n
-def remove_space(dataset_csv):
-    df=pd.read_csv(dataset_csv)
-    #*注: pandas中操作字符串一定要加.str啊啊啊啊
-    #df['type']=df['type'].str.replace(' ','').str.replace('\n', '').str.replace('\r', '')
-    df['nearest_station']=df['nearest_station'].str.replace(' ','').str.replace('\n', '').str.replace('\r', '')
-    df.to_csv('remove_space.csv', index=False)
-    return
-#remove_space()
-
-#全角转半角
-def convert_to_helf_width(string):
-    new_string_list=[]
-    for char in string:
-                num=ord(char)
-                if num==0x3000:
-                    num=32
-                elif 0xFF01 <= num <= 0xFF5E:
-                    num -= 0xfee0
-                num = chr(num)
-                new_string_list.append(num)
-    new_string=''.join(new_string_list)
-    return new_string
-#执行全角转半角
-def do_convert_to_helf_width():
-    dataset_csv='houses_data_1.csv'           
-    df=pd.read_csv(dataset_csv)
-    df['price']=df['price'].apply(convert_to_helf_width)
-    print(df['price'])            
-    df.to_csv('convert_to_helf_width.csv', index=False)
-    return
-
-
 #数据去重
 def data_deduplication():
     dataset_csv='houses_data_1.csv'
