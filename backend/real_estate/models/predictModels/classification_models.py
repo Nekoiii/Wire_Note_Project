@@ -39,37 +39,106 @@ def do_classification_predict(model):
     if model=='Logistic_Regression':
         from sklearn.linear_model import LogisticRegression
         classifier = LogisticRegression(random_state = 0)
+    #K-Nearest Neighbors (K-NN)
+    elif model=='K-NN':
+        from sklearn.neighbors import KNeighborsClassifier
+        classifier = KNeighborsClassifier(n_neighbors = 5, metric = 'minkowski', p = 2)
+    #Support Vector Machine (SVM)
+    elif model=='SVM':
+        from sklearn.svm import SVC
+        classifier = SVC(kernel = 'linear', random_state = 0)
+    #Kernel SVM
+    elif model=='Kernel_SVM':
+        from sklearn.svm import SVC
+        classifier = SVC(kernel = 'rbf', random_state = 0)
+    #Naive Bayes 朴素贝叶斯
+    elif model=='Naive_Bayes':
+        from sklearn.naive_bayes import GaussianNB
+        classifier = GaussianNB()
+    #Decision Tree Classification
+    elif model=='Decision_Tree':
+        from sklearn.tree import DecisionTreeClassifier
+        classifier = DecisionTreeClassifier(criterion = 'entropy',
+                                            random_state = 0)
+    #Random Forest Classification
+    elif model=='Random_Forest':
+        from sklearn.ensemble import RandomForestClassifier
+        classifier = RandomForestClassifier(n_estimators = 10,
+                                            criterion = 'entropy', random_state = 0)
+
     classifier.fit(X_train, y_train)
     X_test = sc_X.transform(X_test)
     y_pred = classifier.predict(X_test)
     #print(np.concatenate((y_pred.reshape(len(y_pred), 1),
     #      y_test.reshape(len(y_test), 1)), 1))
+        
+    #混淆矩阵
     from sklearn.metrics import confusion_matrix, accuracy_score
     cm = confusion_matrix(y_test, y_pred)
     print(cm)
     accuracy_score(y_test, y_pred)
     
+    #画图
     from matplotlib.colors import ListedColormap
-    #X_set, y_set = sc_X.inverse_transform(X_train), y_train
-    X_set, y_set = sc_X.inverse_transform(X_test), y_test
-    X1, X2 = np.meshgrid(np.arange(start = X_set[:, 0].min() - 10, stop = X_set[:, 0].max() + 10, step = 0.25),
-                         np.arange(start = X_set[:, 1].min() - 10, stop = X_set[:, 1].max() + 10, step = 0.25))
+    X_set_1, y_set_1 = sc_X.inverse_transform(X_train), y_train
+    X_set_2, y_set_2 = sc_X.inverse_transform(X_test), y_test
+    x_start=(X_set_1[:, 0].min() \
+        if X_set_1[:, 0].min()<X_set_2[:, 0].min() \
+            else X_set_2[:, 0].min())-10
+    x_stop=(X_set_1[:, 0].max() \
+        if X_set_1[:, 0].max()>X_set_2[:, 0].max() \
+            else X_set_2[:, 0].max())+10
+    x_step = 0.25
+    y_start=(X_set_1[:, 1].min() \
+        if X_set_1[:, 1].min()<X_set_2[:, 1].min() \
+            else X_set_2[:, 1].min())-10
+    y_stop=(X_set_1[:, 1].max() \
+        if X_set_1[:, 1].max()>X_set_2[:, 1].max() \
+            else X_set_2[:, 1].max())+10
+    y_step = 0.25
+        
+    X1, X2 = np.meshgrid(np.arange(x_start, x_stop, x_step),
+                         np.arange(y_start, y_stop, y_step))
+    #画训练集
+    plt.figure()
+    plt.subplot(1,2,1)#把两个图画在一个窗口
     plt.contourf(X1, X2, classifier.predict(sc_X.transform(np.array([X1.ravel(), X2.ravel()]).T)).reshape(X1.shape),
                  alpha = 0.75, cmap = ListedColormap(('red', 'green')))
     plt.xlim(X1.min(), X1.max())
     plt.ylim(X2.min(), X2.max())
-    for i, j in enumerate(np.unique(y_set)):
-        plt.scatter(X_set[y_set == j, 0], X_set[y_set == j, 1], color = ListedColormap(('red', 'green'))(i), label = j)
-    #plt.title('Logistic Regression (Training set)')
-    plt.title('Logistic Regression (Test set)')
+    for i, j in enumerate(np.unique(y_set_1)):
+        plt.scatter(X_set_1[y_set_1 == j, 0], X_set_1[y_set_1 == j, 1], color = ListedColormap(('red', 'green'))(i), label = j)
+    plt.title('Classification (Training set)')
+    plt.xlabel('Land Area')
+    plt.ylabel('Station Dist')
+    plt.legend()
+    plt.show()
+    
+    #画测试集
+    #plt.figure() #把两个图画在不同窗口
+    plt.subplot(1,2,2)
+    plt.contourf(X1, X2, classifier.predict(sc_X.transform(np.array([X1.ravel(), X2.ravel()]).T)).reshape(X1.shape),
+                 alpha = 0.75, cmap = ListedColormap(('red', 'green')))
+    plt.xlim(X1.min(), X1.max())
+    plt.ylim(X2.min(), X2.max())
+    for i, j in enumerate(np.unique(y_set_2)):
+        plt.scatter(X_set_2[y_set_2 == j, 0], X_set_2[y_set_2 == j, 1], color = ListedColormap(('red', 'green'))(i), label = j)
+    plt.title('Classification (Test set)')
     plt.xlabel('Land Area')
     plt.ylabel('Station Dist')
     plt.legend()
     plt.show()
     
 
-do_classification_predict('Logistic_Regression')       
-        
+#do_classification_predict('Logistic_Regression')       
+#do_classification_predict('Kernel_SVM')       
+#do_classification_predict('K-NN')       
+#do_classification_predict('SVM')       
+#do_classification_predict('Kernel_SVM')       
+#do_classification_predict('Naive_Bayes')       
+#do_classification_predict('Decision_Tree')       
+#do_classification_predict('Random_Forest')       
+           
         
         
         
