@@ -19,20 +19,23 @@ def create_new_csv(file_name, header):
         f_writer.writerow(header)
     return
 
-house_list = asyncio.run(get_house_list())
-print('house_list: ', house_list)
-if len(house_list) > 0:
-    keys_list = list(house_list[0].keys())
-    print(keys_list)
-    file_name='houses_data_1.csv'
-    create_new_csv(file_name, keys_list)
-    value_list=[]
-    for it in house_list:
-        value_list.append(list(it.values()))
-    print(value_list)
-    with open(file_name, 'a') as f:  # 'a': 从尾部添加
-        f_writer = csv.writer(f)
-        f_writer.writerows(value_list)
+#爬取房产网站信息,建立csv
+def create_house_list():
+    return  #*爬取有风险,先封住,防止误操作
+    house_list = asyncio.run(get_house_list())
+    print('house_list: ', house_list)
+    if len(house_list) > 0:
+        keys_list = list(house_list[0].keys())
+        print(keys_list)
+        file_name='houses_data_1.csv'
+        create_new_csv(file_name, keys_list)
+        value_list=[]
+        for it in house_list:
+            value_list.append(list(it.values()))
+        print(value_list)
+        with open(file_name, 'a') as f:  # 'a': 从尾部添加
+            f_writer = csv.writer(f)
+            f_writer.writerows(value_list)
         
         
 #全角转半角
@@ -73,12 +76,12 @@ def add_affordable_col():
     dataset_csv='houses_data_1.csv'           
     df=pd.read_csv(dataset_csv)
     affordable_list=[]
-    thr=2000#价钱阈值
+    thr=5000#价钱阈值
     for i,row in df.iterrows():
         #print(i,row['price'])
-        affordable=False
+        affordable=0
         if not(row['price']>thr):
-            affordable=True
+            affordable=1
         print(affordable)
         affordable_list.append(affordable)
     df['affordable']=affordable_list
