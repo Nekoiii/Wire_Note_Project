@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Classification models 回归模型
+Classification models 分类模型
 """
 import sys
 sys.path.append('/Users/nekosa/code/maocaoStalls/backend/real_estate/models')
@@ -40,31 +40,34 @@ def do_classification_predict(model):
         from sklearn.linear_model import LogisticRegression
         classifier = LogisticRegression(random_state = 0)
     #K-Nearest Neighbors (K-NN)
-    elif model=='K-NN':
+    if model=='K-NN':
         from sklearn.neighbors import KNeighborsClassifier
-        classifier = KNeighborsClassifier(n_neighbors = 5, metric = 'minkowski', p = 2)
+        classifier = KNeighborsClassifier(n_neighbors = 5, 
+                                          metric = 'minkowski', 
+                                          p = 2)
     #Support Vector Machine (SVM)
-    elif model=='SVM':
+    if model=='SVM':
         from sklearn.svm import SVC
         classifier = SVC(kernel = 'linear', random_state = 0)
-    #Kernel SVM
-    elif model=='Kernel_SVM':
+    #SVM (RBF Kernel)
+    if model=='SVM_RBF':
         from sklearn.svm import SVC
         classifier = SVC(kernel = 'rbf', random_state = 0)
     #Naive Bayes 朴素贝叶斯
-    elif model=='Naive_Bayes':
+    if model=='Naive_Bayes':
         from sklearn.naive_bayes import GaussianNB
         classifier = GaussianNB()
     #Decision Tree Classification
-    elif model=='Decision_Tree':
+    if model=='Decision_Tree':
         from sklearn.tree import DecisionTreeClassifier
         classifier = DecisionTreeClassifier(criterion = 'entropy',
                                             random_state = 0)
     #Random Forest Classification
-    elif model=='Random_Forest':
+    if model=='Random_Forest':
         from sklearn.ensemble import RandomForestClassifier
         classifier = RandomForestClassifier(n_estimators = 10,
-                                            criterion = 'entropy', random_state = 0)
+                                            criterion = 'entropy',
+                                            random_state = 0)
 
     classifier.fit(X_train, y_train)
     X_test = sc_X.transform(X_test)
@@ -72,11 +75,12 @@ def do_classification_predict(model):
     #print(np.concatenate((y_pred.reshape(len(y_pred), 1),
     #      y_test.reshape(len(y_test), 1)), 1))
         
-    #混淆矩阵
+    #混淆矩阵、评分
     from sklearn.metrics import confusion_matrix, accuracy_score
     cm = confusion_matrix(y_test, y_pred)
     print(cm)
-    accuracy_score(y_test, y_pred)
+    score=accuracy_score(y_test, y_pred)
+    print(score)
     
     #画图
     from matplotlib.colors import ListedColormap
@@ -99,15 +103,23 @@ def do_classification_predict(model):
         
     X1, X2 = np.meshgrid(np.arange(x_start, x_stop, x_step),
                          np.arange(y_start, y_stop, y_step))
+    #print('X_set_1',X_set_1[0])
+    #print('y_set_1',y_set_1)
     #画训练集
     plt.figure()
     plt.subplot(1,2,1)#把两个图画在一个窗口
-    plt.contourf(X1, X2, classifier.predict(sc_X.transform(np.array([X1.ravel(), X2.ravel()]).T)).reshape(X1.shape),
+    plt.contourf(X1, X2, classifier.predict(sc_X.transform(
+        np.array([X1.ravel(), X2.ravel()]).T)).reshape(X1.shape),
                  alpha = 0.75, cmap = ListedColormap(('red', 'green')))
     plt.xlim(X1.min(), X1.max())
     plt.ylim(X2.min(), X2.max())
+    #y_set_1经过np.unique()去重后就只剩跟种类数一样长度的数据
     for i, j in enumerate(np.unique(y_set_1)):
-        plt.scatter(X_set_1[y_set_1 == j, 0], X_set_1[y_set_1 == j, 1], color = ListedColormap(('red', 'green'))(i), label = j)
+        #print('y_set_1---2',y_set_1)
+        #print('i:',i,'j:',j)
+        plt.scatter(X_set_1[y_set_1 == j, 0], X_set_1[y_set_1 == j, 1],
+                    color = ListedColormap(('red', 'green'))(i),
+                    label = j)
     plt.title('Classification (Training set)')
     plt.xlabel('Land Area')
     plt.ylabel('Station Dist')
@@ -117,12 +129,15 @@ def do_classification_predict(model):
     #画测试集
     #plt.figure() #把两个图画在不同窗口
     plt.subplot(1,2,2)
-    plt.contourf(X1, X2, classifier.predict(sc_X.transform(np.array([X1.ravel(), X2.ravel()]).T)).reshape(X1.shape),
+    plt.contourf(X1, X2, classifier.predict(sc_X.transform(np.array(
+        [X1.ravel(), X2.ravel()]).T)).reshape(X1.shape),
                  alpha = 0.75, cmap = ListedColormap(('red', 'green')))
     plt.xlim(X1.min(), X1.max())
     plt.ylim(X2.min(), X2.max())
     for i, j in enumerate(np.unique(y_set_2)):
-        plt.scatter(X_set_2[y_set_2 == j, 0], X_set_2[y_set_2 == j, 1], color = ListedColormap(('red', 'green'))(i), label = j)
+        plt.scatter(X_set_2[y_set_2 == j, 0], X_set_2[y_set_2 == j, 1],
+                    color = ListedColormap(('red', 'green'))(i),
+                    label = j)
     plt.title('Classification (Test set)')
     plt.xlabel('Land Area')
     plt.ylabel('Station Dist')
@@ -130,11 +145,10 @@ def do_classification_predict(model):
     plt.show()
     
 
-#do_classification_predict('Logistic_Regression')       
-#do_classification_predict('Kernel_SVM')       
+do_classification_predict('Logistic_Regression')       
 #do_classification_predict('K-NN')       
 #do_classification_predict('SVM')       
-#do_classification_predict('Kernel_SVM')       
+#do_classification_predict('SVM_RBF')       
 #do_classification_predict('Naive_Bayes')       
 #do_classification_predict('Decision_Tree')       
 #do_classification_predict('Random_Forest')       

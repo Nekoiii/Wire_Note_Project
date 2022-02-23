@@ -65,12 +65,12 @@ def do_regression_predict(model):
         plot_charts.plot_predict_result(y_test, y_pred, score)
         return(y_test, y_pred, score)
     # 多元线性回归（Multiple Linear Regression）
-    elif model=='MultipleLinearRegression':
+    if model=='MultipleLinearRegression':
         from sklearn.linear_model import LinearRegression
         regressor = LinearRegression()
     # 多项式回归（Polynomial Regression）
     # problem: y_pred出现了负数，不知是哪出了问题？？？
-    elif model=='PolynomialRegression':
+    if model=='PolynomialRegression':
         from sklearn.linear_model import LinearRegression
         from sklearn.preprocessing import PolynomialFeatures
         # degree太高了会死机,千万别试!!!!
@@ -90,17 +90,17 @@ def do_regression_predict(model):
         return(y_test, y_pred, score)
     
     # 支持向量回归 (SVR) (Support Vector Regression)
-    elif model=='SupportVectorRegression':
+    if model=='SupportVectorRegression':
         from sklearn.svm import SVR
         regressor = SVR(kernel='rbf')
         #regressor.fit(X_train, y_train.ravel())  # *记得加.ravel()
     # 决策树回归(Decision Tree Regression）'''
     # X:土地面积
-    elif model=='DecisionTreeRegression':
+    if model=='DecisionTreeRegression':
         from sklearn.tree import DecisionTreeRegressor
         regressor = DecisionTreeRegressor(random_state=0)
     # 随机森林回归（Random Forest Regression）
-    elif model=='RandomForestRegression':
+    if model=='RandomForestRegression':
         from sklearn.ensemble import RandomForestRegressor
         regressor = RandomForestRegressor(
             n_estimators=5, random_state=0)  # n_estimators是森林里树的棵数
