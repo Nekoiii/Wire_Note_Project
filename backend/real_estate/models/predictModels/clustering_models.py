@@ -17,6 +17,9 @@ import data_preprocessing
 #dataset_csv='houses_data_affordable_2.csv'
 dataset_csv='Mall_Customers.csv'
 
+
+# unfinished:X要先标准化啊！！！！
+
 def do_clustering_predict(model):
     n_clusters=2
     df = pd.read_csv(dataset_csv)
