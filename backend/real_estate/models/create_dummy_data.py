@@ -28,8 +28,6 @@ def distribute_funrniture(user_num,furniture_list):
                 random_num=random.randint(0,10)#再随机生成一个数
                 if random_num>funi_thro_list[i_2]:#如果随机数>家具阈值,则放进去
                     a_list.append(furniture_list[i_2])
-            #a_list.extend((len(furniture_list)-len(a_list))\
-            #              *[''])
             if len(a_list)>max_cols:
                 max_cols=len(a_list)
             print('a_list',a_list)
