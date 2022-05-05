@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 dataset_csv='furniture_factory.csv'
-#dataset_csv='Market_Basket_Optimisation.csv'
 
 def do_association_rule_learning(model):
     #* 注:这次csv没有表头所以记得加上header=None
@@ -19,19 +18,19 @@ def do_association_rule_learning(model):
     #print(total_rows,total_cols)
     
     transactions = []
-    #for i in range(0, total_rows):
-    for i in range(0, 10):
+    for i in range(0, total_rows):
+    #for i in range(0, 10):
         transactions.append([str(df.values[i,j]) \
                              for j in range(0, total_cols)])
 
     from apyori import apriori
     rules = apriori(transactions = transactions,\
                     min_support = 0.001, min_confidence = 0.1,\
-                    min_lift = 3, min_length = 3, \
-                    max_length = 3)
+                    min_lift = 2, min_length = 2, \
+                    max_length = 2)
         
     results = list(rules)
-    #print(results)
+    print(results)
     
     lhs         = [tuple(result[2][0][0])[0] for result in results]
     rhs         = [tuple(result[2][0][1])[0] for result in results]
@@ -54,7 +53,7 @@ def do_association_rule_learning(model):
 
 
 do_association_rule_learning('Apriori')
-do_association_rule_learning('Eclat')
+#do_association_rule_learning('Eclat')
 
 
 
