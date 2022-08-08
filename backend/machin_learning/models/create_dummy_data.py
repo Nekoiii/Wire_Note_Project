@@ -61,23 +61,22 @@ def create_houses_marks_record():
     with open('houses_marks_record.csv', 'w') as f:  # 'w':  覆盖原文件重写
         f_writer = csv.writer(f)
         f_writer.writerow(csv_header)
-    print(houses)
     for i, j in enumerate(houses):  # 给每个房子随机生成一个阈值
-        threshold = random.randint(1, 8)  # 随机生成[1,8]间的阈值
-        print(i, j)
+        threshold = random.randint(1, 800)  # 随机生成[1,800]间的阈值
         j['thre'] = threshold
-    print(houses)
+    #print(houses)
+    for i in houses:
+        print(i['thre'])
     for i in range(0, 10000):  # 创建10000条记录
         a_row=[]
         for x, y in enumerate(houses):
             mark = 0
-            print(x,y)
-            threshold = random.randint(0, 20)  # 随机生成阈值
+            threshold = random.randint(0, 2000)  # 随机生成阈值
             if threshold < y['thre']:
                 mark = 1
             a_row.append(mark)
         with open('houses_marks_record.csv', 'a') as f:  # 'a': 从尾部添加
             f_writer = csv.writer(f)
             f_writer.writerow(a_row)# *注:这里别写成writerows了啊啊啊啊
-
+create_houses_marks_record()
 
