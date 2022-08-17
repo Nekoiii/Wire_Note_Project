@@ -75,6 +75,7 @@ def remove_space(dataset_csv):
 def add_affordable_col():
     dataset_csv='houses_data_1.csv'           
     df=pd.read_csv(dataset_csv)
+    print(df.columns)
     affordable_list=[]
     thr=5000#价钱阈值
     for i,row in df.iterrows():
@@ -88,9 +89,25 @@ def add_affordable_col():
     print(df['affordable'])
     df.to_csv('add_affordable.csv', index=False)
 add_affordable_col()
-    
 
-
-
+#添加label列
+def add_classification_label_col():
+    dataset_csv='Absenteeism_at_work.csv'
+    df=pd.read_csv(dataset_csv)
+    label_col=[]
+    #print(df.columns)
+    #分为5档,0、0~5、6~10、11~30、>30
+    thr_list=[0,5,10,30]
+    for i,row in df.iterrows():
+        label=1#label设为从1开始
+        for j in range(0,len(thr_list)):
+            if(row['Absenteeism_time_in_hours']>thr_list[j]):
+                label=j+2
+        print(label)
+        label_col.append(label)
+    df['label']=label_col
+    print(df['label'])
+    df.to_csv('Absenteeism_at_work_new.csv', index=False)
+add_classification_label_col()
 
 
