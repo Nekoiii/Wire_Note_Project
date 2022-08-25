@@ -12,11 +12,11 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-
+from sklearn.metrics import explained_variance_score
 
 # Importing the dataset
-dataset = pd.read_csv('Absenteeism_at_work.csv')
-X = dataset.iloc[:, :-1].values
+dataset = pd.read_csv('Absenteeism_at_work_new.csv')
+X = dataset.iloc[:, :-2].values#记得去掉[-2]的缺勤时间！！！！
 y = dataset.iloc[:, -1].values
 
 # Splitting the dataset into the Training set and Test set
@@ -34,27 +34,32 @@ def do_dimensionality_reduction(mode, X_train, X_test, y_train):
     if mode == 'PCA':
         from sklearn.decomposition import PCA
         pca = PCA(n_components=2)
+        #pca = PCA()
         X_train = pca.fit_transform(X_train)
         X_test = pca.transform(X_test)
+        ratio = pca.explained_variance_ratio_
+        print("explained_variance_ratio: ", ratio)
     # Applying Kernel PCA
     if mode == 'Kernel_PCA':
         from sklearn.decomposition import KernelPCA
         kpca = KernelPCA(n_components=2, kernel='rbf')
         X_train = kpca.fit_transform(X_train)
         X_test = kpca.transform(X_test)
-    # Applying LDA
+# Applying LDA
     if mode == 'LDA':
         from sklearn.discriminant_analysis \
             import LinearDiscriminantAnalysis as LDA
+        #n_components for LDA cannot be larger than min(n_features, n_classes - 1).
         lda = LDA(n_components=2)
         X_train = lda.fit_transform(X_train, y_train)
         X_test = lda.transform(X_test)
+        ratio = lda.explained_variance_ratio_
+        print("explained_variance_ratio: ", ratio)
     return (X_train, X_test, y_train)
 
-print('X_train:',X_train[0],'\nX_test:',X_test[0])
-X_train, X_test, y_train = do_dimensionality_reduction(
-    'LDA', X_train, X_test, y_train)
-print('X_train:',X_train[0],'\nX_test:',X_test[0])
+print('X_train:\n',X_train[0],len(X_train[0]))
+X_train, X_test, y_train = do_dimensionality_reduction('PCA', X_train, X_test, y_train)
+print('X_train(after):\n',X_train[0],len(X_train[0]))
 
 # Training the Logistic Regression model on the Training set
 classifier = LogisticRegression(random_state=1)
@@ -65,6 +70,8 @@ y_pred = classifier.predict(X_test)
 cm = confusion_matrix(y_test, y_pred)
 print(cm)
 print(accuracy_score(y_test, y_pred))
+
+
 
 
 #隐藏掉画图设定颜色时的warning

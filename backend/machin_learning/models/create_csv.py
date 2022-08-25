@@ -96,8 +96,10 @@ def add_classification_label_col():
     df=pd.read_csv(dataset_csv)
     label_col=[]
     #print(df.columns)
-    #分为5档,0、0~5、6~10、11~30、>30
-    thr_list=[0,5,10,30]
+    #分为5档,0、1~5、6~10、11~30、>30
+    #thr_list=[0,5,10,30]
+    #分为3档,0、1~10、>10
+    thr_list=[0,10]
     for i,row in df.iterrows():
         label=1#label设为从1开始
         for j in range(0,len(thr_list)):
