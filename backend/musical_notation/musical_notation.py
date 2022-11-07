@@ -37,7 +37,7 @@ def blur_image(img_gray): #滤波函数。类似于cv里的filter2d()
     return np.round(res).astype(np.uint8)
   
 #进行霍斯变换
-def hough_transform(img, angle_step=1,value_threshold=5):
+'''def hough_transform(img, angle_step=1,value_threshold=5):'''
   thetas = np.deg2rad(np.arange(-90.0, 90.0, angle_step))#np.deg2rad()角度制转弧度制 
   width, height = img.shape
   diag_len = int(round(math.sqrt(width * width + height * height)))
@@ -113,6 +113,24 @@ img_gray=rgb2gray(img)
 img_gray = blur_image(img_gray) 
 
 edged = cv2.Canny(img_gray, 30, 130) 
+
+#有时图片会自带边框, 为忽略掉它们这里把边沿5px都设为0
+borderLen = 5 
+lenx, leny = edged.shape
+edged[0:borderLen,0:leny] = 0
+edged[lenx-borderLen:lenx,0:leny] = 0
+edged[0:lenx,0:borderLen] = 0
+edged[0:lenx,leny-borderLen:leny] = 0
+plt.imshow(edged)  
+                   
+fig, ax1 = plt.subplots(ncols=1, nrows=1, figsize=(8, 4))
+ax1.set_axis_off()  #set_axis_off():不显示X轴和Y轴
+ax1.imshow(edged, cmap="bone")#这里"bone"是一种颜色
+fig.savefig("Rectangles_edged.jpg")#savefig()保存图片
+
+
+rho,theta = hough_transform(edged,rho_res=1,theta_res=1,
+                            thresholdVotes=30,filterMultiple=5,thresholdPixels=0)
 
 
 #plt.imshow(img_gray)
