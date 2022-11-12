@@ -47,9 +47,13 @@ const ChatRecordPage = (props: any) => {
   获取头像
   id：角色id, me_id: 现在在哪个角色的视角
    */
+  const id_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'z'];
   const get_icon_src = (id: number | string) => {
     let icon_src: string = '';
-    switch (id) {
+    //require好像不能用变量作为路径,只能写死?
+    let icon_name = './icons/' + id + '.png';
+    icon_src = require(icon_name).default;
+    /*switch (id) { 
       case 'a':
         icon_src = require('./icons/a.png').default;
         break;
@@ -76,7 +80,7 @@ const ChatRecordPage = (props: any) => {
         break;
       default:
         break;
-    }
+    }*/
     return icon_src;
   };
 
