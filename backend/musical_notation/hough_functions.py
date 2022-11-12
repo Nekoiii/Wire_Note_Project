@@ -80,33 +80,37 @@ def plotHoughLines(rho,theta,img):
 #edged输入图像
 #rho_res距离精度(单位是像素),theta_res角度精度(单位是弧度)。这俩一般用1就好了。
 #thresholdVotes指定在累加平面中阈值,大于它的直线才会被返回。
+#filterMultiple
 #thresholdPixels指定边缘的阈值,大于它的像素点都会被认为是边缘。(深色背景,浅色边缘)
 def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresholdPixels=0):
-  #霍夫空间中 x= theta, y= x*cos(theta)+y*sin(theta)
+  #笛卡尔坐标系x-y,笛卡尔坐标转霍夫空间k-q,极坐标转霍夫空间θ-ρ(读作theta-rho)
+  #极坐标霍夫空间中, 横轴θ, 竖轴 ρ=x*cosθ+y*sinθ
   #角度制转弧度制公式: 1度=π/180≈0.01745弧度，1弧度=180/π≈57.3度
   
   rows, columns = edged.shape
-  
+  print('rows:',rows,'columns:',columns)
+
   #创建霍夫空间横轴, 值=theta。范围[-90,90], 取点数 2*(90/theta_res)+1 
   #np.linspace(起始值,终点值,取点数):创建等差数列。
   theta = np.linspace(-90.0, 0.0, int(np.ceil(90.0/theta_res) + 1.0))#*?为什么是-90°~90°?
   #数组中[start:end:step]。这里step=-1表示从右往左取值,len(theta)-2是为了去掉一个多余的0
   theta = np.concatenate((theta, -theta[len(theta)-2::-1]))
- 
+  
   #创建霍夫空间竖轴。范围[-图片对角线长度,图片对角线长度],取点数: 2*(图片对角线长度/rho_res)+1
   diagonal = np.sqrt((rows - 1)**2 + (columns - 1)**2) #diagonal对角线
   q = np.ceil(diagonal/rho_res)
   nrho = 2*q + 1 #取点数
-  rho = np.linspace(-q*rho_res, q*rho_res, nrho)
+  rho = np.linspace(-q*rho_res, q*rho_res, int(nrho))
   
   #创建空的霍夫空间坐标系。大小为rho行theta列
   houghMatrix = np.zeros((len(rho), len(theta)))
-  
+
   #把图片里的像素一个个填入霍夫空间坐标系。
   for rowId in range(rows):                           
       for colId in range(columns):
         #如果是边缘像素,则循环遍历所有可能的θ值,计算对应的ρ,在累加器中找到θ和ρ索引并在该位置递加。                   
         if edged[rowId, colId]>thresholdPixels: 
+          print('rowId,colId:',rowId, colId,'\n edged[rowId, colId]:',edged[rowId, colId])
           #霍夫空间竖轴, 值=rhoVal。
           for thId in range(len(theta)):
             rhoVal = colId*np.cos(theta[thId]*np.pi/180.0) + \
@@ -116,19 +120,23 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
             #这里相当于用了np.argmin(np.abs(rho - rhoVal))。np.argmin():返回最小值在数组中的索引。
             rhoIdx = np.nonzero(np.abs(rho-rhoVal) == np.min(np.abs(rho-rhoVal)))[0] 
             houghMatrix[rhoIdx[0], thId] += 1   #*注:这里不要写反了,坐标系里x、y轴在数组里位置是[y,x](因为是先取行再取列)
-          
- #cluster and filter multiple dots in Houghs plane
+  print('houghMatrix:\n',houghMatrix)
+
+  #*?这里没太看懂, 好像是为了不让线粘太紧,所以靠得近的线就选了数值最高的一条?
+  #cluster and filter multiple dots in Houghs plane
   if filterMultiple>0:
-      clusterDiameter=filterMultiple # diameter直径
+      clusterDiameter=filterMultiple # diameter:直径
+      #values为houghMatrix中大于阈值的值的位置。np.transpose():交换轴的位置,不加其他参数时相当于.T()转置。
       values=np.transpose(np.array(np.nonzero(houghMatrix>thresholdVotes)))
+      print('values:\n',values)
       filterArray=[]
       filterArray.append(0)
       totalArray=[]
       for i in range (0, len(values)):
           if i in filterArray[1::]:
-              continue
+              continue #*注:continue，break都是对for起作用而不是if啊啊啊啊
           tempArray=[i]
-          for j in range (i+1, len(values)):
+          for j in range (i+1, len(values)):#遍历位置在i后面的值
               if j in filterArray[1::]:
                   continue
               for k in range (0, len(tempArray)):
@@ -137,9 +145,9 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
                       tempArray.append(j)
                       break
           totalArray.append(tempArray)
-      
+          print('totalArray:\n',totalArray)
+      print('totalArray:\n',totalArray)
       #leave the highest value in each cluster
-      #*这里ii、jj/i、j为什么要设为0
       for i in range (0, len(totalArray)):
            for j in range (0, len(totalArray[i])):
                if j==0:
@@ -154,29 +162,45 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
                        jj=j
                    else:
                        houghMatrix[values[totalArray[i][j]][0],values[totalArray[i][j]][1]]=0
-                  
-  return (np.where(houghMatrix>thresholdVotes)[0]-q)*rho_res, theta[np.where(houghMatrix>thresholdVotes)[1]]*np.pi/180.0
+  print('houghMatrix-2:\n',houghMatrix)     
+  return (np.where(houghMatrix>thresholdVotes)[0]-q)*rho_res,\
+            theta[np.where(houghMatrix>thresholdVotes)[1]]*np.pi/180.0
 
 
 #画霍斯空间的线
 def plotHoughLines(rho,theta,image):
-    a = np.cos(theta)
-    b = np.sin(theta)
-    x0 = a*rho
-    y0 = b*rho
+  #极坐标与笛卡尔互相转换: https://blog.csdn.net/weixin_36815313/article/details/109485524
+  #极坐标转笛卡尔坐标系公式: x=ρ*cosθ, y=ρ*sinθ
+  a = np.cos(theta) # a=cosθ
+  b = np.sin(theta) # b=sinθ
+  x0 = a*rho
+  y0 = b*rho
 
-    fig2, ax1 = plt.subplots(ncols=1, nrows=1)
-    ax1.imshow(image)
-    
-    for i in range (0, len(rho)):   
-        ax1.plot( [x0[i] + 1000*(-b[i]), x0[i] - 1000*(-b[i])],
-                  [y0[i] + 1000*(a[i]), y0[i] - 1000*(a[i])], 
-                  'xb-',linewidth=3)
-    
-    ax1.set_ylim([image.shape[0],0])
-    ax1.set_xlim([0,image.shape[1]])
-    
-    plt.show()
+  #plt.subplots():一纸绘多图。nrows:横轴分成的区域,ncols:纵轴分成的区域,plot_number:当前的绘图区,figsize:绘图区大小
+  fig2, ax1 = plt.subplots(ncols=1, nrows=1)
+  ax1.imshow(image)
+  
+  # plot():参数[fmt] = '[color][marker][line]'。
+  #*注:[x1,x2],[y1,y2]的xy别写反了
+  #*?(没太懂)这里的1000是为了求延长线,其他数值也可以
+  for i in range (0, len(rho)): 
+      xy=[[x0[i] + (-b[i]), x0[i] - (-b[i])],\
+                [y0[i] + (a[i]), y0[i] - (a[i])]]
+      ax1.plot( [x0[i] + 1000*(-b[i]), x0[i] - 1000*(-b[i])],
+                [y0[i] + 1000*(a[i]), y0[i] - 1000*(a[i])], 
+                'xb-',linewidth=3)
+      '''ax1.plot( [x0[i] + 100*(-b[i]), x0[i] - 100*(-b[i])],
+                [y0[i] + 100*(a[i]), y0[i] - 100*(a[i])], 
+                'xb-',linewidth=3)'''
+      # Plot beginnings and ends of lines
+      #*?这里感觉不太对
+      plt.plot(xy[0][0],xy[1][0],"or:")
+      plt.plot(xy[0][1],xy[1][1],"oy:")
+      
+  ax1.set_ylim([image.shape[0],0])
+  ax1.set_xlim([0,image.shape[1]])
+  
+  plt.show()
 
 
 #计算两点的距离, startPoint、secondPoint格式: [x,y] 
@@ -277,26 +301,7 @@ def getAngle(startPoint,secondPoint,thirdPoint, absol=True):
     if np.absolute(angle) < 0.02:
         angle=0
     return a*angle
-    
-def plotHoughLines(rho,theta,image):
   
-    a = np.cos(theta)
-    b = np.sin(theta)
-    x0 = a*rho
-    y0 = b*rho
-
-    fig2, ax1 = plt.subplots(ncols=1, nrows=1)
-    ax1.imshow(image)
-    
-    for i in range (0, len(rho)):   
-        ax1.plot( [x0[i] + 1000*(-b[i]), x0[i] - 1000*(-b[i])],
-                  [y0[i] + 1000*(a[i]), y0[i] - 1000*(a[i])], 
-                  'xb-',linewidth=3)
-    
-    ax1.set_ylim([image.shape[0],0])
-    ax1.set_xlim([0,image.shape[1]])
-    
-    plt.show()
     
 def rgb2gray(image_rgb):
 
