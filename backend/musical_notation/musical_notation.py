@@ -8,8 +8,11 @@ https://github.com/alyssaq/hough_transform/blob/master/hough_transform.py
 直接用opencv实现：
 https://opencv24-python-tutorials.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_houghlines/py_houghlines.html
 
-几乎不使用opencv检测长方形：
-原理: https://www.homeworkhelponline.net/blog/programming/find-rectangles，github: https://github.com/HomeworkHelpOnline/Python-Find_Rectangles
+
+参考代码-几乎不使用opencv检测长方形：
+https://www.homeworkhelponline.net/blog/programming/find-rectangles，github: https://github.com/HomeworkHelpOnline/Python-Find_Rectangles
+参考代码-基于霍夫变换进行线检测
+https://blog.csdn.net/algorithmPro/article/details/115499827
 """
 import numpy as np
 import matplotlib.pyplot as plt

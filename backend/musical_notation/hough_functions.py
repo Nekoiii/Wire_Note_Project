@@ -77,7 +77,10 @@ def plotHoughLines(rho,theta,img):
   ax1.set_xlim([0,img.shape[1]])
   
   plt.show()'''
-#rho_res、theta_res一般用1就好了, thresholdVotes指定至少经过几个点
+#edged输入图像
+#rho_res距离精度(单位是像素),theta_res角度精度(单位是弧度)。这俩一般用1就好了。
+#thresholdVotes指定在累加平面中阈值,大于它的直线才会被返回。
+#thresholdPixels指定边缘的阈值,大于它的像素点都会被认为是边缘。(深色背景,浅色边缘)
 def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresholdPixels=0):
   #霍夫空间中 x= theta, y= x*cos(theta)+y*sin(theta)
   #角度制转弧度制公式: 1度=π/180≈0.01745弧度，1弧度=180/π≈57.3度
@@ -101,16 +104,18 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
   
   #把图片里的像素一个个填入霍夫空间坐标系。
   for rowId in range(rows):                           
-      for colId in range(columns):                        
-        if edged[rowId, colId]>thresholdPixels:  #pixel一般为0~255 
+      for colId in range(columns):
+        #如果是边缘像素,则循环遍历所有可能的θ值,计算对应的ρ,在累加器中找到θ和ρ索引并在该位置递加。                   
+        if edged[rowId, colId]>thresholdPixels: 
           #霍夫空间竖轴, 值=rhoVal。
           for thId in range(len(theta)):
             rhoVal = colId*np.cos(theta[thId]*np.pi/180.0) + \
                 rowId*np.sin(theta[thId]*np.pi/180)
             #np.nonzero()得到数组array中非零元素的位置。np.abs()绝对值。
-            #*?这里没明白为什么rhoIdx是这样算出来的,为什么要用rhoIdx[0]不能直接用rhoVal???
+            #这里相当于用nonzero()找到令rho=rhoVal为True时ρ的索引
+            #这里相当于用了np.argmin(np.abs(rho - rhoVal))。np.argmin():返回最小值在数组中的索引。
             rhoIdx = np.nonzero(np.abs(rho-rhoVal) == np.min(np.abs(rho-rhoVal)))[0] 
-            houghMatrix[rhoIdx[0], thId] += 1   #*注:这里不要写反了,坐标系里x、y的值在数组里位置是[y,x](因为是先取行再取列)
+            houghMatrix[rhoIdx[0], thId] += 1   #*注:这里不要写反了,坐标系里x、y轴在数组里位置是[y,x](因为是先取行再取列)
           
  #cluster and filter multiple dots in Houghs plane
   if filterMultiple>0:
