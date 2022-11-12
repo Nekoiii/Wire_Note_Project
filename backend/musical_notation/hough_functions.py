@@ -1,20 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-霍夫变换等函数
+霍夫变换(hough transform)等函数
 """
-
 import numpy as np
 import scipy.signal as sp
 import math
 import matplotlib.pyplot as plt
 import cv2
-
-
-
-
-
-
 
 #进行霍夫变换
 '''def hough_transform(img, angle_step=1,value_threshold=5):
@@ -84,36 +77,44 @@ def plotHoughLines(rho,theta,img):
   ax1.set_xlim([0,img.shape[1]])
   
   plt.show()'''
-#rho_res、theta_res一般用1
+#rho_res、theta_res一般用1就好了, thresholdVotes指定至少经过几个点
 def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresholdPixels=0):
-  rows, columns = edged.shape
-  theta = np.linspace(-90.0, 0.0, np.ceil(90.0/theta_res) + 1.0)#np.linspace()创建等差数列
-  theta = np.concatenate((theta, -theta[len(theta)-2::-1]))
-  
   #霍夫空间中 x= theta, y= x*cos(theta)+y*sin(theta)
   #角度制转弧度制公式: 1度=π/180≈0.01745弧度，1弧度=180/π≈57.3度
-  diagonal = np.sqrt((rows - 1)**2 + (columns - 1)**2)#原坐标系里图片对角线的长度作为新坐标系
+  
+  rows, columns = edged.shape
+  
+  #创建霍夫空间横轴, 值=theta。范围[-90,90], 取点数 2*(90/theta_res)+1 
+  #np.linspace(起始值,终点值,取点数):创建等差数列。
+  theta = np.linspace(-90.0, 0.0, int(np.ceil(90.0/theta_res) + 1.0))#*?为什么是-90°~90°?
+  #数组中[start:end:step]。这里step=-1表示从右往左取值,len(theta)-2是为了去掉一个多余的0
+  theta = np.concatenate((theta, -theta[len(theta)-2::-1]))
+ 
+  #创建霍夫空间竖轴。范围[-图片对角线长度,图片对角线长度],取点数: 2*(图片对角线长度/rho_res)+1
+  diagonal = np.sqrt((rows - 1)**2 + (columns - 1)**2) #diagonal对角线
   q = np.ceil(diagonal/rho_res)
-  nrho = 2*q + 1
+  nrho = 2*q + 1 #取点数
   rho = np.linspace(-q*rho_res, q*rho_res, nrho)
+  
+  #创建空的霍夫空间坐标系。大小为rho行theta列
   houghMatrix = np.zeros((len(rho), len(theta)))
   
-  for rowId in range(rows):                              
+  #把图片里的像素一个个填入霍夫空间坐标系。
+  for rowId in range(rows):                           
       for colId in range(columns):                        
-        if edged[rowId, colId]>thresholdPixels:  #pixel一般为0 ~ 255 
-          #计算rhoVal,然后映射到霍夫空间
+        if edged[rowId, colId]>thresholdPixels:  #pixel一般为0~255 
+          #霍夫空间竖轴, 值=rhoVal。
           for thId in range(len(theta)):
             rhoVal = colId*np.cos(theta[thId]*np.pi/180.0) + \
                 rowId*np.sin(theta[thId]*np.pi/180)
-            #np.nonzero()得到数组array中非零元素的位置。np.abs()绝对值
-            #**这里没懂为什么要
+            #np.nonzero()得到数组array中非零元素的位置。np.abs()绝对值。
+            #*?这里没明白为什么rhoIdx是这样算出来的,为什么要用rhoIdx[0]不能直接用rhoVal???
             rhoIdx = np.nonzero(np.abs(rho-rhoVal) == np.min(np.abs(rho-rhoVal)))[0] 
-            houghMatrix[rhoIdx[0], thId] += 1  
+            houghMatrix[rhoIdx[0], thId] += 1   #*注:这里不要写反了,坐标系里x、y的值在数组里位置是[y,x](因为是先取行再取列)
           
- 
  #cluster and filter multiple dots in Houghs plane
   if filterMultiple>0:
-      clusterDiameter=filterMultiple
+      clusterDiameter=filterMultiple # diameter直径
       values=np.transpose(np.array(np.nonzero(houghMatrix>thresholdVotes)))
       filterArray=[]
       filterArray.append(0)
@@ -150,6 +151,28 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
                        houghMatrix[values[totalArray[i][j]][0],values[totalArray[i][j]][1]]=0
                   
   return (np.where(houghMatrix>thresholdVotes)[0]-q)*rho_res, theta[np.where(houghMatrix>thresholdVotes)[1]]*np.pi/180.0
+
+
+#画霍斯空间的线
+def plotHoughLines(rho,theta,image):
+    a = np.cos(theta)
+    b = np.sin(theta)
+    x0 = a*rho
+    y0 = b*rho
+
+    fig2, ax1 = plt.subplots(ncols=1, nrows=1)
+    ax1.imshow(image)
+    
+    for i in range (0, len(rho)):   
+        ax1.plot( [x0[i] + 1000*(-b[i]), x0[i] - 1000*(-b[i])],
+                  [y0[i] + 1000*(a[i]), y0[i] - 1000*(a[i])], 
+                  'xb-',linewidth=3)
+    
+    ax1.set_ylim([image.shape[0],0])
+    ax1.set_xlim([0,image.shape[1]])
+    
+    plt.show()
+
 
 #计算两点的距离, startPoint、secondPoint格式: [x,y] 
 def getLength(startPoint,secondPoint):
@@ -193,6 +216,98 @@ def blur_image(img_gray): #滤波函数。类似于cv里的filter2d()
     res=sp.convolve2d(img_gray,kernel,mode='same')#scipy.signal.convolve2d():进行卷积
     return np.round(res).astype(np.uint8)
 
+def reorderPoints(corners):
+    ##Inputs:
+    #corners - list of corners (look at example)
 
+    ##Outputs:
+    #array - reordered corners array
+
+    #Example
+    #corenrs=[[153, 104], [255, 98], [178, 144], [231, 58]]
+    #array -> [[153, 104], [178, 144], [255, 98], [231, 58]]
+    
+    array=[]
+    for i in range (0, len(corners)):
+        tempArray=[]
+        length1=getLength(corners[i][0],corners[i][1])
+        length2=getLength(corners[i][0],corners[i][2])
+        length3=getLength(corners[i][0],corners[i][3])
+        lenArr=np.array([length1,length2,length3])
+        tempArray.append(corners[i][0])
+        tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.min(lenArr))[0][0]])
+        lenArr[np.where(np.array(lenArr)==np.min(lenArr))[0][0]]+=-0.00001 #n case of rectangle
+        tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.max(lenArr))[0][0]])
+        tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.median(lenArr))[0][0]])
+        array.append(tempArray)
+    return array
+    
+def getAngle(startPoint,secondPoint,thirdPoint, absol=True):
+    #Gets angle between vectors (startPoint,secondPoint) and vector
+    #(secondPoint,thirdPoint)
+    
+    ##Inputs:
+    #startPoint - [x,y]
+    #secondPoint - [x,y]
+    #thirdPoint - [x,y]
+
+    ##Outputs:
+    #angle - angle between two vectors
+
+    
+    v1x=secondPoint[0]-startPoint[0]
+    v1y=secondPoint[1]-startPoint[1]
+    v2x=thirdPoint[0]-startPoint[0]
+    v2y=thirdPoint[1]-startPoint[1]
+    
+    lenv1=np.sqrt(v1x*v1x+v1y*v1y)
+    lenv2=np.sqrt(v2x*v2x+v2y*v2y)
+    
+    angle=np.arccos((v1x*v2x+v1y*v2y)/(lenv1*lenv2))
+    
+    a=1
+    if absol==False:
+        a = np.sign((v1x) * (v2y) - (v1y) * (v2x))
+    
+    if np.absolute(angle) < 0.02:
+        angle=0
+    return a*angle
+    
+def plotHoughLines(rho,theta,image):
+  
+    a = np.cos(theta)
+    b = np.sin(theta)
+    x0 = a*rho
+    y0 = b*rho
+
+    fig2, ax1 = plt.subplots(ncols=1, nrows=1)
+    ax1.imshow(image)
+    
+    for i in range (0, len(rho)):   
+        ax1.plot( [x0[i] + 1000*(-b[i]), x0[i] - 1000*(-b[i])],
+                  [y0[i] + 1000*(a[i]), y0[i] - 1000*(a[i])], 
+                  'xb-',linewidth=3)
+    
+    ax1.set_ylim([image.shape[0],0])
+    ax1.set_xlim([0,image.shape[1]])
+    
+    plt.show()
+    
+def rgb2gray(image_rgb):
+
+    r, g, b = image_rgb[:,:,0], image_rgb[:,:,1], image_rgb[:,:,2]
+    image_gray = np.round(0.2989 * r + 0.5870 * g + 0.1140 * b).astype(np.uint8)
+
+    return image_gray
+    
+def blurImage(image_gray):
+    kernel = np.ones((2,2),np.float32)/4                     #Blurring kernel
+    #We will skip first line and first column to keep it more simple, it's zeroed out anyway.
+    #now for every pixel we change it with the average of 4 pixels(as the kernel): itself, pixel to left
+    #pixel up, and pixel up-left. It drifts some edges one pixel to bottom-down, but it does not matter as
+    #long as we use edged picture for the future work
+    res=sp.convolve2d(image_gray,kernel,mode='same')
+    
+    return np.round(res).astype(np.uint8)
 
 
