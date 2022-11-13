@@ -20,7 +20,7 @@ import cv2
 
 import hough_functions
 
- 
+
 img_path = 'imgs/test_img-1.jpg' #*注:Spyder里记得在Files窗口打开目录文件夹啊!
 img_rgb=np.array(plt.imread(img_path)) 
 #plt.imshow(img_rgb)
@@ -28,6 +28,7 @@ img_gray=hough_functions.rgb2gray(img_rgb)
 img_gray = hough_functions.blur_image(img_gray) 
 edged = cv2.Canny(img_gray, 30, 130)#cv2.Canny():边缘检测
 
+#开始检测直线
 #有时图片会自带边框, 为忽略掉它们这里把边沿5px都设为0
 borderLen = 5 
 lenx, leny = edged.shape
@@ -57,56 +58,69 @@ hough_functions.plotHoughLines(rho,theta,img_rgb)
 
 
 
+#开始检测矩形
+theta2=theta+np.pi/2 #theta2=θ+90°
+theta3=theta-np.pi/2 #theta3=θ-90°
+difference=np.pi/90  #θ差异的阈值
+differenceRho=2  #ρ差异的阈值
+#找两两相互平行的线
+accumParallel=[]   #accumulated:累积的,parallel:平行的
+for i in range (0, len(theta)):#遍历θ
+  #拿下一个值和它对比,如果θ两头都没超过θ阈值,且ρ超过ρ阈值,则放进去
+  for j in range (i+1, len(theta)):
+      if theta[j]>(theta[i]-difference) and theta[j]<(theta[i]+difference):
+           if rho[j]<(rho[i]-differenceRho) or rho[j]>(rho[i]+differenceRho):
+             accumParallel.append([i,j])
+print('accumParallel:\n',accumParallel)
 
-#找平行线
-theta2=theta+np.pi/2
-theta3=theta-np.pi/2
-difference=np.pi/90
-differenceRho=2
-accumParallel=[]#parallel平行的
-for i in range (0, len(theta)):
-    for j in range (i+1, len(theta)):
-        if theta[j]>(theta[i]-difference) and theta[j]<(theta[i]+difference):
-             if rho[j]<(rho[i]-differenceRho) or rho[j]>(rho[i]+differenceRho):
-                accumParallel.append([i,j])
-
+#找矩形的四条边
 fourLines=[]
-#找直角
+#accumParallel中的平行线对进行两两对比,如果能形成直角(即其中有一条在theta2、theta3里的角度
+#分别和另一个平行线对里其中一条的theta对比时两头都没超过阈值),则这两个平行线对能组成矩形
 for i in range (0, len(accumParallel)):
-    for j in range (1, len(accumParallel)):
-        if     (theta2[accumParallel[j][0]]>(theta[accumParallel[i][0]]-difference) and theta2[accumParallel[j][0]]<(theta[accumParallel[i][0]]+difference)) \
-            or (theta2[accumParallel[j][1]]>(theta[accumParallel[i][0]]-difference) and theta2[accumParallel[j][1]]<(theta[accumParallel[i][0]]+difference)) \
-            or (theta2[accumParallel[j][0]]>(theta[accumParallel[i][1]]-difference) and theta2[accumParallel[j][0]]<(theta[accumParallel[i][1]]+difference)) \
-            or (theta2[accumParallel[j][1]]>(theta[accumParallel[i][1]]-difference) and theta2[accumParallel[j][1]]<(theta[accumParallel[i][1]]+difference)) \
-            or (theta3[accumParallel[j][0]]>(theta[accumParallel[i][0]]-difference) and theta3[accumParallel[j][0]]<(theta[accumParallel[i][0]]+difference)) \
-            or (theta3[accumParallel[j][1]]>(theta[accumParallel[i][0]]-difference) and theta3[accumParallel[j][1]]<(theta[accumParallel[i][0]]+difference)) \
-            or (theta3[accumParallel[j][0]]>(theta[accumParallel[i][1]]-difference) and theta3[accumParallel[j][0]]<(theta[accumParallel[i][1]]+difference)) \
-            or (theta3[accumParallel[j][1]]>(theta[accumParallel[i][1]]-difference) and theta3[accumParallel[j][1]]<(theta[accumParallel[i][1]]+difference)):
-                fourLines.append(np.concatenate([accumParallel[i],accumParallel[j]],1))
-    
-fourLines=hough_functions.unique(fourLines)
+  for j in range (1, len(accumParallel)):
+      if     (theta2[accumParallel[j][0]]>(theta[accumParallel[i][0]]-difference) and theta2[accumParallel[j][0]]<(theta[accumParallel[i][0]]+difference)) \
+          or (theta2[accumParallel[j][1]]>(theta[accumParallel[i][0]]-difference) and theta2[accumParallel[j][1]]<(theta[accumParallel[i][0]]+difference)) \
+          or (theta2[accumParallel[j][0]]>(theta[accumParallel[i][1]]-difference) and theta2[accumParallel[j][0]]<(theta[accumParallel[i][1]]+difference)) \
+          or (theta2[accumParallel[j][1]]>(theta[accumParallel[i][1]]-difference) and theta2[accumParallel[j][1]]<(theta[accumParallel[i][1]]+difference)) \
+          or (theta3[accumParallel[j][0]]>(theta[accumParallel[i][0]]-difference) and theta3[accumParallel[j][0]]<(theta[accumParallel[i][0]]+difference)) \
+          or (theta3[accumParallel[j][1]]>(theta[accumParallel[i][0]]-difference) and theta3[accumParallel[j][1]]<(theta[accumParallel[i][0]]+difference)) \
+          or (theta3[accumParallel[j][0]]>(theta[accumParallel[i][1]]-difference) and theta3[accumParallel[j][0]]<(theta[accumParallel[i][1]]+difference)) \
+          or (theta3[accumParallel[j][1]]>(theta[accumParallel[i][1]]-difference) and theta3[accumParallel[j][1]]<(theta[accumParallel[i][1]]+difference)):
+            print('accumParallel[i]:\n',accumParallel[i])
+            print('accumParallel[j]:\n',accumParallel[j])
 
+            #*?原文章np.concatenate()第二个参数写了1但会报错,不知道是不是哪步错了???
+            #fourLines.append(np.concatenate([[accumParallel[i]],[accumParallel[j]]],1)) 
+            fourLines.append(np.concatenate([accumParallel[i],accumParallel[j]],0))             
+      #break
+  #if len(fourLines)>0:
+    #break
+
+fourLines=hough_functions.unique(fourLines) #去重
+print('fourLines:\n',fourLines)
+  
 #solve 4 of equations for 4 corners
 #rho_j = x cos(theta_j) + y sin(theta_j)
 #rho_k = x cos(theta_k) + y sin(theta_k)
 corners=[]
-for quads in range (0, len(fourLines)):
+for quads in range (0, len(fourLines)):#quads:四倍;四方院;四胞胎之一
     cornersTemp=[]
     for lines in range (0,4):
-        if lines in [0,1]:
-            linesi=lines
-            nexti=2
+        if lines in [0,1]:#第1、3线的lines_i为0, 而2、4的为1
+            lines_i=lines
+            next_i=2
         if lines == 2:
-            linesi=0
-            nexti=3
+            lines_i=0
+            next_i=3
         if lines == 3:
-            linesi=1
-            nexti=1
-        b=np.array([rho[fourLines[quads][linesi]],rho[fourLines[quads][linesi+nexti]]])
-        a=np.array([[np.cos(theta[fourLines[quads][linesi]]),
-                     np.sin(theta[fourLines[quads][linesi]])],
-                    [np.cos(theta[fourLines[quads][linesi+nexti]]),
-                     np.sin(theta[fourLines[quads][linesi+nexti]])]])
+            lines_i=1
+            next_i=1
+        b=np.array([rho[fourLines[quads][lines_i]],rho[fourLines[quads][lines_i+next_i]]])
+        a=np.array([[np.cos(theta[fourLines[quads][lines_i]]),
+                     np.sin(theta[fourLines[quads][lines_i]])],
+                    [np.cos(theta[fourLines[quads][lines_i+next_i]]),
+                     np.sin(theta[fourLines[quads][lines_i+next_i]])]])
         ans = np.linalg.solve(a, b)
         cornersTemp.append([int(ans[0]),int(ans[1])])
     corners.append(cornersTemp)

@@ -13,15 +13,15 @@ import cv2
 #edged输入图像
 #rho_res距离精度(单位是像素),theta_res角度精度(单位是弧度)。这里的'精度'相当于步长,这俩一般用1就好了。
 #thresholdVotes指定在累加平面中阈值,大于它的直线才会被返回。
-#filterMultiple指定靠得太近的n条线中只留一条。
+#filterMultiple指定在相邻一定距离内,只留一条值最大的线。
 #thresholdPixels指定边缘的阈值,大于它的像素点都会被认为是边缘。(深色背景,浅色边缘)
 def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresholdPixels=0):
   #笛卡尔坐标系x-y,笛卡尔坐标转霍夫空间k-q,极坐标转霍夫空间θ-ρ(读作theta-rho)
   #极坐标霍夫空间中, 横轴θ, 竖轴 ρ=x*cosθ+y*sinθ
-  #角度制转弧度制公式: 1度=π/180≈0.01745弧度，1弧度=180/π≈57.3度
+  #角度制转弧度制公式: 1度=π/180≈0.01745弧度, 1弧度=180/π≈57.3度
   
   rows, columns = edged.shape
-  print('rows:',rows,'columns:',columns)
+  #print('rows:',rows,'columns:',columns)
 
   #创建霍夫空间横轴, 值=theta。范围[-90,90], 取点数 2*(90/theta_res)+1 
   #np.linspace(起始值,终点值,取点数):创建等差数列。
@@ -43,7 +43,7 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
       for colId in range(columns):
         #如果是边缘像素,则循环遍历所有可能的θ值,计算对应的ρ,在累加器中找到θ和ρ索引并在该位置递加。                   
         if edged[rowId, colId]>thresholdPixels: 
-          print('rowId,colId:',rowId, colId,'\n edged[rowId, colId]:',edged[rowId, colId])
+          #print('rowId,colId:',rowId, colId,'\n edged[rowId, colId]:',edged[rowId, colId])
           #霍夫空间竖轴, 值=rhoVal。
           for thId in range(len(theta)):
             rhoVal = colId*np.cos(theta[thId]*np.pi/180.0) + \
@@ -62,25 +62,25 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
       #values存放houghMatrix中大于阈值的值。np.transpose():交换轴的位置,不加其他参数时相当于.T()转置。
       values=np.transpose(np.array(np.nonzero(houghMatrix>thresholdVotes)))
       print('values:\n',values)
-      filterArray=[]
+      filterArray=[]#这几个Array放的都是在values里的索引
       filterArray.append(0)
       totalArray=[]
       for i in range (0, len(values)):
           if i in filterArray[1::]:
               continue #*注:continue，break都是对for起作用而不是if啊啊啊啊
           tempArray=[i]
-          for j in range (i+1, len(values)):#遍历位置在i后面的值
+          for j in range (i+1, len(values)):#遍历位置在i后面的值,如果
               if j in filterArray[1::]:
                   continue
+              #遍历当前簇,如果此线和里面其他线有距离小于阈值的,则放进同一簇
               for k in range (0, len(tempArray)):
                   if getLength(values[tempArray[k]],values[j])<clusterDiameter:
                       filterArray.append(j)
-                      tempArray.append(j)
+                      tempArray.append(j)#放进当前的簇
                       break
-          totalArray.append(tempArray)
-          print('totalArray:\n',totalArray)
-      print('totalArray:\n',totalArray)
-      #leave the highest value in each cluster
+          totalArray.append(tempArray)#tempArray存放一簇线,totalArray存放所有tempArray
+          #print('totalArray-',i,':\n',totalArray)
+      #print('totalArray-ending',totalArray)
       #每一簇都只留一条最大值,其他变成0
       for i in range (0, len(totalArray)):
            for j in range (0, len(totalArray[i])):
@@ -92,10 +92,11 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
                    if houghMatrix[values[totalArray[i][j]][0],values[totalArray[i][j]][1]]>=highest:
                        highest=houghMatrix[values[totalArray[i][j]][0],values[totalArray[i][j]][1]]
                        houghMatrix[values[totalArray[ii][jj]][0],values[totalArray[ii][jj]][1]]=0
-                       ii=i
+                       ii=i  #ii,jj保存上一轮的i,j
                        jj=j
                    else:
                        houghMatrix[values[totalArray[i][j]][0],values[totalArray[i][j]][1]]=0
+               #print('highest:',highest)
   print('houghMatrix-2:\n',houghMatrix)     
   return (np.where(houghMatrix>thresholdVotes)[0]-q)*rho_res,\
             theta[np.where(houghMatrix>thresholdVotes)[1]]*np.pi/180.0
@@ -110,27 +111,18 @@ def plotHoughLines(rho,theta,image):
   x0 = a*rho
   y0 = b*rho
 
-  #plt.subplots():一纸绘多图。nrows:横轴分成的区域,ncols:纵轴分成的区域,plot_number:当前的绘图区,figsize:绘图区大小
+  #plt.subplots():一纸绘多图。nrows:横轴分成的区域,ncols:纵轴分成的区域
   fig2, ax1 = plt.subplots(ncols=1, nrows=1)
   ax1.imshow(image)
   
-  # plot():参数[fmt] = '[color][marker][line]'。
+ 
   #*注:[x1,x2],[y1,y2]的xy别写反了
-  #*?(没太懂)这里的1000是为了求延长线,其他数值也可以
   for i in range (0, len(rho)): 
-      xy=[[x0[i] + (-b[i]), x0[i] - (-b[i])],\
-                [y0[i] + (a[i]), y0[i] - (a[i])]]
-      ax1.plot( [x0[i] + 1000*(-b[i]), x0[i] - 1000*(-b[i])],
-                [y0[i] + 1000*(a[i]), y0[i] - 1000*(a[i])], 
-                'xb-',linewidth=3)
-      '''ax1.plot( [x0[i] + 100*(-b[i]), x0[i] - 100*(-b[i])],
-                [y0[i] + 100*(a[i]), y0[i] - 100*(a[i])], 
-                'xb-',linewidth=3)'''
-      # Plot beginnings and ends of lines
-      #*?这里感觉不太对
-      plt.plot(xy[0][0],xy[1][0],"or:")
-      plt.plot(xy[0][1],xy[1][1],"oy:")
-      
+    #这里的+1000*(-b[i])和+1000*(a[i])是为了画延长线,其他数值也可以
+    ax1.plot( [x0[i] + 1000*(-b[i]), x0[i] - 1000*(-b[i])],
+              [y0[i] + 1000*(a[i]), y0[i] - 1000*(a[i])], 
+              'xb-',linewidth=3)# plot():参数[fmt] = '[color][marker][line]'。
+  
   ax1.set_ylim([image.shape[0],0])
   ax1.set_xlim([0,image.shape[1]])
   
@@ -139,10 +131,11 @@ def plotHoughLines(rho,theta,image):
 
 #计算两点的距离, startPoint、secondPoint格式: [x,y] 
 def getLength(startPoint,secondPoint):
-    v1x=secondPoint[0]-startPoint[0]
-    v1y=secondPoint[1]-startPoint[1]
-    lenv=np.sqrt(v1x*v1x+v1y*v1y)
-    return lenv
+  v1x=secondPoint[0]-startPoint[0]
+  v1y=secondPoint[1]-startPoint[1]
+  lenv=np.sqrt(v1x*v1x+v1y*v1y)
+  #print('startPoint',startPoint,'secondPoint:',secondPoint,'lenv:',lenv)     
+  return lenv
   
 
 #去除array中的重复项,a: list of 1xN arrays,返回值b: array
@@ -178,19 +171,17 @@ def blur_image(img_gray): #滤波函数。类似于cv里的filter2d()
     kernel = np.ones((2,2),np.float32)/4  #Blurring kernel
     res=sp.convolve2d(img_gray,kernel,mode='same')#scipy.signal.convolve2d():进行卷积
     return np.round(res).astype(np.uint8)
+  
+a=[1,2,2]
+np.where(np.array(a)==np.max(a))
+np.where(np.array(a)==np.median(a))
 
-def reorderPoints(corners):
-    ##Inputs:
-    #corners - list of corners (look at example)
-
-    ##Outputs:
-    #array - reordered corners array
-
-    #Example
-    #corenrs=[[153, 104], [255, 98], [178, 144], [231, 58]]
-    #array -> [[153, 104], [178, 144], [255, 98], [231, 58]]
-    
+#重新排列四边形的四个角。reorder:重新排列
+#corners:四角坐标,形如[[153, 104], [255, 98], [178, 144], [231, 58]]
+#返回array:[[153, 104], [178, 144], [255, 98], [231, 58]]
+def reorderPoints(corners):    
     array=[]
+    #遍历每个角,分别算它和另外三点距离
     for i in range (0, len(corners)):
         tempArray=[]
         length1=getLength(corners[i][0],corners[i][1])
@@ -198,11 +189,16 @@ def reorderPoints(corners):
         length3=getLength(corners[i][0],corners[i][3])
         lenArr=np.array([length1,length2,length3])
         tempArray.append(corners[i][0])
+        #找到最短边对应的角中的第一个,放进tempArray
         tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.min(lenArr))[0][0]])
-        lenArr[np.where(np.array(lenArr)==np.min(lenArr))[0][0]]+=-0.00001 #n case of rectangle
+        #为避免有一样长的,把最短那条缩短
+        lenArr[np.where(np.array(lenArr)==np.min(lenArr))[0][0]]+=-0.00001 
+        #最长、中间边对应的角放进tempArray
         tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.max(lenArr))[0][0]])
         tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.median(lenArr))[0][0]])
         array.append(tempArray)
+        print('tempArray:\n',tempArray)
+    print('array:\n',array)
     return array
     
 def getAngle(startPoint,secondPoint,thirdPoint, absol=True):
