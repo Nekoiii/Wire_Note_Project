@@ -1,4 +1,0 @@
-export{
-  doRegister
-}
-from './userManager'
