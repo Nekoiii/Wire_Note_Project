@@ -78,9 +78,9 @@ def plotHoughLines(rho,theta,img):
   
   plt.show()'''
 #edged输入图像
-#rho_res距离精度(单位是像素),theta_res角度精度(单位是弧度)。这俩一般用1就好了。
+#rho_res距离精度(单位是像素),theta_res角度精度(单位是弧度)。这里的'精度'相当于步长,这俩一般用1就好了。
 #thresholdVotes指定在累加平面中阈值,大于它的直线才会被返回。
-#filterMultiple
+#filterMultiple指定靠得太近的n条线中只留一条。
 #thresholdPixels指定边缘的阈值,大于它的像素点都会被认为是边缘。(深色背景,浅色边缘)
 def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresholdPixels=0):
   #笛卡尔坐标系x-y,笛卡尔坐标转霍夫空间k-q,极坐标转霍夫空间θ-ρ(读作theta-rho)
@@ -105,7 +105,7 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
   #创建空的霍夫空间坐标系。大小为rho行theta列
   houghMatrix = np.zeros((len(rho), len(theta)))
 
-  #把图片里的像素一个个填入霍夫空间坐标系。
+  #把图片里属于边缘的像素一个个填入霍夫空间坐标系。
   for rowId in range(rows):                           
       for colId in range(columns):
         #如果是边缘像素,则循环遍历所有可能的θ值,计算对应的ρ,在累加器中找到θ和ρ索引并在该位置递加。                   
@@ -122,11 +122,11 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
             houghMatrix[rhoIdx[0], thId] += 1   #*注:这里不要写反了,坐标系里x、y轴在数组里位置是[y,x](因为是先取行再取列)
   print('houghMatrix:\n',houghMatrix)
 
-  #*?这里没太看懂, 好像是为了不让线粘太紧,所以靠得近的线就选了数值最高的一条?
+  #为了不让线粘太紧,靠得近的线里只留数值最高的一条,其他除掉
   #cluster and filter multiple dots in Houghs plane
   if filterMultiple>0:
       clusterDiameter=filterMultiple # diameter:直径
-      #values为houghMatrix中大于阈值的值的位置。np.transpose():交换轴的位置,不加其他参数时相当于.T()转置。
+      #values存放houghMatrix中大于阈值的值。np.transpose():交换轴的位置,不加其他参数时相当于.T()转置。
       values=np.transpose(np.array(np.nonzero(houghMatrix>thresholdVotes)))
       print('values:\n',values)
       filterArray=[]
@@ -148,6 +148,7 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
           print('totalArray:\n',totalArray)
       print('totalArray:\n',totalArray)
       #leave the highest value in each cluster
+      #每一簇都只留一条最大值,其他变成0
       for i in range (0, len(totalArray)):
            for j in range (0, len(totalArray[i])):
                if j==0:
