@@ -146,8 +146,6 @@ def getLength(startPoint,secondPoint):
 #       array([ 1,  3, 18, 20])]
 #去除array中的重复项,a: list of 1xN arrays,返回值b: array (按行升序排序)
 def unique(a):
-    print('a\n',a)
-    return []
     #a=[np.array([ 1,  3, 12, 17]),np.array([ 1,  3, 17, 12]),np.array([ 1,  3, 18, 20])] 
     #print('a: \n',a)
     b=np.array(a)
@@ -173,12 +171,15 @@ def rgb2gray(rbg_img):  #RGB彩图转灰度图(convert a color img to grayscale)
   #RGB转灰度的常用参数[0.2989, 0.5870, 0.1140]     
   return np.dot(rbg_img[..., :3], [0.2989, 0.5870, 0.1140]).astype(np.uint8)
 
-def blur_image(img_gray): #滤波函数。类似于cv里的filter2d()
-    #skipped first line and first column to keep it more simple (it's zeroed out anyway).
-    #for every pixel we change it with the average of 4 pixels.
-    kernel = np.ones((2,2),np.float32)/4  #Blurring kernel
-    res=sp.convolve2d(img_gray,kernel,mode='same')#scipy.signal.convolve2d():进行卷积
+def blurImage(image_gray):#滤波函数。类似于cv里的filter2d()
+    kernel = np.ones((2,2),np.float32)/4   #Blurring kernel
+    #We will skip first line and first column to keep it more simple, it's zeroed out anyway.
+    #now for every pixel we change it with the average of 4 pixels(as the kernel): itself, pixel to left
+    #pixel up, and pixel up-left. It drifts some edges one pixel to bottom-down, but it does not matter as
+    #long as we use edged picture for the future work
+    res=sp.convolve2d(image_gray,kernel,mode='same') #scipy.signal.convolve2d():进行卷积
     return np.round(res).astype(np.uint8)
+
   
 #重新排列四边形的四个角,使相邻的角跟在一起。reorder:重新排列
 #corners:四角坐标,形如[[153, 104], [255, 98], [178, 144], [231, 58]]
@@ -237,15 +238,6 @@ def getAngle(startPoint,secondPoint,thirdPoint, absol=True):
     return a*angle
 
 
-def blurImage(image_gray):
-    kernel = np.ones((2,2),np.float32)/4                     #Blurring kernel
-    #We will skip first line and first column to keep it more simple, it's zeroed out anyway.
-    #now for every pixel we change it with the average of 4 pixels(as the kernel): itself, pixel to left
-    #pixel up, and pixel up-left. It drifts some edges one pixel to bottom-down, but it does not matter as
-    #long as we use edged picture for the future work
-    res=sp.convolve2d(image_gray,kernel,mode='same')
-
-    return np.round(res).astype(np.uint8)
   
   
   

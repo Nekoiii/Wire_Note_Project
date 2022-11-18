@@ -25,7 +25,7 @@ img_path = 'imgs/test_img-1.jpg' #*注:Spyder里记得在Files窗口打开目录
 img_rgb=np.array(plt.imread(img_path)) 
 #plt.imshow(img_rgb)
 img_gray=hough_functions.rgb2gray(img_rgb)
-img_gray = hough_functions.blur_image(img_gray) 
+img_gray = hough_functions.blurImage(img_gray) 
 edged = cv2.Canny(img_gray, 30, 130)#cv2.Canny():边缘检测
 
 #开始检测直线
@@ -62,7 +62,7 @@ theta2=theta+np.pi/2 #theta2=θ+90°
 theta3=theta-np.pi/2 #theta3=θ-90°
 difference=np.pi/90  #θ差异的阈值
 differenceRho=2  #ρ差异的阈值
-#找两两相互平行的线 #accumParallel存放的是角度θ
+#找两两相互平行的角度
 accumParallel=[] #accumulated:累积的,parallel:平行的
 for i in range (0, len(theta)):#遍历θ
   #拿下一个值和它对比,如果θ两头都没超过θ阈值,且ρ超过ρ阈值,则放进去
@@ -77,8 +77,8 @@ print('accumParallel:\n',accumParallel)
 print('accumParallel:\n',accumParallel.shape)
 #找矩形的四条边
 fourLines=[]
-#accumParallel中的平行线对进行两两对比,如果能形成直角(即其中有一条在theta2、theta3里的角度
-#　分别和另一个平行线对里其中一条的theta对比时两头都没超过阈值),则这两个平行线对能组成矩形
+#accumParallel中的平行角度对进行两两对比,如果能形成直角(即其中有一个在theta2、theta3里的角度
+#　分别和另一组平行角度对里其中一个的theta角度对比时两头都没超过阈值),则这两组平行角度对能组成矩形
 for i in range (0, len(accumParallel)):
   for j in range (1, len(accumParallel)):
       if     (theta2[accumParallel[j][0]]>(theta[accumParallel[i][0]]-difference) and theta2[accumParallel[j][0]]<(theta[accumParallel[i][0]]+difference)) \
@@ -113,59 +113,63 @@ print('fourLines:\n',fourLines)
 
 
 #找四个角
-#rho_j = x cos(theta_j) + y sin(theta_j)
-#rho_k = x cos(theta_k) + y sin(theta_k)
 corners=[]
-for quads in range (0, len(fourLines)): #遍历每对 #quads:四倍;四方院;四胞胎之一
-    cornersTemp=[]
-    for lines in range (0,4):
-        if lines in [0,1]:#第1、3线的lines_i为0, 而2、4的为1
-            lines_i=lines
-            next_i=2
-        if lines == 2:
-            lines_i=0
-            next_i=3
-        if lines == 3:
-            lines_i=1
-            next_i=1
-        b=np.array([rho[fourLines[quads][lines_i]],\
-                    rho[fourLines[quads][lines_i+next_i]]])
-        a=np.array([[np.cos(theta[fourLines[quads][lines_i]]),
-                     np.sin(theta[fourLines[quads][lines_i]])],
-                    [np.cos(theta[fourLines[quads][lines_i+next_i]]),
-                     np.sin(theta[fourLines[quads][lines_i+next_i]])]])
-        ans = np.linalg.solve(a, b)
-        cornersTemp.append([int(ans[0]),int(ans[1])])
-    corners.append(cornersTemp)
+for quads in range (0, len(fourLines)): #遍历每对四角度的组合 #quads:四倍;四方院;四胞胎之一
+  cornersTemp=[]
+  for lines in range (0,4):
+    if lines in [0,1]:#第0、2线的lines_i为0, 而1、3的为1
+        lines_i=lines#第0、1线的next_i为2, 2的为3,3的为1
+        next_i=2
+    if lines == 2:
+        lines_i=0
+        next_i=3
+    if lines == 3:
+        lines_i=1
+        next_i=1
+    #a为:(j、k代表当前线和next线)
+    #rho_j = x cos(theta_j) + y sin(theta_j)
+    #rho_k = x cos(theta_k) + y sin(theta_k)
+    a=np.array([[np.cos(theta[fourLines[quads][lines_i]]),
+                 np.sin(theta[fourLines[quads][lines_i]])],
+                [np.cos(theta[fourLines[quads][lines_i+next_i]]),
+                 np.sin(theta[fourLines[quads][lines_i+next_i]])]])
+    #b为j、k的角度θ对应在rho里的ρ
+    b=np.array([rho[fourLines[quads][lines_i]],\
+                rho[fourLines[quads][lines_i+next_i]]])
+    #np.linalg.solve(a,b)以矩阵形式给出线性方程组的解。a为系数矩阵,b为线性方程组的等号右边的值。官方文档https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html
+    #解出的x、y值即为交点坐标
+    ans = np.linalg.solve(a, b)
+    cornersTemp.append([int(ans[0]),int(ans[1])])
+  corners.append(cornersTemp)
 
+print('corners\n',corners)
 #四角重新排序
 corners=hough_functions.reorderPoints(corners)
 
-#过滤矩形
-for i in range (len(corners)-1,-1,-1):
+#过滤掉没用的矩形
+for i in range (len(corners)-1,-1,-1):#*?为什么要从后往前遍历
     minx=np.min(np.array(corners[i])[:,0])
     maxx=np.max(np.array(corners[i])[:,0])
     miny=np.min(np.array(corners[i])[:,1])
     maxy=np.max(np.array(corners[i])[:,1]) 
-
-    height=hough_functions.getLength(corners[i][0],corners[i][1])
-    width=hough_functions.getLength(corners[i][2],corners[i][1])
+    #print('orners[i]:',corners[i])
 
     #去除太小的矩形
+    height=hough_functions.getLength(corners[i][0],corners[i][1])
+    width=hough_functions.getLength(corners[i][2],corners[i][1])
     if height<20 or width<20 or maxy-miny<10 or maxx-minx<10:
         del corners[i]
         continue
-
-
+      
+    #去除标准差过高的矩形 
     xlin=np.array(np.linspace(corners[i][0][0],corners[i][2][0],20)).astype(int)
     ylin=np.array(np.linspace(corners[i][0][1],corners[i][2][1],20)).astype(int)
     xlin2=np.array(np.linspace(corners[i][1][0],corners[i][3][0],20)).astype(int)
     ylin2=np.array(np.linspace(corners[i][1][1],corners[i][3][1],20)).astype(int)
-
-    #去除标准差过高的矩形 
     #*?这里没太懂。标准偏差太高可能意味着形成矩形的可能是图片角落。但这里只能检测出solid rectangles。
     #np.std()计算标准差
     std=np.std(np.concatenate([img_gray[(ylin[2:-2]),(xlin[2:-2])],img_gray[(ylin2[2:-2]),(xlin2[2:-2])]]))
+    print('std:',std)
     if std>7:
         del corners[i]
         continue
