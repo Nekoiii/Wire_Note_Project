@@ -138,17 +138,9 @@ def getLength(startPoint,secondPoint):
   return lenv
   
 
-#Example
-# a=[array([ 1,  3, 12, 17]),
-#    array([ 1,  3, 17, 12]),
-#    array([ 1,  3, 18, 20])]
-# b -> [array([ 1,  3, 12, 17]),
-#       array([ 1,  3, 18, 20])]
 #去除array中的重复项,a: list of 1xN arrays,返回值b: array (按行升序排序)
 def unique(a):
-    print('a\n',a)
-    return []
-    #a=[np.array([ 1,  3, 12, 17]),np.array([ 1,  3, 17, 12]),np.array([ 1,  3, 18, 20])] 
+    #a=np.array([[ 1,  3, 12, 17],[ 1,  3, 17, 12],[ 1,  3, 18, 20]]) #Example
     #print('a: \n',a)
     b=np.array(a)
     a=np.sort(np.array(a)) #np.sort():数组排序。axis=0 按列排序, axis=1 按行排序。
