@@ -206,19 +206,12 @@ def reorderPoints(corners):
     print('array:\n',array)
     return array
 
+#计算两个向量的角度
+#Gets angle between vector (startPoint,secondPoint) and vector (secondPoint,thirdPoint)
+##Inputs: startPoint [x,y], secondPoint [x,y], thirdPoint [x,y]
+##Outputs: angle between two vectors
+#absol是否取正负号
 def getAngle(startPoint,secondPoint,thirdPoint, absol=True):
-    #Gets angle between vectors (startPoint,secondPoint) and vector
-    #(secondPoint,thirdPoint)
-
-    ##Inputs:
-    #startPoint - [x,y]
-    #secondPoint - [x,y]
-    #thirdPoint - [x,y]
-
-    ##Outputs:
-    #angle - angle between two vectors
-
-
     v1x=secondPoint[0]-startPoint[0]
     v1y=secondPoint[1]-startPoint[1]
     v2x=thirdPoint[0]-startPoint[0]
@@ -231,7 +224,7 @@ def getAngle(startPoint,secondPoint,thirdPoint, absol=True):
 
     a=1
     if absol==False:
-        a = np.sign((v1x) * (v2y) - (v1y) * (v2x))
+        a = np.sign((v1x) * (v2y) - (v1y) * (v2x))#np.sign()取数字的正负号
 
     if np.absolute(angle) < 0.02:
         angle=0
