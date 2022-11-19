@@ -177,10 +177,11 @@ for i in range (len(corners)-1,-1,-1):#*?为什么要从后往前遍历
   std=np.std(np.concatenate([img_gray[(ylin[2:-2]),(xlin[2:-2])],\
                              img_gray[(ylin2[2:-2]),(xlin2[2:-2])]]))
   print('std:',std)
-  #*?这里的7是怎么选出来的?
-  '''if std>7:
-      del corners[i]#*for test。暂时屏蔽掉它
-      continue'''
+  #*?原文里是7,这个数字该怎么选?
+  #if std>7:
+  if std>20:
+      del corners[i]
+      continue
 
   #*?这里也没太看懂
   #Remove if brighter: The requirement by task is fulfilled by checking the 
@@ -204,9 +205,9 @@ for i in range (len(corners)-1,-1,-1):#*?为什么要从后往前遍历
       a=(np.array(corners[i][j+1])+np.array(corners[i][j]))/2+[int(x),int(y)]
       if img_gray[int(a[1]),int(a[0])]-averageInside<5:
           delete=1
-  '''if delete==1:
-      del corners[i]#*for test。暂时屏蔽掉它
-      continue'''
+  if delete==1:
+      del corners[i]
+      continue
 
 #去除部分重叠的矩形(同片区域只保留最好的一个)
 sumi=np.zeros(len(corners))
@@ -239,7 +240,7 @@ if len(corners)>0:
   for i in range (len(corners)-2,-1,-1):
       found=0
       for j in range (len(corners2)-1,-1,-1):
-          if hough_functions.getLength(\
+          if hough_functions.getLength(
               middlePoint[corners2[j]],middlePoint[i])<=maxDistance:
               found=1
               if sumi[i]>sumi[corners2[j]]:
