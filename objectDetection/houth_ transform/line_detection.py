@@ -22,8 +22,11 @@ import cv2
 import hough_functions
 
 img_path = 'imgs/test_img-1.jpg' #*注:Spyder里记得在Files窗口打开目录文件夹啊!
+#img_path = 'imgs/test_img-2.jpg' 
+#img_path = 'imgs/test_img-3.jpg' 
 img_rgb=np.array(plt.imread(img_path)) 
-#plt.imshow(img_rgb)
+plt.title("Original Image")
+plt.imshow(img_rgb)
 img_gray=hough_functions.rgb2gray(img_rgb)
 img_gray = hough_functions.blurImage(img_gray) 
 edged = cv2.Canny(img_gray, 30, 130)#cv2.Canny():边缘检测
@@ -36,20 +39,22 @@ edged[0:borderLen,0:leny] = 0
 edged[lenx-borderLen:lenx,0:leny] = 0
 edged[0:lenx,0:borderLen] = 0
 edged[0:lenx,leny-borderLen:leny] = 0
+plt.title("Edged Image")
 plt.imshow(edged) 
 #np.set_printoptions(threshold=np.inf) #解决print()数组显示不全的问题
-np.set_printoptions(threshold=1000) #恢复缩略显示
+#np.set_printoptions(threshold=1000) #恢复缩略显示
 #print(edged[2000]) 
 
 #plt.subplots():一纸绘多图。nrows:横轴分成的区域,ncols:纵轴分成的区域,plot_number:当前的绘图区,figsize:绘图区大小
 fig, ax1 = plt.subplots(ncols=1, nrows=1, figsize=(8, 4))
 ax1.set_axis_off()  #set_axis_off():不显示X轴和Y轴
+plt.title("Edged Image - set_axis_off")
 ax1.imshow(edged, cmap="bone") #这里"bone"是一种颜色
 fig.savefig("Rectangles_edged.jpg") #savefig():保存图片
 
 
 rho,theta = hough_functions.hough_transform(edged,rho_res=1,theta_res=1,
-                            thresholdVotes=30,filterMultiple=5,thresholdPixels=0)
+                            thresholdVotes=20,filterMultiple=5,thresholdPixels=0)
 
 print('rho:\n',rho)
 print('theta:\n',theta)
@@ -70,11 +75,11 @@ for i in range (0, len(theta)):#遍历θ
       if theta[j]>(theta[i]-difference) and theta[j]<(theta[i]+difference):
            if rho[j]<(rho[i]-differenceRho) or rho[j]>(rho[i]+differenceRho):
              accumParallel.append([i,j])
-print('accumParallel:\n',accumParallel)
+#print('accumParallel:\n',accumParallel)
 
 accumParallel=np.array(accumParallel)
 print('accumParallel:\n',accumParallel)
-print('accumParallel:\n',accumParallel.shape)
+#print('accumParallel:\n',accumParallel.shape)
 #找矩形的四条边
 fourLines=[]
 #accumParallel中的平行角度对进行两两对比,如果能形成直角(即其中有一个在theta2、theta3里的角度
@@ -89,27 +94,28 @@ for i in range (0, len(accumParallel)):
           or (theta3[accumParallel[j][1]]>(theta[accumParallel[i][0]]-difference) and theta3[accumParallel[j][1]]<(theta[accumParallel[i][0]]+difference)) \
           or (theta3[accumParallel[j][0]]>(theta[accumParallel[i][1]]-difference) and theta3[accumParallel[j][0]]<(theta[accumParallel[i][1]]+difference)) \
           or (theta3[accumParallel[j][1]]>(theta[accumParallel[i][1]]-difference) and theta3[accumParallel[j][1]]<(theta[accumParallel[i][1]]+difference)):
-            print('accumParallel[i]:\n',accumParallel[i],'\n',accumParallel[i].shape)
+            '''print('accumParallel[i]:\n',accumParallel[i],'\n',accumParallel[i].shape)
             print('accumParallel[j]:\n',accumParallel[j],'\n',accumParallel[j].shape)
             accumParallel_ij=[accumParallel[i],accumParallel[j]]
             print('accumParallel_ij-1\n',accumParallel_ij)
             accumParallel_ij=np.array([accumParallel[i],accumParallel[j]])
             print('accumParallel_ij-2\n',accumParallel_ij,'\n',accumParallel_ij.shape)
             v=np.vstack((accumParallel[i],accumParallel[j]))
-            print('v\n',v,'\n',v.shape)
+            print('v\n',v,'\n',v.shape)'''
             #*原文章这样写np.concatenate()会报错,而且后面自定义函数unique()中也是用的一维,不知道是不是原文错了???
             #fourLines.append(np.concatenate([accumParallel[i],accumParallel[j]],1))             
             fourLines.append(np.concatenate([accumParallel[i],accumParallel[j]],0))             
             #如果按原文的方式拼接,可以用np.vstack()代替np.concatenate(,axis=1)
             #fourLines.append(np.vstack((accumParallel[i],accumParallel[j])))             
             #print('fourLines\n',fourLines,'\n',fourLines.shape)
-            print('fourLines\n',fourLines)
+            #print('fourLines\n',fourLines)
       '''break #*for test
   if len(fourLines)>0:
     break'''
-  
+
+print('fourLines-before:\n',fourLines,np.array(fourLines).shape)  
 fourLines=hough_functions.unique(fourLines) #去重
-print('fourLines:\n',fourLines)
+print('fourLines-after:\n',fourLines,np.array(fourLines).shape)
 
 
 #找四个角
@@ -142,14 +148,31 @@ for quads in range (0, len(fourLines)): #遍历每对四角度的组合 #quads:�
     cornersTemp.append([int(ans[0]),int(ans[1])])
   corners.append(cornersTemp)
 
-#print('corners\n',corners)
+#print('corners-before\n',corners)
 #四角重新排序
 corners=hough_functions.reorderPoints(corners)
+#print('corners-after\n',corners)
+
+corners_a=corners
+fig2, ax1 = plt.subplots(ncols=1, nrows=1, figsize=(8, 4))
+ax1.imshow(img_rgb)
+ax1.set_axis_off()
+for i in range(len(corners_a)):   
+    corners_a[i].append(corners_a[i][0])
+    for j in range (0,4):
+        ax1.plot( [corners_a[i][j][0],corners_a[i][j+1][0]],\
+                 [corners_a[i][j][1],corners_a[i][j+1][1]], 'xb-',linewidth=3)
+
+plt.title("before-filter")
+ax1.set_ylim([img_gray.shape[0],0])
+ax1.set_xlim([0,img_gray.shape[1]])
+plt.show()
+
 
 #过滤掉没用的矩形
-print('len-1',len(corners)-1)
+#print('len-1',len(corners)-1)
 for i in range (len(corners)-1,-1,-1):#*?为什么要从后往前遍历
-  print('len-2',len(corners)-1)
+  #print('len-2',len(corners)-1)
   if len(corners)<1:
     break
   minx=np.min(np.array(corners[i])[:,0])
@@ -161,7 +184,8 @@ for i in range (len(corners)-1,-1,-1):#*?为什么要从后往前遍历
   #去除太小的矩形
   height=hough_functions.getLength(corners[i][0],corners[i][1])
   width=hough_functions.getLength(corners[i][2],corners[i][1])
-  if height<20 or width<20 or maxy-miny<10 or maxx-minx<10:
+  print('height',height,'width',width)
+  if height<10 or width<10 or maxy-miny<5 or maxx-minx<5:
       del corners[i]
       continue
     
@@ -179,7 +203,8 @@ for i in range (len(corners)-1,-1,-1):#*?为什么要从后往前遍历
   print('std:',std)
   #*?原文里是7,这个数字该怎么选?
   #if std>7:
-  if std>20:
+  #if std>20:
+  if std>30:
       del corners[i]
       continue
 
@@ -254,12 +279,15 @@ if len(corners)>0:
   for i in corners2:   
       corners[i].append(corners[i][0])
       for j in range (0,4):
-          ax1.plot( [corners[i][j][0],corners[i][j+1][0]],[corners[i][j][1],corners[i][j+1][1]], 'xb-',linewidth=3)
+          ax1.plot( [corners[i][j][0],corners[i][j+1][0]],\
+                   [corners[i][j][1],corners[i][j+1][1]], 'xb-',linewidth=3)
   
-ax1.set_ylim([img_gray.shape[0],0])
-ax1.set_xlim([0,img_gray.shape[1]])
-fig2.savefig("Example4.jpg")
+  ax1.set_ylim([img_gray.shape[0],0])
+  ax1.set_xlim([0,img_gray.shape[1]])
+  fig2.savefig("output-image.jpg")
+  
 if len(corners)>0:
-    plt.show()
+  plt.title("final")
+  plt.show()
 else:
-    print ('No rectangles were found')
+  print ('No rectangles were found')

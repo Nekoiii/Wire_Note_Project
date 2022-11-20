@@ -97,39 +97,42 @@ def hough_transform(edged,rho_res,theta_res,thresholdVotes,filterMultiple,thresh
                    else:
                        houghMatrix[values[totalArray[i][j]][0],values[totalArray[i][j]][1]]=0
                #print('highest:',highest)
-  print('houghMatrix-2:\n',houghMatrix)     
+  print('houghMatrix-2:\n',houghMatrix)  
+  #*?为什么ρ要-q)*rho_res
+  #*?为什么θ要*np.pi/180.0,是弧度制转角度制?
   return (np.where(houghMatrix>thresholdVotes)[0]-q)*rho_res,\
             theta[np.where(houghMatrix>thresholdVotes)[1]]*np.pi/180.0
 
 
-#画霍斯空间的线
+#画霍斯空间的线 #rho,theta都是list
 def plotHoughLines(rho,theta,image):
+  #print('rho,theta',rho,theta)
   #极坐标与笛卡尔互相转换: https://blog.csdn.net/weixin_36815313/article/details/109485524
   #极坐标转笛卡尔坐标系公式: x=ρ*cosθ, y=ρ*sinθ
   a = np.cos(theta) # a=cosθ
   b = np.sin(theta) # b=sinθ
-  x0 = a*rho
-  y0 = b*rho
+  x0 = a*rho  #x0=ρ*cosθ
+  y0 = b*rho  #y0=ρ*sinθ
 
   #plt.subplots():一纸绘多图。nrows:横轴分成的区域,ncols:纵轴分成的区域
   fig2, ax1 = plt.subplots(ncols=1, nrows=1)
   ax1.imshow(image)
   
- 
   #*注:[x1,x2],[y1,y2]的xy别写反了
   for i in range (0, len(rho)): 
     #这里的+1000*(-b[i])和+1000*(a[i])是为了画延长线,其他数值也可以
-    ax1.plot( [x0[i] + 1000*(-b[i]), x0[i] - 1000*(-b[i])],
-              [y0[i] + 1000*(a[i]), y0[i] - 1000*(a[i])], 
+    ax1.plot( [x0[i] + 1000*(-b[i]), x0[i] - 1000*(-b[i])],#[ρ*cosθ-n*sinθ,ρ*cosθ+n*sinθ]
+              [y0[i] + 1000*(a[i]), y0[i] - 1000*(a[i])], #[ρ*sinθ-n*cosθ,ρ*sinθ+n*cosθ]
               'xb-',linewidth=3)# plot():参数[fmt] = '[color][marker][line]'。
   
   ax1.set_ylim([image.shape[0],0])
   ax1.set_xlim([0,image.shape[1]])
   
+  plt.title("plotHoughLines")
   plt.show()
 
 
-#计算笛卡尔坐标系中两点的距离, startPoint、secondPoint格式: [x,y] 
+#计算两点的距离, startPoint、secondPoint格式: [x,y] 
 def getLength(startPoint,secondPoint):
   v1x=secondPoint[0]-startPoint[0]
   v1y=secondPoint[1]-startPoint[1]
@@ -185,26 +188,26 @@ def blurImage(image_gray):#滤波函数。类似于cv里的filter2d()
 #corners:四角坐标,形如[[153, 104], [255, 98], [178, 144], [231, 58]]
 #返回array:[[153, 104], [178, 144], [255, 98], [231, 58]]
 def reorderPoints(corners):    
-    array=[]
-    #遍历每个角,分别算它和另外三点距离
-    for i in range (0, len(corners)):
-        tempArray=[]
-        length1=getLength(corners[i][0],corners[i][1])
-        length2=getLength(corners[i][0],corners[i][2])
-        length3=getLength(corners[i][0],corners[i][3])
-        lenArr=np.array([length1,length2,length3])
-        tempArray.append(corners[i][0])
-        #找到最短距离对应的角中的第一个,放进tempArray
-        tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.min(lenArr))[0][0]])
-        #为避免有一样长的,把最短那条缩短
-        lenArr[np.where(np.array(lenArr)==np.min(lenArr))[0][0]]+=-0.00001 
-        #最长、中间边对应的角放进tempArray
-        tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.max(lenArr))[0][0]])
-        tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.median(lenArr))[0][0]])
-        array.append(tempArray)
-        print('tempArray:\n',tempArray)
-    print('array:\n',array)
-    return array
+  array=[]
+  #遍历每个角,分别算它和另外三点距离
+  for i in range (0, len(corners)):
+    tempArray=[]
+    length1=getLength(corners[i][0],corners[i][1])
+    length2=getLength(corners[i][0],corners[i][2])
+    length3=getLength(corners[i][0],corners[i][3])
+    lenArr=np.array([length1,length2,length3])
+    tempArray.append(corners[i][0])
+    #找到最短距离对应的角中的第一个,放进tempArray
+    tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.min(lenArr))[0][0]])
+    #为避免有一样长的,把最短那条缩短
+    lenArr[np.where(np.array(lenArr)==np.min(lenArr))[0][0]]+=-0.00001 
+    #最长、中间边对应的角放进tempArray
+    tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.max(lenArr))[0][0]])
+    tempArray.append(corners[i][1+np.where(np.array(lenArr)==np.median(lenArr))[0][0]])
+    array.append(tempArray)
+    print('tempArray:\n',tempArray)
+  print('array:\n',array)
+  return array
 
 #计算两个向量的角度
 #Gets angle between vector (startPoint,secondPoint) and vector (secondPoint,thirdPoint)
