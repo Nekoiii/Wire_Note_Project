@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-霍夫变换原理和实现：
+霍夫变换原理和实现:
 https://www.cnblogs.com/php-rearch/p/6760683.html
-python代码参考：
-https://github.com/alyssaq/hough_transform/blob/master/hough_transform.py
-直接用opencv实现：
-https://opencv24-python-tutorials.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_houghlines/py_houghlines.html
-
-
-*重要参考代码-几乎不使用opencv的检测长方形:(几乎是copy了这里的)
+参考代码(几乎是copy了这里的):
 https://www.homeworkhelponline.net/blog/programming/find-rectangles，
 https://github.com/HomeworkHelpOnline/Python-Find_Rectangles
-*重要参考代码-基于霍夫变换进行线检测
+
+其他参考代码:
 https://blog.csdn.net/algorithmPro/article/details/115499827
+https://github.com/alyssaq/hough_transform/blob/master/hough_transform.py
+直接用opencv实现:
+https://opencv24-python-tutorials.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_houghlines/py_houghlines.html
 """
 import numpy as np
 import matplotlib.pyplot as plt
