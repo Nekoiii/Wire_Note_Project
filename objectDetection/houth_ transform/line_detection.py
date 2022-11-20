@@ -21,9 +21,9 @@ import cv2
 
 import hough_functions
 
-img_path = 'imgs/test_img-1.jpg' #*注:Spyder里记得在Files窗口打开目录文件夹啊!
+#img_path = 'imgs/test_img-1.jpg' #*注:Spyder里记得在Files窗口打开目录文件夹啊!
 #img_path = 'imgs/test_img-2.jpg' 
-#img_path = 'imgs/test_img-3.jpg' 
+img_path = 'imgs/test_img-3.jpg' 
 img_rgb=np.array(plt.imread(img_path)) 
 plt.title("Original Image")
 plt.imshow(img_rgb)
@@ -125,7 +125,7 @@ for quads in range (0, len(fourLines)): #遍历每对四角度的组合 #quads:�
   for lines in range (0,4):
     if lines in [0,1]:#第0、2线的lines_i为0, 而1、3的为1
         lines_i=lines#第0、1线的next_i为2, 2的为3,3的为1
-        next_i=2
+        next_i=2  #第0线[lines_i+next_i]为2,第1线为3,第2线为1,第3线为2,
     if lines == 2:
         lines_i=0
         next_i=3
@@ -175,17 +175,19 @@ for i in range (len(corners)-1,-1,-1):#*?为什么要从后往前遍历
   #print('len-2',len(corners)-1)
   if len(corners)<1:
     break
-  minx=np.min(np.array(corners[i])[:,0])
+  #找到corners[i]中x、y的最大最小值
+  minx=np.min(np.array(corners[i])[:,0])#[行,列]
   maxx=np.max(np.array(corners[i])[:,0])
   miny=np.min(np.array(corners[i])[:,1])
   maxy=np.max(np.array(corners[i])[:,1]) 
-  #print('orners[i]:',corners[i])
+  print('orners[i]:',corners[i])
+  print('minx,maxx。miny,maxy:',minx,maxx,'。',miny,maxy)
 
   #去除太小的矩形
   height=hough_functions.getLength(corners[i][0],corners[i][1])
   width=hough_functions.getLength(corners[i][2],corners[i][1])
   print('height',height,'width',width)
-  if height<10 or width<10 or maxy-miny<5 or maxx-minx<5:
+  if height<10 or width<10 or maxy-miny<5 or maxx-minx<5:#*?只判定长宽不行吗?为什么还要判定maxy-miny和maxx-minx?
       del corners[i]
       continue
     

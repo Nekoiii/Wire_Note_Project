@@ -122,8 +122,8 @@ def plotHoughLines(rho,theta,image):
   for i in range (0, len(rho)): 
     #这里的+1000*(-b[i])和+1000*(a[i])是为了画延长线,其他数值也可以
     ax1.plot( [x0[i] + 1000*(-b[i]), x0[i] - 1000*(-b[i])],#[ρ*cosθ-n*sinθ,ρ*cosθ+n*sinθ]
-              [y0[i] + 1000*(a[i]), y0[i] - 1000*(a[i])], #[ρ*sinθ-n*cosθ,ρ*sinθ+n*cosθ]
-              'xb-',linewidth=3)# plot():参数[fmt] = '[color][marker][line]'。
+              [y0[i] + 1000*(a[i]), y0[i] - 1000*(a[i])], #[ρ*sinθ+n*cosθ,ρ*sinθ-n*cosθ]
+              'xb-',linewidth=3)# plot():参数[fmt] = '[color][marker][line]'。              'xb-',linewidth=3)# plot():参数[fmt] = '[color][marker][line]'。
   
   ax1.set_ylim([image.shape[0],0])
   ax1.set_xlim([0,image.shape[1]])
@@ -189,7 +189,7 @@ def blurImage(image_gray):#滤波函数。类似于cv里的filter2d()
 #返回array:[[153, 104], [178, 144], [255, 98], [231, 58]]
 def reorderPoints(corners):    
   array=[]
-  #遍历每个角,分别算它和另外三点距离
+  #遍历每组矩形,分别算角[0]和另外三角距离
   for i in range (0, len(corners)):
     tempArray=[]
     length1=getLength(corners[i][0],corners[i][1])
