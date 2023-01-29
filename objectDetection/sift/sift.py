@@ -74,23 +74,23 @@ def GuassianKernel(sigma, dim):
     result = (1.0/(temp*np.pi))*np.exp(-(assistant**2+(assistant.T)**2)/temp)
     return result
 
-
+#计算高斯差分金字塔
 def getDoG(img, n, sigma0, S=None, O=None):
     '''
     :param img: the original img.
     :param sigma0: sigma of the first stack of the first octave. default 1.52 for complicate reasons.
-    :param n: how many stacks of feature that you wanna extract.
+    :param n: how many stacks of feature that you wanna extract.一组里想提取多少层。
     :param S: how many stacks does every octave have. S must bigger than 3.
     :param k: the ratio of two adjacent stacks' scale.
-    :param O: how many octaves do we have.
+    :param O: how many octaves do we have. 组数。(同样大小的图为一组)
     :return: the DoG Pyramid
     '''
     if S == None:
-        S = n + 3
+        S = n + 3 #3是因为S层高斯金字塔中只能提取S-1层高斯差分金字塔,而要找特征点就需要在竖直方向也能求导,所以最上层最下层也要去掉
     if O == None:
-        O = int(np.log2(min(img.shape[0], img.shape[1]))) - 3
+        O = int(np.log2(min(img.shape[0], img.shape[1]))) - 3 #这是原论文里推荐计算O值的公式
 
-    k = 2 ** (1.0 / n)
+    k = 2 ** (1.0 / n) #*这个公式不知道哪儿推出来的
     sigma = [[(k**s)*sigma0*(1 << o) for s in range(S)] for o in range(O)]
     samplePyramid = [downsample(img, 1 << o) for o in range(O)]
 
@@ -108,7 +108,7 @@ def getDoG(img, n, sigma0, S=None, O=None):
 
     return DoG, GuassianPyramid
 
-
+#调整极值
 def adjustLocalExtrema(DoG, o, s, x, y, contrastThreshold, edgeThreshold, sigma, n, SIFT_FIXPT_SCALE):
     SIFT_MAX_INTERP_STEPS = 5
     SIFT_IMG_BORDER = 5
@@ -190,6 +190,7 @@ def adjustLocalExtrema(DoG, o, s, x, y, contrastThreshold, edgeThreshold, sigma,
     return point, x, y, s
 
 
+#得到主方向
 def GetMainDirection(img, r, c, radius, sigma, BinNum):
     expf_scale = -1.0 / (2.0 * sigma * sigma)
 
@@ -255,7 +256,10 @@ def GetMainDirection(img, r, c, radius, sigma, BinNum):
 
     return maxval, hist
 
-
+#找极值(关键点)
+'''
+contrastThreshold 用来过滤掉太小的点(噪声)
+'''
 def LocateKeyPoint(DoG, sigma, GuassianPyramid, n, BinNum=36, contrastThreshold=0.04, edgeThreshold=10.0):
     SIFT_ORI_SIG_FCTR = 1.52
     SIFT_ORI_RADIUS = 3 * SIFT_ORI_SIG_FCTR
@@ -268,8 +272,8 @@ def LocateKeyPoint(DoG, sigma, GuassianPyramid, n, BinNum=36, contrastThreshold=
     KeyPoints = []
     O = len(DoG)
     S = len(DoG[0])
-    for o in range(O):
-        for s in range(1, S-1):
+    for o in range(O): #每一组
+        for s in range(1, S-1): #每一组里的每一层
             threshold = 0.5*contrastThreshold/(n*255*SIFT_FIXPT_SCALE)
             img_prev = DoG[o][s-1]
             img = DoG[o][s]
@@ -320,7 +324,7 @@ def LocateKeyPoint(DoG, sigma, GuassianPyramid, n, BinNum=36, contrastThreshold=
 
     return KeyPoints
 
-
+#计算描述符
 def calcSIFTDescriptor(img, ptf, ori, scl, d, n, SIFT_DESCR_SCL_FCTR=3.0, SIFT_DESCR_MAG_THR=0.2, SIFT_INT_DESCR_FCTR=512.0, FLT_EPSILON=1.19209290E-07):
     dst = []
     pt = [int(np.round(ptf[0])), int(np.round(ptf[1]))]  # 坐标点取整
@@ -451,7 +455,7 @@ def calcSIFTDescriptor(img, ptf, ori, scl, d, n, SIFT_DESCR_SCL_FCTR=3.0, SIFT_D
 
     return dst
 
-
+#构建关键点的描述符
 def calcDescriptors(gpyr, keypoints, SIFT_DESCR_WIDTH=4, SIFT_DESCR_HIST_BINS=8):
     # SIFT_DESCR_WIDTH = 4，描述直方图的宽度
     # SIFT_DESCR_HIST_BINS = 8
@@ -474,10 +478,9 @@ def calcDescriptors(gpyr, keypoints, SIFT_DESCR_WIDTH=4, SIFT_DESCR_HIST_BINS=8)
 
 
 def do_sift(img, showDoGimgs=False):
-    SIFT_SIGMA = 1.6
-    SIFT_INIT_SIGMA = 0.5  # 假设的摄像头的尺度
+    SIFT_SIGMA = 1.6  #希望第一次卷积后能达到的尺度
+    SIFT_INIT_SIGMA = 0.5  # 假设的摄像头的尺度(即假设的原图自带的模糊尺度)
     sigma0 = np.sqrt(SIFT_SIGMA**2-SIFT_INIT_SIGMA**2)
-
     n = 3
 
     DoG, GuassianPyramid = getDoG(img, n, sigma0)
@@ -552,7 +555,7 @@ if __name__ == '__main__':
         img2 = origimg2.mean(axis=-1)
     else:
         img2 = origimg2
-    ScaleRatio = img.shape[0]*1.0/img2.shape[0]
+    ScaleRatio = img.shape[0]*1.0/img2.shape[0]#.shape[0]图片高度
 
     img2 = np.array(Image.fromarray(img2).resize(
         (int(round(ScaleRatio * img2.shape[1])), img.shape[0]), Image.BICUBIC))
