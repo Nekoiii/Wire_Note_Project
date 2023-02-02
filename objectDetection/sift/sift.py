@@ -109,6 +109,9 @@ def getDoG(img, n, sigma0, S=None, O=None):
     return DoG, GuassianPyramid
 
 #调整极值
+'''
+DoG:高斯差分金字塔。o,s:当前第几组、层。x, y: 当前像素坐标。
+'''
 def adjustLocalExtrema(DoG, o, s, x, y, contrastThreshold, edgeThreshold, sigma, n, SIFT_FIXPT_SCALE):
     SIFT_MAX_INTERP_STEPS = 5
     SIFT_IMG_BORDER = 5
@@ -116,13 +119,13 @@ def adjustLocalExtrema(DoG, o, s, x, y, contrastThreshold, edgeThreshold, sigma,
     point = []
 
     img_scale = 1.0 / (255 * SIFT_FIXPT_SCALE)
-    deriv_scale = img_scale * 0.5
+    deriv_scale = img_scale * 0.5 #*?deriv_scale是什么
     second_deriv_scale = img_scale
     cross_deriv_scale = img_scale * 0.25
 
     img = DoG[o][s]
     i = 0
-    while i < SIFT_MAX_INTERP_STEPS:
+    while i < SIFT_MAX_INTERP_STEPS: #层数<1或超出想取的层数范围n、
         if s < 1 or s > n or y < SIFT_IMG_BORDER or y >= img.shape[1] - SIFT_IMG_BORDER or x < SIFT_IMG_BORDER or x >= img.shape[0] - SIFT_IMG_BORDER:
             return None, None, None, None
 
@@ -145,11 +148,11 @@ def adjustLocalExtrema(DoG, o, s, x, y, contrastThreshold, edgeThreshold, sigma,
         dys = (next[x + 1, y] - next[x - 1, y] -
                prev[x + 1, y] + prev[x - 1, y]) * cross_deriv_scale
 
-        H = [[dxx, dxy, dxs],
+        H = [[dxx, dxy, dxs], #海森矩阵。视频https://www.bilibili.com/video/BV1Qb411W7cK?p=2&vd_source=d3186b41f1a6229779fb4fe8e9ce0154,P2里11:50有解释
              [dxy, dyy, dys],
              [dxs, dys, dss]]
 
-        X = np.matmul(np.linalg.pinv(np.array(H)), np.array(dD))
+        X = np.matmul(np.linalg.pinv(np.array(H)), np.array(dD)) #np.matmul():矩阵乘法(matrix multiply)
 
         xi = -X[2]
         xr = -X[1]
@@ -170,7 +173,9 @@ def adjustLocalExtrema(DoG, o, s, x, y, contrastThreshold, edgeThreshold, sigma,
             img.shape[0] - SIFT_IMG_BORDER:
         return None, None, None, None
 
-    t = (np.array(dD)).dot(np.array([xc, xr, xi]))
+    t = (np.array(dD)).dot(np.array([xc, xr, xi])) #.dot()矩阵乘法。
+    #.matmul()和.dot()的区别：https://blog.csdn.net/Dontla/article/details/106498504
+    #如果参与运算的是两个二维数组,官方更推荐使用np.matmul()和@用于矩阵乘法。https://www.cnblogs.com/ssyfj/p/12913015.html#%E4%B8%80%E7%82%B9%E7%A7%AFdot-product
 
     contr = img[x, y] * img_scale + t * 0.5
     if np.abs(contr) * n < contrastThreshold:
@@ -267,26 +272,29 @@ def LocateKeyPoint(DoG, sigma, GuassianPyramid, n, BinNum=36, contrastThreshold=
 
     SIFT_INT_DESCR_FCTR = 512.0
     # SIFT_FIXPT_SCALE = 48
-    SIFT_FIXPT_SCALE = 1
+    SIFT_FIXPT_SCALE = 1 #*？SIFT_FIXPT_SCALE是什么
 
     KeyPoints = []
     O = len(DoG)
     S = len(DoG[0])
-    for o in range(O): #每一组
+    for o in range(O): #高斯差分金字塔中每一组
         for s in range(1, S-1): #每一组里的每一层
             threshold = 0.5*contrastThreshold/(n*255*SIFT_FIXPT_SCALE)
-            img_prev = DoG[o][s-1]
+            img_prev = DoG[o][s-1] #对比上一层、下一层
             img = DoG[o][s]
             img_next = DoG[o][s+1]
             for i in range(img.shape[0]):
                 for j in range(img.shape[1]):
-                    val = img[i, j]
-                    eight_neiborhood_prev = img_prev[max(
-                        0, i - 1):min(i + 2, img_prev.shape[0]), max(0, j - 1):min(j + 2, img_prev.shape[1])]
-                    eight_neiborhood = img[max(
-                        0, i - 1):min(i + 2, img.shape[0]), max(0, j - 1):min(j + 2, img.shape[1])]
-                    eight_neiborhood_next = img_next[max(
-                        0, i - 1):min(i + 2, img_next.shape[0]), max(0, j - 1):min(j + 2, img_next.shape[1])]
+                    val = img[i, j] 
+                    #在立体八邻域找极值(都叫eight但上、下层中是9个像素)
+                    #这里的max、min是为了不超出图片范围。-1、+2是因为左闭右开[)。
+                    eight_neiborhood_prev = img_prev[max(0, i - 1):min(i + 2, img_prev.shape[0]), 
+                                                     max(0, j - 1):min(j + 2, img_prev.shape[1])]
+                    eight_neiborhood = img[max(0, i - 1):min(i + 2, img.shape[0]), 
+                                           max(0, j - 1):min(j + 2, img.shape[1])]
+                    eight_neiborhood_next = img_next[max(0, i - 1):min(i + 2, img_next.shape[0]), 
+                                                     max(0, j - 1):min(j + 2, img_next.shape[1])]
+                    #if值大于阈值、且>0并大于所有领域中的值、或者<0并小于所有领域中的值
                     if np.abs(val) > threshold and \
                         ((val > 0 and (val >= eight_neiborhood_prev).all() and (val >= eight_neiborhood).all() and (val >= eight_neiborhood_next).all())
                          or (val < 0 and (val <= eight_neiborhood_prev).all() and (val <= eight_neiborhood).all() and (val <= eight_neiborhood_next).all())):
@@ -543,14 +551,16 @@ def drawLines(X1, X2, Y1, Y2, dis, img, num=10):
 
 
 if __name__ == '__main__':
-    origimg = plt.imread('./SIFTimg/3.jpeg')
+    origimg = plt.imread('./imgs/cat_1_small.jpeg')
+    #plt.imshow(origimg)
     if len(origimg.shape) == 3:
         img = origimg.mean(axis=-1)#如果是彩图,用.mean()给图像去均值
     else:
         img = origimg
     keyPoints, discriptors = do_sift(img)
 
-    origimg2 = plt.imread('./SIFTimg/4.jpeg')
+    origimg2 = plt.imread('./imgs/cat_2_small.jpeg')
+    #plt.imshow(origimg2)
     if len(origimg.shape) == 3:
         img2 = origimg2.mean(axis=-1)
     else:
