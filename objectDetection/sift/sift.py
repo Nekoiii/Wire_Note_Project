@@ -52,6 +52,7 @@ def convolve(filter, mat, padding, strides):
 
             result = np.array(channel)
 
+    print('convolve---result: ',result)
     return result
 
 
@@ -72,6 +73,8 @@ def GuassianKernel(sigma, dim):
     assistant = np.array(assistant)
     temp = 2*sigma*sigma
     result = (1.0/(temp*np.pi))*np.exp(-(assistant**2+(assistant.T)**2)/temp)
+    
+    print('GuassianKernel---result: ',result)
     return result
 
 #计算高斯差分金字塔
@@ -106,6 +109,7 @@ def getDoG(img, n, sigma0, S=None, O=None):
     DoG = [[GuassianPyramid[o][s+1] - GuassianPyramid[o][s]
             for s in range(S - 1)] for o in range(O)]
 
+    print('getDoG---DoG, GuassianPyramid: ',DoG, GuassianPyramid)
     return DoG, GuassianPyramid
 
 #调整极值
@@ -192,6 +196,7 @@ def adjustLocalExtrema(DoG, o, s, x, y, contrastThreshold, edgeThreshold, sigma,
     point.append(o + (s << 8) + (int(np.round((xi + 0.5)) * 255) << 16))
     point.append(sigma * np.power(2.0, (s + xi) / n)*(1 << o) * 2)
 
+    print('adjustLocalExtrema---point, x, y, s: ',point, x, y, s)
     return point, x, y, s
 
 
@@ -259,6 +264,7 @@ def GetMainDirection(img, r, c, radius, sigma, BinNum):
     # 得到主方向
     maxval = max(hist)
 
+    print('GetMainDirection---maxval: ',maxval, 'GetMainDirection---hist: ',hist)
     return maxval, hist
 
 #找极值(关键点)
@@ -330,6 +336,7 @@ def LocateKeyPoint(DoG, sigma, GuassianPyramid, n, BinNum=36, contrastThreshold=
                                 temp.append((360.0/BinNum) * bin)
                                 KeyPoints.append(temp)
 
+    print('LocateKeyPoint---KeyPoints: ',KeyPoints)
     return KeyPoints
 
 #计算描述符
@@ -461,6 +468,7 @@ def calcSIFTDescriptor(img, ptf, ori, scl, d, n, SIFT_DESCR_SCL_FCTR=3.0, SIFT_D
     for k in range(length):
         dst[k] = min(max(dst[k] * nrm2, 0), 255)
 
+    print('calcSIFTDescriptor---dst: ',dst)
     return dst
 
 #构建关键点的描述符
@@ -482,6 +490,8 @@ def calcDescriptors(gpyr, keypoints, SIFT_DESCR_WIDTH=4, SIFT_DESCR_HIST_BINS=8)
 
         descriptors.append(calcSIFTDescriptor(
             img, ptf, kpt[-1], size * 0.5, d, n))
+        
+    print('calcDescriptors---descriptors: ',descriptors)
     return descriptors
 
 
@@ -502,6 +512,7 @@ def do_sift(img, showDoGimgs=False):
     KeyPoints = LocateKeyPoint(DoG, SIFT_SIGMA, GuassianPyramid, n)
     discriptors = calcDescriptors(GuassianPyramid, KeyPoints)
 
+    print('do_sift---KeyPoints, discriptors: ',KeyPoints, discriptors)
     return KeyPoints, discriptors
 
 
@@ -536,22 +547,25 @@ def drawLines(X1, X2, Y1, Y2, dis, img, num=10):
     info = np.array(info)
     info = info[:min(num, info.shape[0]), :]
     img = Lines(img, info)
-    #plt.imsave('./sift/3.jpg', img)
+    plt.imsave('./imgs/output_1.jpg', img)
 
     if len(img.shape) == 2:
         plt.imshow(img.astype(np.uint8), cmap='gray')
     else:
         plt.imshow(img.astype(np.uint8))
     plt.axis('off')
-    #plt.plot([info[:,0], info[:,1]], [info[:,2], info[:,3]], 'c')
-    # fig = plt.gcf()
-    # fig.set_size_inches(int(img.shape[0]/100.0),int(img.shape[1]/100.0))
-    #plt.savefig('./sift/2.jpg')
+    plt.plot([info[:,0], info[:,1]], [info[:,2], info[:,3]], 'c')
+    fig = plt.gcf()
+    fig.set_size_inches(int(img.shape[0]/100.0),int(img.shape[1]/100.0))
+    plt.savefig('./imgs/output_2.jpg')
     plt.show()
 
+#圈出特征点和主方向
+def drawkeyPoints():
+    plt.show()
 
 if __name__ == '__main__':
-    origimg = plt.imread('./imgs/cat_1_small.jpeg')
+    origimg = plt.imread('./imgs/cat_1_medium.jpeg')
     #plt.imshow(origimg)
     if len(origimg.shape) == 3:
         img = origimg.mean(axis=-1)#如果是彩图,用.mean()给图像去均值
@@ -559,7 +573,7 @@ if __name__ == '__main__':
         img = origimg
     keyPoints, discriptors = do_sift(img)
 
-    origimg2 = plt.imread('./imgs/cat_2_small.jpeg')
+    origimg2 = plt.imread('./imgs/cat_2_medium.jpeg')
     #plt.imshow(origimg2)
     if len(origimg.shape) == 3:
         img2 = origimg2.mean(axis=-1)
