@@ -515,9 +515,8 @@ def do_sift(img, showDoGimgs=False):
     #print('do_sift---KeyPoints, discriptors: ',KeyPoints, discriptors)
     return KeyPoints, discriptors
 
-
-def Lines(img, info, color=(255, 0, 0), err=700):
-
+#画线
+def drawLines(img, info, color=(255, 0, 0), err=700):
     if len(img.shape) == 2:
         result = np.dstack((img, img, img))
     else:
@@ -535,18 +534,17 @@ def Lines(img, info, color=(255, 0, 0), err=700):
             if (temp*(t >= 0)*(t <= 1)).any():
                 result[i, j] = color
                 k += 1
-    print(k)
+    #print('Lines---k',k)
 
     return result
 
-
-def drawLines(X1, X2, Y1, Y2, dis, img, num=10):
-
+#连接两张图的特征点
+def drawKeyPointsLines(X1, X2, Y1, Y2, dis, img, num=10):
     info = list(np.dstack((X1, X2, Y1, Y2, dis))[0])
     info = sorted(info, key=lambda x: x[-1])
     info = np.array(info)
     info = info[:min(num, info.shape[0]), :]
-    img = Lines(img, info)
+    img = drawLines(img, info)
     plt.imsave('./imgs/output_1.jpg', img)
 
     if len(img.shape) == 2:
@@ -597,7 +595,7 @@ if __name__ == '__main__':
     keyPoints = np.array(keyPoints)[:, :2]
     keyPoints2 = np.array(keyPoints2)[:, :2]
     print('keyPoints',keyPoints,'keyPoints2',keyPoints2)
-    drawKeyPoints(origimg,keyPoints)
+    #drawKeyPoints(origimg,keyPoints)
 
     keyPoints2[:, 1] = img.shape[1] + keyPoints2[:, 1]
 
@@ -606,10 +604,11 @@ if __name__ == '__main__':
     result = np.hstack((origimg, origimg2))
 
     keyPoints = keyPoints[match[1][:, 0]]
+    drawKeyPoints(origimg,keyPoints)
 
     X1 = keyPoints[:, 1]
     X2 = keyPoints2[:, 1]
     Y1 = keyPoints[:, 0]
     Y2 = keyPoints2[:, 0]
 
-    drawLines(X1, X2, Y1, Y2, match[0][:, 0], result)
+    drawKeyPointsLines(X1, X2, Y1, Y2, match[0][:, 0], result)
