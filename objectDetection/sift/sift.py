@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-sift
+sift（Scale-invariant feature transform) (尺度不变特征变换)
 
-
-教程视频:https://www.bilibili.com/video/BV1Qb411W7cK/?spm_id_from=333.337.search-card.all.click&vd_source=d3186b41f1a6229779fb4fe8e9ce0154
-原理:http://pm.itheima.com/news/20210604/113227.html
-代码:https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/blob/master/sift/SIFT.py
-
+b站教程视频:https://www.bilibili.com/video/BV1Qb411W7cK/?spm_id_from=333.337.search-card.all.click&vd_source=d3186b41f1a6229779fb4fe8e9ce0154
+代码copy自这里:https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/blob/master/sift/SIFT.py
+(这篇原理比较详细)原理、py代码:https://mp.weixin.qq.com/s?__biz=MzU0NjgzMDIxMQ==&mid=2247599504&idx=3&sn=b3e46e54abc43a2e8952a1d774f69897&chksm=fb54a77ccc232e6acd0af5be6f01a5133fa9bf8360658478dd5af7f5b14fcd98cc39f01660b3&scene=27
+(这篇超详细)原理和C++代码详解:https://dezeming.top/wp-content/uploads/2021/07/Sift算法原理与OpenCV源码解读.pdf
 """
 
 from PIL import Image
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt
 import numpy as np
+import cv2
 import warnings
 warnings.filterwarnings("ignore")  # 忽略警告
 
@@ -74,7 +74,7 @@ def GuassianKernel(sigma, dim):
     temp = 2*sigma*sigma
     result = (1.0/(temp*np.pi))*np.exp(-(assistant**2+(assistant.T)**2)/temp)
     
-    #print('GuassianKernel---result: ',result)
+    #print('Guassian Kernel---result: ',result)
     return result
 
 #计算高斯差分金字塔
@@ -93,7 +93,7 @@ def getDoG(img, n, sigma0, S=None, O=None):
     if O == None:
         O = int(np.log2(min(img.shape[0], img.shape[1]))) - 3 #这是原论文里推荐计算O值的公式
 
-    k = 2 ** (1.0 / n) #*这个公式不知道哪儿推出来的
+    k = 2 ** (1.0 / n)  
     sigma = [[(k**s)*sigma0*(1 << o) for s in range(S)] for o in range(O)]
     samplePyramid = [downsample(img, 1 << o) for o in range(O)]
 
@@ -109,7 +109,7 @@ def getDoG(img, n, sigma0, S=None, O=None):
     DoG = [[GuassianPyramid[o][s+1] - GuassianPyramid[o][s]
             for s in range(S - 1)] for o in range(O)]
 
-    print('getDoG---DoG, GuassianPyramid: ',DoG, GuassianPyramid)
+    #print('getDoG---DoG, GuassianPyramid: ',DoG, GuassianPyramid)
     return DoG, GuassianPyramid
 
 #调整极值
@@ -117,27 +117,28 @@ def getDoG(img, n, sigma0, S=None, O=None):
 DoG:高斯差分金字塔。o,s:当前第几组、层。x, y: 当前像素坐标。
 '''
 def adjustLocalExtrema(DoG, o, s, x, y, contrastThreshold, edgeThreshold, sigma, n, SIFT_FIXPT_SCALE):
-    SIFT_MAX_INTERP_STEPS = 5
+    SIFT_MAX_INTERP_STEPS = 5 #迭代次数超过5次，则判定为未找到准确特征点
     SIFT_IMG_BORDER = 5
 
     point = []
 
-    img_scale = 1.0 / (255 * SIFT_FIXPT_SCALE)
-    deriv_scale = img_scale * 0.5 #*?deriv_scale是什么
-    second_deriv_scale = img_scale
-    cross_deriv_scale = img_scale * 0.25
+    #有限差分法求导。这里有说明:https://dezeming.top/wp-content/uploads/2021/07/Sift算法原理与OpenCV源码解读.pdf
+    img_scale = 1.0 / (255 * SIFT_FIXPT_SCALE) #img_scale相当于对图像进行归一化，将DOG数据压缩到[ −1 ,1]之间
+    deriv_scale = img_scale * 0.5 #一阶偏导系数(2h)
+    second_deriv_scale = img_scale #二阶偏导系数(h^2)
+    cross_deriv_scale = img_scale * 0.25 #二阶混合偏导系数(4h^2)
 
     img = DoG[o][s]
     i = 0
-    while i < SIFT_MAX_INTERP_STEPS: #层数<1或超出想取的层数范围n、
+    while i < SIFT_MAX_INTERP_STEPS:
         if s < 1 or s > n or y < SIFT_IMG_BORDER or y >= img.shape[1] - SIFT_IMG_BORDER or x < SIFT_IMG_BORDER or x >= img.shape[0] - SIFT_IMG_BORDER:
             return None, None, None, None
 
         img = DoG[o][s]
         prev = DoG[o][s - 1]
         next = DoG[o][s + 1]
-
-        dD = [(img[x, y + 1] - img[x, y - 1]) * deriv_scale,
+        
+        dD = [(img[x, y + 1] - img[x, y - 1]) * deriv_scale, 
               (img[x + 1, y] - img[x - 1, y]) * deriv_scale,
               (next[x, y] - prev[x, y]) * deriv_scale]
 
@@ -152,7 +153,7 @@ def adjustLocalExtrema(DoG, o, s, x, y, contrastThreshold, edgeThreshold, sigma,
         dys = (next[x + 1, y] - next[x - 1, y] -
                prev[x + 1, y] + prev[x - 1, y]) * cross_deriv_scale
 
-        H = [[dxx, dxy, dxs], #海森矩阵。视频https://www.bilibili.com/video/BV1Qb411W7cK?p=2&vd_source=d3186b41f1a6229779fb4fe8e9ce0154,P2里11:50有解释
+        H = [[dxx, dxy, dxs], #海森矩阵。去除边缘效应
              [dxy, dyy, dys],
              [dxs, dys, dss]]
 
@@ -181,7 +182,7 @@ def adjustLocalExtrema(DoG, o, s, x, y, contrastThreshold, edgeThreshold, sigma,
     #.matmul()和.dot()的区别：https://blog.csdn.net/Dontla/article/details/106498504
     #如果参与运算的是两个二维数组,官方更推荐使用np.matmul()和@用于矩阵乘法。https://www.cnblogs.com/ssyfj/p/12913015.html#%E4%B8%80%E7%82%B9%E7%A7%AFdot-product
 
-    contr = img[x, y] * img_scale + t * 0.5
+    contr = img[x, y] * img_scale + t * 0.5 #舍去低对比度的点 :|fx| < T/n
     if np.abs(contr) * n < contrastThreshold:
         return None, x, y, s
 
@@ -191,12 +192,15 @@ def adjustLocalExtrema(DoG, o, s, x, y, contrastThreshold, edgeThreshold, sigma,
     if det <= 0 or tr * tr * edgeThreshold >= (edgeThreshold + 1) * (edgeThreshold + 1) * det:
         return None, x, y, s
 
+    #保存特征点信息，因为不同的组会将图像降采样，所以关键点位置需要再乘以当前组数，得到在原图尺寸中的位置。
     point.append((x + xr) * (1 << o))
     point.append((y + xc) * (1 << o))
+    #按格式保存特征点所在的组、层以及插值后的层的偏移量
     point.append(o + (s << 8) + (int(np.round((xi + 0.5)) * 255) << 16))
+    #特征点相对于输入图像的尺度。因为我们设置的输入图像是实际输入图像扩大一倍以后的图像，因此要乘以2
     point.append(sigma * np.power(2.0, (s + xi) / n)*(1 << o) * 2)
 
-    #print('adjustLocalExtrema---point, x, y, s: ',point, x, y, s)
+    #print('adjust LocalExtrema---point, x, y, s: ',point, x, y, s)
     return point, x, y, s
 
 
@@ -233,11 +237,11 @@ def GetMainDirection(img, r, c, radius, sigma, BinNum):
 
     length = k
 
-    W = np.exp(np.array(W))
+    W = np.exp(np.array(W)) #高斯权重
     Y = np.array(Y)
     X = np.array(X)
-    Ori = np.arctan2(Y, X)*180/np.pi
-    Mag = (X**2+Y**2)**0.5
+    Ori = np.arctan2(Y, X)*180/np.pi #梯度方向
+    Mag = (X**2+Y**2)**0.5 #梯度幅值
 
     # 计算直方图的每个bin
     for k in range(length):
@@ -270,6 +274,7 @@ def GetMainDirection(img, r, c, radius, sigma, BinNum):
 #找极值(关键点)
 '''
 contrastThreshold 用来过滤掉太小的点(噪声)
+edgeThreshold 过滤掉边缘
 '''
 def LocateKeyPoint(DoG, sigma, GuassianPyramid, n, BinNum=36, contrastThreshold=0.04, edgeThreshold=10.0):
     SIFT_ORI_SIG_FCTR = 1.52
@@ -336,7 +341,7 @@ def LocateKeyPoint(DoG, sigma, GuassianPyramid, n, BinNum=36, contrastThreshold=
                                 temp.append((360.0/BinNum) * bin)
                                 KeyPoints.append(temp)
                                 
-    #print('LocateKeyPoint---KeyPoints: ',KeyPoints)
+    #print('Locate KeyPoint---KeyPoints: ',KeyPoints)
     return KeyPoints
 
 #计算描述符
@@ -368,7 +373,7 @@ def calcSIFTDescriptor(img, ptf, ori, scl, d, n, SIFT_DESCR_SCL_FCTR=3.0, SIFT_D
 
             c_rot = j * cos_t - i * sin_t
             r_rot = j * sin_t + i * cos_t
-            rbin = r_rot + d // 2 - 0.5
+            rbin = r_rot + d // 2 - 0.5   # //：向下取整的除法
             cbin = c_rot + d // 2 - 0.5
             r = pt[1] + i
             c = pt[0] + j
@@ -391,24 +396,27 @@ def calcSIFTDescriptor(img, ptf, ori, scl, d, n, SIFT_DESCR_SCL_FCTR=3.0, SIFT_D
     W = np.exp(np.array(W))
 
     for k in range(length):
-        rbin = RBin[k]
+        rbin = RBin[k] #得到d*d邻域区域的坐标,即三维直方图的底内的位置
         cbin = CBin[k]
-        obin = (Ori[k] - ori) * bins_per_rad
-        mag = Mag[k] * W[k]
+        obin = (Ori[k] - ori) * bins_per_rad #得到幅角的所属的8个等分中的一个,即直方图的高度。bins_per_rad =n/360
+        mag = Mag[k] * W[k] #得到高斯加权以后的梯度幅值
 
+        #r0 c0 o0 为三维坐标的整数部分，表示属于那个正方体，因为正方体个数是固定的，且为整数
         r0 = int(rbin)
         c0 = int(cbin)
         o0 = int(obin)
+        #rbin cbin obin 为三维坐标的小数部分，也就是上图中小正方体c的坐标
         rbin -= r0
         cbin -= c0
         obin -= o0
 
-        if o0 < 0:
+
+        if o0 < 0: #把角度调整到0~360°之间
             o0 += n
         if o0 >= n:
             o0 -= n
 
-        # histogram update using tri-linear interpolation
+        # histogram update using tri-linear interpolation。三线性插值
         v_r1 = mag * rbin
         v_r0 = mag - v_r1
 
@@ -429,8 +437,10 @@ def calcSIFTDescriptor(img, ptf, ori, scl, d, n, SIFT_DESCR_SCL_FCTR=3.0, SIFT_D
 
         v_rco001 = v_rc00 * obin
         v_rco000 = v_rc00 - v_rco001
-
-        idx = ((r0 + 1) * (d + 2) + c0 + 1) * (n + 2) + o0
+        
+        #得到该像素点在三维直方图中的索引
+        idx = ((r0 + 1) * (d + 2) + c0 + 1) * (n + 2) + o0 
+        #8个顶点对应于坐标平移前的8个直方图正方体，对其进行累加求和
         hist[idx] += v_rco000
         hist[idx+1] += v_rco001
         hist[idx + (n+2)] += v_rco010
@@ -441,6 +451,7 @@ def calcSIFTDescriptor(img, ptf, ori, scl, d, n, SIFT_DESCR_SCL_FCTR=3.0, SIFT_D
         hist[idx+(d+3) * (n+2)+1] += v_rco111
 
     # finalize histogram, since the orientation histograms are circular
+    # 角度是循环的, 所以要给最终的描述符加上循环部分的hist 
     for i in range(d):
         for j in range(d):
             idx = ((i+1) * (d+2) + (j+1)) * (n+2)
@@ -449,26 +460,23 @@ def calcSIFTDescriptor(img, ptf, ori, scl, d, n, SIFT_DESCR_SCL_FCTR=3.0, SIFT_D
             for k in range(n):
                 dst.append(hist[idx+k])
 
-    # copy histogram to the descriptor,
-    # apply hysteresis thresholding
-    # and scale the result, so that it can be easily converted
-    # to byte array
+    #copy histogram to the descriptor,apply hysteresis thresholding　and scale the result, so that it can be easily converted　to byte array
     nrm2 = 0
     length = d * d * n
     for k in range(length):
         nrm2 += dst[k] * dst[k]
-    thr = np.sqrt(nrm2) * SIFT_DESCR_MAG_THR
+    thr = np.sqrt(nrm2) * SIFT_DESCR_MAG_THR #对光照阈值进行反归一化处理, SIFT_DESCR_MAG_THR=0.2
 
     nrm2 = 0
     for i in range(length):
-        val = min(dst[i], thr)
+        val = min(dst[i], thr) #把特征矢量中大于反归一化阈值的元素用thr 替代
         dst[i] = val
         nrm2 += val * val
     nrm2 = SIFT_INT_DESCR_FCTR / max(np.sqrt(nrm2), FLT_EPSILON)
     for k in range(length):
         dst[k] = min(max(dst[k] * nrm2, 0), 255)
 
-    #print('calcSIFTDescriptor---dst: ',dst)
+    #print('calc SIFTDescriptor---dst: ',dst)
     return dst
 
 #构建关键点的描述符
@@ -522,6 +530,7 @@ def drawLines(img, info, color=(255, 0, 0), err=700):
     else:
         result = img
     k = 0
+    #print('draw Lines---info[:, 1],info[:, 0]:',info[:, 1],info[:, 0])
     for i in range(result.shape[0]):
         for j in range(result.shape[1]):
             temp = (info[:, 1]-info[:, 0])
@@ -539,11 +548,19 @@ def drawLines(img, info, color=(255, 0, 0), err=700):
     return result
 
 #连接两张图的特征点
+'''
+num: 连多少组特征点
+'''
 def drawKeyPointsLines(X1, X2, Y1, Y2, dis, img, num=10):
+    #plt.clf()
+  
     info = list(np.dstack((X1, X2, Y1, Y2, dis))[0])
     info = sorted(info, key=lambda x: x[-1])
     info = np.array(info)
+    #print('draw KeyPointsLines---len(info): ',len(info))
     info = info[:min(num, info.shape[0]), :]
+    #print('draw KeyPointsLines---len(info-2): ',len(info))
+    #print('draw KeyPointsLines---info-2: ',info)
     img = drawLines(img, info)
     plt.imsave('./imgs/output_1.jpg', img)
 
@@ -552,10 +569,10 @@ def drawKeyPointsLines(X1, X2, Y1, Y2, dis, img, num=10):
     else:
         plt.imshow(img.astype(np.uint8))
     plt.axis('off')
-    plt.plot([info[:,0], info[:,1]], [info[:,2], info[:,3]], 'c')
+    '''plt.plot([info[:,0], info[:,1]], [info[:,2], info[:,3]], 'c')
     fig = plt.gcf()
     fig.set_size_inches(int(img.shape[0]/100.0),int(img.shape[1]/100.0))
-    plt.savefig('./imgs/output_2.jpg')
+    plt.savefig('./imgs/output_2.jpg')'''
     plt.show()
 
 #圈出特征点和主方向
@@ -594,7 +611,7 @@ if __name__ == '__main__':
 
     keyPoints = np.array(keyPoints)[:, :2]
     keyPoints2 = np.array(keyPoints2)[:, :2]
-    print('keyPoints',keyPoints,'keyPoints2',keyPoints2)
+    #print('keyPoints',keyPoints,'keyPoints2',keyPoints2)
     #drawKeyPoints(origimg,keyPoints)
 
     keyPoints2[:, 1] = img.shape[1] + keyPoints2[:, 1]
@@ -610,5 +627,21 @@ if __name__ == '__main__':
     X2 = keyPoints2[:, 1]
     Y1 = keyPoints[:, 0]
     Y2 = keyPoints2[:, 0]
+    
 
-    drawKeyPointsLines(X1, X2, Y1, Y2, match[0][:, 0], result)
+    drawKeyPointsLines(X1, X2, Y1, Y2, match[0][:, 0], result,15)
+    
+    #直接用opencv的sift
+    '''
+    img = cv2.imread('./imgs/cat_2_medium.jpeg')
+    # convert the image to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    sift = cv2.SIFT_create()
+    # find the keypoints on image (grayscale)
+    kp = sift.detect(gray,None)
+    img_ky=cv2.drawKeypoints(gray,kp,None,flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)    
+    # display the image with keypoints drawn on it
+    cv2.imshow("Keypoints", img_ky)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    '''
