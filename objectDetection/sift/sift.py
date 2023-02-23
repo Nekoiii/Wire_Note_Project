@@ -5,7 +5,7 @@ sift（Scale-invariant feature transform) (尺度不变特征变换)
 
 b站教程视频:https://www.bilibili.com/video/BV1Qb411W7cK/?spm_id_from=333.337.search-card.all.click&vd_source=d3186b41f1a6229779fb4fe8e9ce0154
 代码copy自这里:https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/blob/master/sift/SIFT.py
-(这篇原理比较详细)原理、py代码:https://mp.weixin.qq.com/s?__biz=MzU0NjgzMDIxMQ==&mid=2247599504&idx=3&sn=b3e46e54abc43a2e8952a1d774f69897&chksm=fb54a77ccc232e6acd0af5be6f01a5133fa9bf8360658478dd5af7f5b14fcd98cc39f01660b3&scene=27
+(这篇原理比较详细)原理、py代码:https://mp.weixin.qq.com/s?__biz=MzU0NjgzMDIxMQ==&mid=2247599504&idx=3&sn=b3e46e54abc43a2e8952a1d774f69897
 (这篇超详细)原理和C++代码详解:https://dezeming.top/wp-content/uploads/2021/07/Sift算法原理与OpenCV源码解读.pdf
 """
 
