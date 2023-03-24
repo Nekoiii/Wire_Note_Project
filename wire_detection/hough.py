@@ -11,9 +11,9 @@ from matplotlib import pyplot as plt
 import math
 
 # 读取图像
-#img = cv2.imread('../test_imgs/big-1.jpg')
-#img = cv2.imread('../test_imgs/big-1.jpg')
-img = cv2.imread('../test_imgs/000024.jpg')
+#img = cv2.imread('../test_imgs/img-1.jpg')
+#img = cv2.imread('../test_imgs/small-1.jpg')
+img = cv2.imread('../test_imgs/img-7.jpg')
 
 # 灰度化
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -57,7 +57,7 @@ if lines is not None:
       # 计算线段的角度和距离
       theta = math.atan2(y2 - y1, x2 - x1)
       rho = x1 * math.cos(theta) + y1 * math.sin(theta)
-      print('length,theta,rho',length,theta,rho)
+      #print('length,theta,rho',length,theta,rho)
       
       # 在每条线段的中心点标注rho和theta
       cv2.putText(img, f"rho:{rho:.2f}, theta:{theta:.2f}", (int((x1+x2)/2), int((y1+y2)/2)),

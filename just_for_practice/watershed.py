@@ -7,8 +7,8 @@
 import numpy as np
 import cv2  
 from matplotlib import pyplot as plt
-img = cv2.imread('../test_imgs/cat-1.jpg')
-#img = cv2.imread('../test_imgs/big-1.jpg')
+#img = cv2.imread('../test_imgs/img-1.jpg')
+img = cv2.imread('../test_imgs/img-6.jpg')
 assert img is not None, "file could not be read, check with os.path.exists()"
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
@@ -29,30 +29,30 @@ sure_bg = cv2.dilate(opening,kernel,iterations=3)
 dist_transform = cv2.distanceTransform(opening,cv2.DIST_L2,5)
 #对前景图像进行二值化（像素值设为0或255）。
 #thresh越小，分类越细
-ret, sure_fg = cv2.threshold(dist_transform,0.7*dist_transform.max(),255,0)
-#ret, sure_fg = cv2.threshold(dist_transform,0.2*dist_transform.max(),255,0)
+#ret, sure_fg = cv2.threshold(dist_transform,0.7*dist_transform.max(),255,0)
+ret, sure_fg = cv2.threshold(dist_transform,0.2*dist_transform.max(),255,0)
 
 sure_fg = np.uint8(sure_fg)
 #计算未知区域(背景减前景)
 unknown = cv2.subtract(sure_bg,sure_fg)
 
- 
+'''
 gap = np.ones((img.shape[0], 10), np.uint8) * 255
 cv2.imshow('gray & thresh',np.hstack((gray,gap, thresh)))
 cv2.imshow('sure_fg & sure_bg & unknown', np.hstack(( sure_fg,gap,sure_bg,gap,unknown)))
 cv2.waitKey(0)
 cv2.destroyAllWindows()
- 
+ '''
 
 #距离小于阈值ret的像素点划分为前景(sure_fg), 其余划分为背景(sure_bg)
 # Marker labelling
 ret, markers = cv2.connectedComponents(sure_fg)
 #print('markers-1',markers)
 '''
-OpenCV中，markers数组的初始化方式是将图像的前景（即目标）区域设为1，背景区域设为0，未知区域（即待分割区域）设为-1。
-算法执行过程中，分水岭算法会将像素分成若干个区域，并为每个区域分配一个标记值。
+初始时将 markers数组中的所有像素初始都为-1(未分类)。然后从markers中某个像素开始，将其周围
+像素根据其灰度值和梯度值与当前像素进行比较，并将相邻像素中灰度值和梯度值较小的标记为同一区域。
+如果有多个区域的像素灰度值和梯度值都与当前像素相同，则选择其中标记值最小的区域。
 标记值的具体取值可以是任意整数，但不能为0或-1，因为这些值已经被用于表示背景和待分割区域了。
-在算法执行过程中，markers数组中的值会随着区域的合并和分离而不断变化，最终得到每个像素的最终标记值
 '''
 # Add one to all labels so that sure background is not 0, but 1
 markers = markers+1
