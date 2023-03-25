@@ -7,9 +7,12 @@ import cv2
 import numpy as np
 import hough  
 
-img_name='img-1'
+img_name='img-7'
 img = cv2.imread('../test_imgs/'+img_name+'.jpg')
 img_mask = cv2.imread('../test_imgs/masks/'+img_name+'_mask.png', cv2.IMREAD_GRAYSCALE)
+if img_mask is None:
+    print("Failed to read mask image!")
+    img_mask = np.zeros(img.shape[:2], dtype=np.uint8)
 img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 #print('img',img,'\n img_mask',img_mask)
 

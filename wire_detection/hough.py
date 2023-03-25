@@ -130,4 +130,4 @@ if __name__ == '__main__':
   # 灰度图
   gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
   hough_line(img,gray)
-  #hough_circle(img,gray)  #*本来想试试这个找有点弧度的电线的但效果不太好而且巨慢
+  #hough_circle(img,gray)  #*本来想试试HoughCircles找有点弧度的电线的但效果不太好而且巨慢

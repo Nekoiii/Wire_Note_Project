@@ -8,7 +8,7 @@ import os
 import numpy as np
 import cv2  
 from matplotlib import pyplot as plt
-img_name='img-1'
+img_name='img-7'
 img_path='../test_imgs/'+img_name+'.jpg'
 img = cv2.imread(img_path)
 assert img is not None, "file could not be read, check with os.path.exists()"
