@@ -8,7 +8,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import math
 
-def do_hough(img,gray):  
+def hough_line(img,gray):  
   
   # 边缘检测
   edges = cv2.Canny(gray,50,150,apertureSize = 3)
@@ -93,10 +93,41 @@ def do_hough(img,gray):
   cv2.destroyAllWindows()
   
   
+def hough_circle(img,gray):
+  # 边缘检测
+  edges = cv2.Canny(gray, 100, 200, apertureSize=3)
+  
+  # EHT
+  '''
+  param1: Canny边缘检测算法的高阈值，用于控制边缘检测的敏感度。
+  param2: Hough变换的阈值，用于控制检测直线的强度。
+  minRadius: 检测到的圆的最小半径，用于过滤掉较小的圆。
+  maxRadius: 检测到的圆的最大半径，用于过滤掉较大的圆。
+  '''
+  circles = cv2.HoughCircles(edges, cv2.HOUGH_GRADIENT, 1, 20,
+                             param1=100, param2=100, 
+                             minRadius=int(0.1*max(gray.shape[:2])), maxRadius=int(0.5*max(gray.shape[:2])))
+  print('circles',circles)
+  # 绘制检测到的圆
+  if circles is not None:
+      circles = np.uint16(np.around(circles))
+      for i in circles[0, :]:
+          # 绘制圆
+          cv2.circle(img, (i[0], i[1]), i[2], (0, 255, 0), 2)
+          # 绘制圆心
+          cv2.circle(img, (i[0], i[1]), 2, (0, 0, 255), 3)
+
+  # 显示图像
+  cv2.imshow('image', img)
+  cv2.waitKey(0)
+  cv2.destroyAllWindows()
+  
+  
   
 if __name__ == '__main__':
   # 读取图像
-  img = cv2.imread('../test_imgs/img-7.jpg')
+  img = cv2.imread('../test_imgs/img-1.jpg')
   # 灰度图
   gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-  do_hough(img,gray)
+  hough_line(img,gray)
+  #hough_circle(img,gray)  #*本来想试试这个找有点弧度的电线的但效果不太好而且巨慢

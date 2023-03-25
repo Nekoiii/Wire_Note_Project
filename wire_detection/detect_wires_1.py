@@ -31,7 +31,7 @@ cv2.imshow('img_hough', img_hough)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-hough.do_hough(img,img_hough)
+hough.hough_line(img,img_hough)
  
  
 
