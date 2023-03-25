@@ -22,7 +22,7 @@ def draw_lines(img,lines,mode='LINE_SEGMENT'):
 
       # 计算线段长度
       length = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-      # 计算线段的角度和距离
+      # 计算线段的极坐标中角度和距离
       theta = math.atan2(y2 - y1, x2 - x1)
       rho = x1 * math.cos(theta) + y1 * math.sin(theta)
       #print('length,theta,rho',length,theta,rho)
