@@ -8,7 +8,7 @@ import os
 import numpy as np
 import cv2  
 from matplotlib import pyplot as plt
-img_name='img-7'
+img_name='img-1'
 img_path='../test_imgs/'+img_name+'.jpg'
 img = cv2.imread(img_path)
 assert img is not None, "file could not be read, check with os.path.exists()"
@@ -34,6 +34,10 @@ dist_transform = cv2.distanceTransform(opening,cv2.DIST_L2,5)
 #thresh越小，分类越细
 #ret, sure_fg = cv2.threshold(dist_transform,0.7*dist_transform.max(),255,0)
 ret, sure_fg = cv2.threshold(dist_transform,0.2*dist_transform.max(),255,0)
+
+#让前景区域更大一点,不然后面检查电线时容易检测到杂线
+kernel_2 = np.ones((7,7),np.uint8)
+sure_fg=cv2.dilate(sure_fg,kernel_2,iterations=30)
 
 sure_fg = np.uint8(sure_fg)
 #计算未知区域(背景减前景)

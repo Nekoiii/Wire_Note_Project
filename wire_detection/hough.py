@@ -7,8 +7,9 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 import math
+import draw_somthing
 
-def hough_line(img,gray):  
+def hough_line(img,gray,threshold=False):  
   
   # 边缘检测
   edges = cv2.Canny(gray,50,150,apertureSize = 3)
@@ -17,14 +18,16 @@ def hough_line(img,gray):
   w=gray.shape[0]
   h=gray.shape[1]
   img_area = w * h
-  # 根据图像面积动态调整 threshold 参数
-  if img_area > 500000:
-      threshold = 500
-  elif  img_area >100000:
-      threshold = int(img_area * 0.0005)
-  else:
-      threshold = 100
-  print('img_area',img_area)
+  
+  if threshold==False:
+    # 根据图像面积动态调整 threshold 参数
+    if img_area > 500000:
+        threshold = 500
+    elif  img_area >100000:
+        threshold = int(img_area * 0.0005)
+    else:
+        threshold = 100
+    print('img_area',img_area)
   
   # 霍夫变换检测曲线
   '''
@@ -37,9 +40,9 @@ def hough_line(img,gray):
   lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=threshold, 
                           minLineLength=50, maxLineGap=5)
   
-  
   # 绘制检测到的直线
   if lines is not None:
+    '''
     for line in lines:
         x1, y1, x2, y2 = line[0]
         cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
@@ -54,8 +57,8 @@ def hough_line(img,gray):
         # 在每条线段的中心点标注rho和theta
         cv2.putText(img, f"rho:{rho:.2f}, theta:{theta:.2f}", (int((x1+x2)/2), int((y1+y2)/2)),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
-  
-        '''
+    '''
+    '''
         rho1 = np.sqrt(x1**2 + y1**2)
         rho2 = np.sqrt(x2**2 + y2**2)
         theta1 = np.arctan2(y1, x1)
@@ -70,7 +73,7 @@ def hough_line(img,gray):
         pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*a))
         cv2.line(img, pt1, pt2, (255, 255, 255), 2)
         '''
-        '''
+    '''
         rho,theta = line[0] #rho:图像原点(0,0)到该直线的垂线距离，theta:垂线与图像水平轴之间的夹角
         a = np.cos(theta)
         b = np.sin(theta)
@@ -86,11 +89,14 @@ def hough_line(img,gray):
         '''
   else:
     print('No lines detected.')
-  
+  '''
   # 显示结果
   cv2.imshow('Hough Lines',img)
   cv2.waitKey(0)
   cv2.destroyAllWindows()
+  '''
+
+  return(lines)
   
   
 def hough_circle(img,gray):
@@ -129,5 +135,8 @@ if __name__ == '__main__':
   img = cv2.imread('../test_imgs/img-1.jpg')
   # 灰度图
   gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-  hough_line(img,gray)
+  lines=hough_line(img,gray)
   #hough_circle(img,gray)  #*本来想试试HoughCircles找有点弧度的电线的但效果不太好而且巨慢
+  draw_somthing.draw_lines(img,lines)
+
+
