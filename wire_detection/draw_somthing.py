@@ -8,10 +8,17 @@ import numpy as np
 import math
 import draw_somthing
 
-def draw_lines(img,lines):
-  for line in lines:
+'''
+mode: LINE_SEGMENT 线段, LINE 直线(线段延长至图外)
+'''
+def draw_lines(img,lines,mode='LINE_SEGMENT'):
+  img_draw=img.copy()
+  lines_mask=np.zeros_like(img)
+  if mode=='LINE_SEGMENT':
+    for line in lines:
       x1, y1, x2, y2 = line[0]
-      cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+      cv2.line(img_draw, (x1, y1), (x2, y2), (0, 0, 255), 2)
+      cv2.line(lines_mask, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
       # 计算线段长度
       length = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
@@ -21,12 +28,32 @@ def draw_lines(img,lines):
       #print('length,theta,rho',length,theta,rho)
       
       # 在每条线段的中心点标注rho和theta
-      cv2.putText(img, f"rho:{rho:.2f}, theta:{theta:.2f}", (int((x1+x2)/2), int((y1+y2)/2)),
-                  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+      cv2.putText(img_draw, f"rho:{rho:.2f}, theta:{theta:.2f}", (int((x1+x2)/2), int((y1+y2)/2)),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+  else:
+    for line in lines:
+      x1, y1, x2, y2 = line[0]
+      diagonal_length = math.sqrt(img.shape[0]**2 + img.shape[1]**2)
+      # 计算线段两端点的延长点坐标
+      dx = (x2 - x1) * int(diagonal_length)
+      dy = (y2 - y1) * int(diagonal_length)
+      x1_extended = x1 - dx
+      y1_extended = y1 - dy
+      x2_extended = x2 + dx
+      y2_extended = y2 + dy
+      
+      # 画出线段和延长线
+      thickness = 1  
+      cv2.line(img_draw, (x1_extended, y1_extended), (x2_extended, y2_extended), (0, 0, 255), thickness)
+      cv2.line(lines_mask, (x1_extended, y1_extended), (x2_extended, y2_extended), (255,255,255), thickness)
 
-  cv2.imshow('Lines',img)
+
+      
+  cv2.imshow('Lines & lines_mask',np.hstack((img_draw,lines_mask)))
+  
   cv2.waitKey(0)
   cv2.destroyAllWindows()
+  return lines_mask
   
 def draw_sheet(img=None,sheet=None):
   img = cv2.imread('../test_imgs/img-1.jpg', cv2.IMREAD_UNCHANGED)
@@ -61,7 +88,7 @@ def draw_sheet(img=None,sheet=None):
   cv2.waitKey(0)
   cv2.destroyAllWindows()
 
-draw_sheet()
+#draw_sheet()
   
   
   

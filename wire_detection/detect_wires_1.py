@@ -48,13 +48,31 @@ elif  count >1000:
     threshold = int(count * 0.05)
 else:
     threshold = 100
-#print('count',count,threshold)
 lines=hough.hough_line(img,img_hough,threshold)
-print('lines',lines)
+ 
+#draw_somthing.draw_lines(img,lines) 
+lines_mask=draw_somthing.draw_lines(img,lines,'LINE') 
 
-draw_somthing.draw_lines(img,lines) 
+#把lines_mask和img_mask重叠
+img_mask_bool = img_mask.astype(bool)
+lines_mask[~img_mask_bool] = 0
+
+
+'''
+cv2.imshow('lines_mask-2',lines_mask)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+'''
+
+
+#lines_mask = lines_mask ^ 255 
+
+lines_2=hough.hough_line(lines_mask,lines_mask,threshold)
+draw_somthing.draw_lines(img,lines_2)
+
+
 sheet=cv2.imread('../test_imgs/sheets/symphony.png', cv2.IMREAD_UNCHANGED)
-draw_somthing.draw_sheet(img,sheet) 
+#lines_img=draw_somthing.draw_sheet(img,sheet) 
 
 
 

@@ -42,6 +42,7 @@ def hough_line(img,gray,threshold=False):
   
   # 绘制检测到的直线
   if lines is not None:
+    print(len(lines),'lines detected.')
     '''
     for line in lines:
         x1, y1, x2, y2 = line[0]
@@ -58,35 +59,6 @@ def hough_line(img,gray,threshold=False):
         cv2.putText(img, f"rho:{rho:.2f}, theta:{theta:.2f}", (int((x1+x2)/2), int((y1+y2)/2)),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
     '''
-    '''
-        rho1 = np.sqrt(x1**2 + y1**2)
-        rho2 = np.sqrt(x2**2 + y2**2)
-        theta1 = np.arctan2(y1, x1)
-        theta2 = np.arctan2(y2, x2)
-        rho = (rho1 + rho2) / 2
-        theta = (theta1 + theta2) / 2
-        a = np.cos(theta)
-        b = np.sin(theta)
-        x0 = a * rho
-        y0 = b * rho
-        pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*a))
-        pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*a))
-        cv2.line(img, pt1, pt2, (255, 255, 255), 2)
-        '''
-    '''
-        rho,theta = line[0] #rho:图像原点(0,0)到该直线的垂线距离，theta:垂线与图像水平轴之间的夹角
-        a = np.cos(theta)
-        b = np.sin(theta)
-        x0 = a*rho
-        y0 = b*rho
-        length = int(math.sqrt(w*w + h*h))
-        x1 = int(x0 + length*(-b))
-        y1 = int(y0 + length*(a))
-        x2 = int(x0 - length*(-b))
-        y2 = int(y0 - length*(a))
-  
-        cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-        '''
   else:
     print('No lines detected.')
   '''
