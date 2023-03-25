@@ -60,6 +60,7 @@ def hough_line(img,gray,threshold=False):
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
     '''
   else:
+    lines=[]
     print('No lines detected.')
   '''
   # 显示结果
