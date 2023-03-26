@@ -9,18 +9,16 @@ from matplotlib import pyplot as plt
 import math
 import draw_somthing
 
-def hough_line(img,gray,threshold=False):  
+def hough_line(img,gray,threshold=False,IF_SHOW=True):  
   
   # 边缘检测
   edges = cv2.Canny(gray,50,150,apertureSize = 3)
   
-  # 计算图像的面积(根据图像面积动态调整后面cv2.HoughLines()里的threshold参数)
+  # 根据图像面积动态调整后面cv2.HoughLines()里的threshold参数
   w=gray.shape[0]
   h=gray.shape[1]
-  img_area = w * h
-  
+  img_area = w * h  
   if threshold==False:
-    # 根据图像面积动态调整 threshold 参数
     if img_area > 500000:
         threshold = 500
     elif  img_area >100000:
@@ -29,16 +27,16 @@ def hough_line(img,gray,threshold=False):
         threshold = 100
     print('img_area',img_area)
   
-  # 霍夫变换检测曲线
+  # 霍夫变换检测直线
   '''
-  1：表示直线距离rho的精度，一般取1。
-  np.pi/180：直线角度theta的精度，一般取np.pi/180。
-  threshold：检测直线的阈值，取值越大，检测到的直线越少。
-  lines：检测到的直线的最小数量。
+  1: 表示直线距离rho的精度, 一般取1。
+  np.pi/180: 直线角度theta的精度, 一般取np.pi/180。
+  threshold: 检测直线的阈值, ，取值越大, 检测到的直线越少。
+  maxLineGap: 如果两个线段之间的间隔大于maxLineGap, 则它们被认为是两条不同的直线
   '''
   #lines = cv2.HoughLines(edges,1,np.pi/180,threshold=threshold)
   lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=threshold, 
-                          minLineLength=50, maxLineGap=5)
+                          minLineLength=50, maxLineGap=50)
   
   # 绘制检测到的直线
   if lines is not None:
@@ -104,9 +102,7 @@ def hough_circle(img,gray):
   
   
 if __name__ == '__main__':
-  # 读取图像
   img = cv2.imread('../test_imgs/img-1.jpg')
-  # 灰度图
   gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
   lines=hough_line(img,gray)
   #hough_circle(img,gray)  #*本来想试试HoughCircles找有点弧度的电线的但效果不太好而且巨慢

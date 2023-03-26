@@ -6,44 +6,46 @@
 import cv2
 import numpy as np
 import math
-import draw_somthing
 
-def draw_lines(img,lines):
+def draw_lines(img,lines,IF_SHOW=True):
   img_draw=img.copy()
   for line in lines:
     x1, y1, x2, y2 = line[0]
     cv2.line(img_draw, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
+    '''
     # 计算线段长度
     length = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     # 计算线段的极坐标中角度和距离
     theta = math.atan2(y2 - y1, x2 - x1)
     rho = x1 * math.cos(theta) + y1 * math.sin(theta)
-    #print('length,theta,rho',length,theta,rho)
-    
+    #print('length,theta,rho',length,theta,rho)   
     # 在每条线段的中心点标注rho和theta
     cv2.putText(img_draw, f"rho:{rho:.2f}, theta:{theta:.2f}", (int((x1+x2)/2), int((y1+y2)/2)),
               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
-  cv2.imshow('img_draw',img_draw)
+    '''
+  if IF_SHOW:
+    cv2.imshow('img_draw',img_draw)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
   
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
+  return img_draw
   
   
-'''
-'''
-def draw_sheet(img=None,sheet=None,x=100,y=100,angle=0):
+def draw_sheet(img,sheet,x=100,y=100,angle=0,sheet_len=0,IF_SHOW=True):
   x,y=int(x),int(y)
-  
   h, w = sheet.shape[:2]  
   
-  #调整sheet大小
   aspect_ratio = h / w
-  w = int(0.75 * img.shape[1])
+  if sheet_len==0:
+    #根据img的宽调整sheet大小
+    w = int(0.75 * img.shape[1])
+  else:
+    w = int(sheet_len)
   h=int(w*aspect_ratio)
   sheet=cv2.resize(sheet,(w,h))
-  
-  #建一个大的图存放sheet,不然旋转后会显示不全
+
+  #建一个边长为sheet对角线的正方形图存放sheet, 不然旋转后会显示不全
   diagonal_length = math.ceil(math.sqrt(w**2 + h**2))
   new_sheet=np.zeros((diagonal_length, diagonal_length, 4), dtype=np.uint8)
   xx_1=math.ceil(0.5*(diagonal_length-w))
@@ -77,13 +79,17 @@ def draw_sheet(img=None,sheet=None,x=100,y=100,angle=0):
   alpha = sheet[:,:,3] / 255.0
   alpha = np.repeat(np.expand_dims(alpha, axis=2), 3, axis=2)
   
-  img[y_min:y_max, x_min:x_max] = alpha[sheet_y_min:sheet_y_max, sheet_x_min:sheet_x_max] * sheet[sheet_y_min:sheet_y_max, sheet_x_min:sheet_x_max, :3] + (1-alpha[sheet_y_min:sheet_y_max, sheet_x_min:sheet_x_max]) * img[y_min:y_max, x_min:x_max]
+  img[y_min:y_max, x_min:x_max] = alpha[sheet_y_min:sheet_y_max,
+          sheet_x_min:sheet_x_max] * sheet[sheet_y_min:sheet_y_max, 
+          sheet_x_min:sheet_x_max, :3] + (1-alpha[sheet_y_min:sheet_y_max, 
+          sheet_x_min:sheet_x_max]) * img[y_min:y_max, x_min:x_max]
 
-
-  # 显示结果
-  cv2.imshow('result', img)
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
+  if IF_SHOW:
+    cv2.imshow('result', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+  
+  return(img)
 
    
   
