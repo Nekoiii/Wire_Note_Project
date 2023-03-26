@@ -32,17 +32,17 @@ def draw_lines(img,lines,IF_SHOW=True):
   return img_draw
   
   
-def draw_sheet(img,sheet,x=100,y=100,angle=0,sheet_len=0,IF_SHOW=True):
+def draw_sheet(img,sheet,x=100,y=100,angle=0,sheet_w=-1,IF_SHOW=True):
   x,y=int(x),int(y)
   h, w = sheet.shape[:2]  
   
   aspect_ratio = h / w
-  if sheet_len==0:
+  if sheet_w<0:
     #根据img的宽调整sheet大小
     w = int(0.75 * img.shape[1])
   else:
-    w = int(sheet_len)
-  h=int(w*aspect_ratio)
+    w = int(sheet_w)
+  h=int(w * aspect_ratio)
   sheet=cv2.resize(sheet,(w,h))
 
   #建一个边长为sheet对角线的正方形图存放sheet, 不然旋转后会显示不全

@@ -74,7 +74,8 @@ def get_watershed_mask(img,gray,img_name,IF_SHOW=True):
   #加一个边框，后面再删掉
   markers = cv2.copyMakeBorder(markers, 5, 5, 5, 5, cv2.BORDER_REPLICATE)
   img=cv2.copyMakeBorder(img, 5, 5, 5, 5, cv2.BORDER_REPLICATE)
-  markers = cv2.watershed(img,markers)
+  
+  markers = cv2.watershed(img,markers) #分水岭算法
   markers = markers[5:-5, 5:-5]
   img = img[5:-5, 5:-5]
   #print('markers-3_1',markers)
@@ -91,7 +92,7 @@ def get_watershed_mask(img,gray,img_name,IF_SHOW=True):
     mask_color[markers == (i+1)] = [(i+1)/num_classes*255, 150, (1-(i+1)/num_classes)*255]
   mask_color[markers == -1] = [255,0,0]
   if IF_SHOW:
-    cv2.imshow('mask & markers',np.hstack((img,mask_color)))
+    cv2.imshow('img & mask_color',np.hstack((img,mask_color)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
