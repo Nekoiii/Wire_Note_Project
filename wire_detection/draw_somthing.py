@@ -76,9 +76,16 @@ def draw_sheet(img,sheet,x=100,y=100,angle=0,sheet_w=-1,IF_SHOW=True):
   sheet_x_max, sheet_y_max = sheet_x_min + (x_max - x_min), sheet_y_min + (y_max - y_min) 
   
   # 进行绘制，注意要考虑透明通道
+  #将带有透明通道的图像中的透明度通道提取出来，并将其归一化到 0 到 1 之间，用于后续混合操作
   alpha = sheet[:,:,3] / 255.0
+  '''
+  np.expand_dims(alpha, axis=2)将二维的alpha矩阵扩展成三维的矩阵。
+  因为后面alpha与sheet运算时，是分别于shee 的R、G、B这三个通道做运算，所以要用np.repeat()复制三份
+  '''
   alpha = np.repeat(np.expand_dims(alpha, axis=2), 3, axis=2)
   
+  
+  #按照透明度混合的公式进行混合
   img[y_min:y_max, x_min:x_max] = alpha[sheet_y_min:sheet_y_max,
           sheet_x_min:sheet_x_max] * sheet[sheet_y_min:sheet_y_max, 
           sheet_x_min:sheet_x_max, :3] + (1-alpha[sheet_y_min:sheet_y_max, 

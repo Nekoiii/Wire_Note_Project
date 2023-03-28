@@ -87,12 +87,13 @@ def detect_wires_1(img_name,IF_SHOW=True):
       
       cv2.line(counter_img, (x1_extended, y1_extended), (x2_extended, y2_extended), (255,255,255), 1)
       cv2.line(extension_lines, (x1_extended, y1_extended), (x2_extended, y2_extended), (0,0,255), 2)
+      #print('cccc-1',(counter_img == 255).sum(),counter_img.shape)
       counter_img[~img_mask_bool] = 0
       extension_lines[~img_mask_bool] = img[~img_mask_bool]
+      #print('cccc-2',(counter_img == 255).sum(),diagonal_length)
             
-      # 计算255的个数（线的长度）
-      #line_length_0=math.sqrt((x2_extended-x1_extended)**2 +(y2_extended-y1_extended)**2)
-      line_length = (counter_img == 255).sum() # *problem:不知为何得到的居然是遮罩前的长度
+      
+      line_length = (counter_img == 255).sum() # *problem:本来想用255的个数来计算线的长度, 但发现出来的数不对
       #print('line_length_0: ',line_length_0,' line_length: ',line_length)
 
       '''
@@ -112,13 +113,13 @@ def detect_wires_1(img_name,IF_SHOW=True):
       y_counter+=y1+y2
   
   
-    avg_theta=sum(thetas)/len(lengths)
+    avg_theta=sum(thetas)/len(thetas)
     angle = -math.degrees(avg_theta) #*注意这里角度是反的
     avg_len=sum(lengths)/len(lengths)
     avg_x=x_counter/(2*len(lengths))
     avg_y=y_counter/(2*len(lengths))
-    print('theta,angle,avg_len,avg_x,avg_y',avg_theta,angle,avg_len,avg_x,avg_y)
-    #print('lengths',lengths,img.shape)
+    #print('theta,angle,avg_len,avg_x,avg_y',avg_theta,angle,avg_len,avg_x,avg_y)
+    #print('lengths---',lengths,img.shape)
     
     #画音符
     sheet=cv2.imread('../test_imgs/sheets/symphony.png', cv2.IMREAD_UNCHANGED)
@@ -147,4 +148,4 @@ def loop_through_jpg_files(folder_path):
 
 loop_through_jpg_files('../test_imgs/')      
 #detect_wires_1('img-6')
-#detect_wires_1('img-1',False)
+#detect_wires_1('img-6',False)

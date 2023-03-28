@@ -119,8 +119,9 @@ def get_watershed_mask(img,gray,img_name,IF_SHOW=True):
   '''
    
   
-  print('mask',mask)
-  print('markers-4',markers)
+  #print('mask',mask)
+  #print('markers-4',markers)
+  
   #保存markers和mask
   # 构建目标文件夹路径
   markers_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../test_imgs', 'markers')
