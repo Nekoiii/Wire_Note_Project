@@ -2,27 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="64aaf45c-5ba3-4408-95c0-856d00c91045" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/Mojito.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/一路向北.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/七里香.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/以父之名.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/半岛铁盒.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/反方向的钟.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/听妈妈的话.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/夜曲.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/夜的第七章.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/晴天.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/最伟大的作品.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/本草纲目.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/止战之殇.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/爱在西元前.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/牛仔很忙.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/稻香.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/红颜如霜.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/花海.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/菊花台.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/蒲公英的约定.mid" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../素材/周杰伦midi/青花瓷.mid" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/audio_to_midi.py" beforeDir="false" afterPath="$PROJECT_DIR$/audio_to_midi.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,6 +67,8 @@
       <option name="presentableId" value="Default" />
       <updated>1680240825645</updated>
       <workItem from="1680240828255" duration="55000" />
+      <workItem from="1680247463809" duration="126000" />
+      <workItem from="1680247609163" duration="51000" />
     </task>
     <servers />
   </component>
