@@ -31,36 +31,6 @@ keys_map = {
     pygame.K_0: 'G4#',
     pygame.K_MINUS: 'A4#'
 }
-'''
-#按键映射表
-keys_map = {
-    't': 'C4',
-    'y': 'D4',
-    'u': 'E4',
-    'i': 'F4',
-    'o': 'G4',
-    'p': 'A4',
-    '[': 'B4',
-    ']': 'C5',
-    '6': 'C4#',
-    '7': 'D4#',
-    '9': 'F4#',
-    '0': 'G4#',
-    '-': 'A4#'
-}
-# 加载钢琴按键音频
-basic_path = 'audios/piano_keys/'
-key_sounds = {}
-for key, note in keys_map.items():
-    key_sound = wave.open(basic_path + note + '.wav', 'rb')
-    key_sounds[key] = {
-        'sound': key_sound,
-        'stream': p.open(format=p.get_format_from_width(key_sound.getsampwidth()),
-                         channels=key_sound.getnchannels(),
-                         rate=key_sound.getframerate(),
-                         output=True)
-    }
-'''
 
 #设置窗口
 pygame.display.set_caption("Piano")
@@ -108,47 +78,14 @@ while True:
           threading.Thread(target=play, args=(fileName,key)).start()
     elif event.type == pygame.KEYUP:
       print('KEYUP--')
-  
-'''
-playing_keys = []
-# 循环读取事件
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:# 退出程序
-            for key_sound in key_sounds.values():
-                key_sound['stream'].stop_stream()
-                key_sound['stream'].close()
-                key_sound['sound'].close()
-            p.terminate()
-            pygame.quit()
-            sys.exit()
-        elif event.type == pygame.KEYDOWN:# 按下键盘
-            key = pygame.key.name(event.key)
-            if(key == pygame.K_ESCAPE):#esc键退出
-                pygame.quit()
-            if key in keys_map and key not in playing_keys:
-                # 播放音频
-                key_sound = key_sounds[key]
-                key_sound['sound'].rewind()
-                key_sound['stream'].write(key_sound['sound'].readframes(44100))
-                playing_keys.append(key)
-        elif event.type == pygame.KEYUP:# 松开键盘
-            key = pygame.key.name(event.key)
-            if key in playing_keys:
-                # 停止音频
-                key_sound = key_sounds[key]
-                key_sound['stream'].stop_stream()
-                playing_keys.remove(key)
 
-    # 绘制文本
-    text = ' '.join([keys_map[key] for key in playing_keys])
-    text_surface = font.render(text, True, (255, 255, 255))
-    screen.fill((0, 0, 0))
-    screen.blit(text_surface, (50, 50))
-    pygame.display.flip()
 
-    # 控制帧率
-    clock = pygame.time.Clock()
-    clock.tick(30)
-'''
+
+
+
+
+
+
+
+
 
