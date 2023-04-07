@@ -16,9 +16,9 @@ keys_map = {
     pygame.K_p: 'A4',
     pygame.K_LEFTBRACKET: 'B4',
     pygame.K_RIGHTBRACKET: 'C5',
-    pygame.K_6: 'C4#',
-    pygame.K_7: 'D4#',
-    pygame.K_9: 'F4#',
-    pygame.K_0: 'G4#',
-    pygame.K_MINUS: 'A4#'
+    pygame.K_6: 'C#4',
+    pygame.K_7: 'D#4',
+    pygame.K_9: 'F#4',
+    pygame.K_0: 'G#4',
+    pygame.K_MINUS: 'A#4'
 }

@@ -66,10 +66,11 @@ while True:
     pix = page.get_pixmap(matrix=mat)  # 使用矩阵对象进行缩放
     pix.save(png_path)
     
+    '''
     png = plt.imread(png_path)
     plt.imshow(png)
     plt.axis('off')
-    plt.show()
+    plt.show()'''
     
     s.show('text')
 

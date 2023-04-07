@@ -30,6 +30,7 @@ max_y=screen_h   # 完整画面的高度
 # 在另一个更大的 Surface 上绘制, 以实现滚动效果
 scroll_surface = pygame.Surface((screen_w, max_y))
 
+
 def play_audio(path,key):
     CHUNK = 1024    #CHUNK指定每次从音频流中读取和处理的音频样本数。它是一个缓冲区的大小，用于控制每次处理的数据量。一般可用 1024 或 2048 。值太小，播放音频将会更加实时，但可能会导致音频出现卡顿或者声音质量差的问题。值太大，音频播放将更加平滑，但会增加延迟，可能会导致应用程序的响应性下降。
     wf = wave.open(path, 'rb')
@@ -99,10 +100,11 @@ def redraw_surface():
     text_surfaces.append(text_surface)
   for text_surface in text_surfaces:
     scroll_surface.blit(text_surface, (x0, y))
-    screen.blit(scroll_surface, (0,0))
+    screen.blit(scroll_surface, (0,0)) #*注: 这里一定要先画一次到screen上！！！！不然后面画图片时再次scroll_surface.blit会覆盖掉前面的！！！！
     y+=30
-    
-  max_y=y+scaled_h
+  
+  if y+scaled_h>screen_h:
+    max_y=y+scaled_h
   
   new_scroll_surface=pygame.Surface((screen_w, max_y)) #scroll_surface改大小
   new_scroll_surface.blit(scroll_surface, (0, 0))
