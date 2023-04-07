@@ -32,7 +32,7 @@ def pdf_to_png():
     elif img.shape[2] == 3:
       img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
       
-    turn_white_to_transparent(img,150)
+    turn_white_to_transparent(img,190)
 
   
 #把图片中像素>threshold的变为透明
@@ -44,6 +44,7 @@ def turn_white_to_transparent(img,threshold=250):
     
     mask = thresh_rgba[:, :, 0] > threshold
     img[mask] = [0, 0, 0, 0]
+    img[np.where(~mask)] = [255, 255, 255, 255]  #其余都设为白色
     cv2.imwrite(png_path, img)
     
   
