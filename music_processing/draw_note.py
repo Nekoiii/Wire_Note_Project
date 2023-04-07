@@ -4,26 +4,31 @@
 画曲谱
 """
 import os
+import asyncio
 from music21 import *
 import matplotlib.pyplot as plt
-import fitz
 import cv2
 from pdf2image import convert_from_path
 import numpy as np
+import nest_asyncio
+nest_asyncio.apply()
+
+
 
 s = stream.Score()
 path = os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "test.xml"))
 pdf_path=os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "test.pdf"))
 png_path="output_sheets/output.png"
 
-def add_note(note_name): #添加音符
+async def add_note(note_name): #添加音符
   global s
   s.append(note.Note(note_name))
-  save_note()
+  png=await save_note()
+  return png
   
   
 #pdf转png
-def pdf_to_png():
+async def pdf_to_png():
     pages = convert_from_path(pdf_path)
     img = np.array(pages[0])
     
@@ -32,11 +37,12 @@ def pdf_to_png():
     elif img.shape[2] == 3:
       img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
       
-    turn_white_to_transparent(img,190)
+    png=await turn_white_to_transparent(img,190)
+    return png
 
   
 #把图片中像素>threshold的变为透明
-def turn_white_to_transparent(img,threshold=250):
+async def turn_white_to_transparent(img,threshold=250):
     #转换为NumPy数组格式的图像数据
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
@@ -47,15 +53,18 @@ def turn_white_to_transparent(img,threshold=250):
     img[np.where(~mask)] = [255, 255, 255, 255]  #其余都设为白色
     cv2.imwrite(png_path, img)
     
+    return img
+    
   
-def save_note():
+async def save_note():
     # 保存为MusicXML文件
     s.write("musicxml.pdf", path)
     
-    pix=pdf_to_png()
+    png=await pdf_to_png()
     #pix.save(png_path)
     
     s.show('text')
+    return png
 
 
 '''

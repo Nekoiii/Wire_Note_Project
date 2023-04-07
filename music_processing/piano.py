@@ -7,10 +7,20 @@ import os
 import sys
 import wave
 import pygame
+import asyncio
 import pyaudio
 import threading
 from keys_map import keys_map
 import draw_note
+import nest_asyncio
+nest_asyncio.apply()
+'''***注: 
+Sypder中用python异步要先pip install nest_asyncio，然后
+import nest_asyncio
+nest_asyncio.apply()
+才能用, 不然会报错RuntimeError: This event loop is already running！！！！
+'''
+
 
 png_path="output_sheets/output.png"
 
@@ -79,7 +89,7 @@ def redraw_scroll():
   pygame.display.update()
 
 
-def redraw_surface():
+def redraw_surface(text_list):
   global scroll_surface,screen,max_y
   # 清空窗口并绘制背景色(不然图片移动时不会恢复底色)
   screen.fill((0, 0, 0))
@@ -124,59 +134,75 @@ def redraw_surface():
   pygame.display.update()
 
 
-text_list=[] #显示的文字
-if_quited=False  #判断是否退出。不然pygame.quit()后再执行pygame.event.get()会报错error: video system not initialized
-while not if_quited:
-  for event in pygame.event.get():
-    if event.type == pygame.QUIT:  #关闭窗口
-      if_quited=True
-      pygame.quit()
-      
-    if event.type == pygame.KEYDOWN: #按下键盘
-      #print('KEYDOWN--')
-      key = event.key
-      scroll_step=100  #上下滚动窗口时每次滚多少
-      if(key == pygame.K_ESCAPE):    #esc键退出
+async def keyboard_event():
+  global scroll_position
+  
+  text_list=[] #显示的文字
+  if_quited=False  #判断是否退出。不然pygame.quit()后再执行pygame.event.get()会报错error: video system not initialized
+  while not if_quited:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:  #关闭窗口
         if_quited=True
         pygame.quit()
-      
-      elif key ==pygame.K_UP:    #上下滚动窗口
-          reload_img()
-          scroll_position -= scroll_step
-          if scroll_position < 0:
-              scroll_position = 0
-          #print('---K_UP--scroll_position',scroll_position)
-          #redraw_surface()
-          redraw_scroll()
-      elif event.key ==pygame.K_DOWN:
-          image,scaled_w,scaled_h=reload_img()
-          scroll_position += scroll_step
-          #print('---K_DOWN--scroll_position111',scroll_position,max_y - screen_h)
-          if scroll_position > (max_y - screen_h):
-              scroll_position = max_y - screen_h
-          #print('---K_DOWN--scroll_position222',scroll_position,max_y - screen_h)
-          #redraw_surface()
-          redraw_scroll()
         
+      if event.type == pygame.KEYDOWN: #按下键盘
+        #print('KEYDOWN--')
+        key = event.key
+        scroll_step=100  #上下滚动窗口时每次滚多少
+        if(key == pygame.K_ESCAPE):    #esc键退出
+          if_quited=True
+          pygame.quit()
         
-      elif key in keys_map.keys():       #按下琴键 
-        note_name=keys_map[key]
-        draw_note.add_note(note_name) #添加音符
-        #播放音频
-        basic_path = 'audios/piano_keys/'
-        fileName = basic_path+str(note_name)+".wav"
-        if os.path.exists(fileName):
-          threading.Thread(target=play_audio, args=(fileName,key)).start()
+        elif key ==pygame.K_UP:    #上下滚动窗口
+            reload_img()
+            scroll_position -= scroll_step
+            if scroll_position < 0:
+                scroll_position = 0
+            #print('---K_UP--scroll_position',scroll_position)
+            #redraw_surface()
+            redraw_scroll()
+        elif event.key ==pygame.K_DOWN:
+            image,scaled_w,scaled_h=reload_img()
+            scroll_position += scroll_step
+            #print('---K_DOWN--scroll_position111',scroll_position,max_y - screen_h)
+            if scroll_position > (max_y - screen_h):
+                scroll_position = max_y - screen_h
+            #print('---K_DOWN--scroll_position222',scroll_position,max_y - screen_h)
+            #redraw_surface()
+            redraw_scroll()
           
-        #绘制
-        text_list.append(keys_map[key])
-        redraw_surface()
-
-      
+          
+        elif key in keys_map.keys():       #按下琴键 
+          note_name=keys_map[key]
+          png=await draw_note.add_note(note_name) #添加音符
+          #播放音频
+          basic_path = 'audios/piano_keys/'
+          fileName = basic_path+str(note_name)+".wav"
+          if os.path.exists(fileName):
+            threading.Thread(target=play_audio, args=(fileName,key)).start()
+            
+          #绘制
+          text_list.append(keys_map[key])
+          redraw_surface(text_list)
+  
         
-    elif event.type == pygame.KEYUP:
-      break
-      #print('KEYUP--')
+          
+      elif event.type == pygame.KEYUP:
+        break
+        #print('KEYUP--')
+
+async def main():
+    asyncio.create_task(keyboard_event())
+
+if __name__ == "__main__":
+    '''
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    loop.close()'''
+    asyncio.run(main())
+
+
+
 
 
 
