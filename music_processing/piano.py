@@ -10,6 +10,7 @@ import pygame
 import pyaudio
 import threading
 from keys_map import keys_map
+import draw_note
 
 png_path="output_sheets/output.png"
 
@@ -159,9 +160,11 @@ while not if_quited:
         
         
       elif key in keys_map.keys():       #按下琴键 
+        note_name=keys_map[key]
+        draw_note.add_note(note_name) #添加音符
         #播放音频
         basic_path = 'audios/piano_keys/'
-        fileName = basic_path+str(keys_map[key])+".wav"
+        fileName = basic_path+str(note_name)+".wav"
         if os.path.exists(fileName):
           threading.Thread(target=play_audio, args=(fileName,key)).start()
           
