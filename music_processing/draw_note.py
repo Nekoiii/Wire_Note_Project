@@ -58,10 +58,10 @@ async def turn_white_to_transparent(img,threshold=250):
   
 async def save_note():
     # 保存为MusicXML文件
-    s.write("musicxml.pdf", path)
+    #s.write("musicxml.pdf", path)
+    s.write("musicxml.png", path)
     
-    png=await pdf_to_png()
-    #pix.save(png_path)
+    #png=await pdf_to_png()
     
     s.show('text')
     return png
