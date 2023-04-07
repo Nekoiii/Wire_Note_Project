@@ -26,28 +26,26 @@ def add_note(note_name): #添加音符
 def pdf_to_png():
     pages = convert_from_path(pdf_path)
     img = np.array(pages[0])
-    turn_white_to_transparent(img)
-    '''
-    pdf = fitz.open(pdf_path)
-    page = pdf.load_page(0)
-    dpi = 350  # 设置输出的分辨率(不设置的话会超级模糊!)
-    scale = dpi / 72  # 计算缩放比例
-    mat = fitz.Matrix(scale, scale)  # 创建矩阵对象
-    pix = page.get_pixmap(matrix=mat)  # 使用矩阵对象进行缩放
-    turn_white_to_transparent(pix)
     
-    return pix'''
+    if len(img.shape) == 2:
+      img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGBA)
+    elif img.shape[2] == 3:
+      img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
+      
+    turn_white_to_transparent(img,150)
+
   
 #把图片中像素>threshold的变为透明
 def turn_white_to_transparent(img,threshold=250):
     #转换为NumPy数组格式的图像数据
-    #img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.h, pix.w, pix.n)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY)
-    color = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
-    color[np.where((color > [250, 250, 250]).all(axis=2))] = [0, 0, 0, 0]
-    cv2.imwrite(png_path, color)
-    return img
+    _, thresh = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
+    thresh_rgba = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGBA)
+    
+    mask = thresh_rgba[:, :, 0] > threshold
+    img[mask] = [0, 0, 0, 0]
+    cv2.imwrite(png_path, img)
+    
   
 def save_note():
     # 保存为MusicXML文件
