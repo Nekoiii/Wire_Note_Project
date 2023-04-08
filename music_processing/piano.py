@@ -21,8 +21,10 @@ nest_asyncio.apply()
 才能用, 不然会报错RuntimeError: This event loop is already running！！！！
 '''
 
-
 png_path="output_sheets/output.png"
+#png_path="output_sheets/test-1.png"
+background_color=(50, 0, 0)
+
 
 # 初始化Pygame和PyAudio
 pygame.init()
@@ -33,7 +35,7 @@ pygame.display.set_caption("Piano")
 font = pygame.font.Font(None, 36)
 screen_w=800;
 screen_h=600;
-screen = pygame.display.set_mode((800,600))
+screen = pygame.display.set_mode((screen_w,screen_h))
 pygame.display.update() 
 x0,y0=50,50; #绘制时的初始坐标
 scroll_position = 0  # 当前窗口应该显示图片的位置
@@ -43,6 +45,7 @@ scroll_surface = pygame.Surface((screen_w, max_y))
 
 
 def play_audio(path,key):
+    print('play_audio--')
     CHUNK = 1024    #CHUNK指定每次从音频流中读取和处理的音频样本数。它是一个缓冲区的大小，用于控制每次处理的数据量。一般可用 1024 或 2048 。值太小，播放音频将会更加实时，但可能会导致音频出现卡顿或者声音质量差的问题。值太大，音频播放将更加平滑，但会增加延迟，可能会导致应用程序的响应性下降。
     wf = wave.open(path, 'rb')
     data = wf.readframes(CHUNK)
@@ -63,8 +66,14 @@ def play_audio(path,key):
     while len(data) > 0:
         stream.write(data)
         data = wf.readframes(CHUNK)
-  
-  
+ 
+def play_audio_async_threadsafe(file_name,key):
+    threading.Thread(target=play_audio, args=(file_name, key)).start()
+def add_note_async_threadsafe(note_name):
+    #***只传一个参数时, args=(note_name,)中要加逗号把它变成一个元组,不然就会报错 xxx() takes 1 positional argument but 2 were given
+    threading.Thread(target=draw_note.add_note, args=(note_name,)).start()
+
+    
 def reload_img():
   global max_y
   image = pygame.image.load(png_path)
@@ -80,7 +89,7 @@ def reload_img():
 
 
 def redraw_scroll():
-  screen.fill((0, 0, 0))
+  screen.fill(background_color)
 
   #print("scroll_surface 高度为：", scroll_surface.get_height())
   #return
@@ -92,8 +101,8 @@ def redraw_scroll():
 def redraw_surface(text_list):
   global scroll_surface,screen,max_y
   # 清空窗口并绘制背景色(不然图片移动时不会恢复底色)
-  screen.fill((0, 0, 0))
-  scroll_surface.fill((0, 0, 0))
+  screen.fill(background_color)
+  scroll_surface.fill(background_color)
 
   image,scaled_w,scaled_h=reload_img()
   #scroll_surface = pygame.Surface((screen_w, max_y))
@@ -134,7 +143,9 @@ def redraw_surface(text_list):
   pygame.display.update()
 
 
+  
 async def keyboard_event():
+  print('running')
   global scroll_position
   
   text_list=[] #显示的文字
@@ -146,40 +157,38 @@ async def keyboard_event():
         pygame.quit()
         
       if event.type == pygame.KEYDOWN: #按下键盘
-        #print('KEYDOWN--')
+        print('KEYDOWN--',event.key)
         key = event.key
         scroll_step=100  #上下滚动窗口时每次滚多少
         if(key == pygame.K_ESCAPE):    #esc键退出
           if_quited=True
           pygame.quit()
         
+        #*problem: 下滚窗口时文字显示会不全,不知道哪里出问题了
         elif key ==pygame.K_UP:    #上下滚动窗口
             reload_img()
             scroll_position -= scroll_step
             if scroll_position < 0:
                 scroll_position = 0
-            #print('---K_UP--scroll_position',scroll_position)
-            #redraw_surface()
             redraw_scroll()
         elif event.key ==pygame.K_DOWN:
             image,scaled_w,scaled_h=reload_img()
             scroll_position += scroll_step
-            #print('---K_DOWN--scroll_position111',scroll_position,max_y - screen_h)
             if scroll_position > (max_y - screen_h):
                 scroll_position = max_y - screen_h
-            #print('---K_DOWN--scroll_position222',scroll_position,max_y - screen_h)
-            #redraw_surface()
             redraw_scroll()
           
           
         elif key in keys_map.keys():       #按下琴键 
           note_name=keys_map[key]
-          png=await draw_note.add_note(note_name) #添加音符
+          #png=await draw_note.add_note(note_name) #添加音符
+          add_note_async_threadsafe(note_name)
           #播放音频
           basic_path = 'audios/piano_keys/'
           fileName = basic_path+str(note_name)+".wav"
-          if os.path.exists(fileName):
-            threading.Thread(target=play_audio, args=(fileName,key)).start()
+          if os.path.exists(fileName):            
+            #threading.Thread(target=play_audio, args=(fileName,key)).start()
+            play_audio_async_threadsafe(fileName,key)
             
           #绘制
           text_list.append(keys_map[key])
@@ -192,13 +201,16 @@ async def keyboard_event():
         #print('KEYUP--')
 
 async def main():
+    '''
+    loop = asyncio.get_event_loop()
+    loop.create_task(main())
+    u
+    loop.run_until_complete(main())
+    loop.close()'''
     asyncio.create_task(keyboard_event())
 
 if __name__ == "__main__":
-    '''
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-    loop.close()'''
     asyncio.run(main())
 
 

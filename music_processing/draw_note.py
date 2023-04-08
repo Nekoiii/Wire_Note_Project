@@ -20,15 +20,15 @@ path = os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "test.xml"))
 pdf_path=os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "test.pdf"))
 png_path="output_sheets/output.png"
 
-async def add_note(note_name): #添加音符
+def add_note(note_name): #添加音符
+  print('add_note--',note_name)
   global s
   s.append(note.Note(note_name))
-  png=await save_note()
-  return png
+  save_note()
   
   
 #pdf转png
-async def pdf_to_png():
+def pdf_to_png():
     pages = convert_from_path(pdf_path)
     img = np.array(pages[0])
     
@@ -36,73 +36,103 @@ async def pdf_to_png():
       img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGBA)
     elif img.shape[2] == 3:
       img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
-      
-    png=await turn_white_to_transparent(img,190)
-    return png
+    #img=turn_white_to_transparent(img)
+    return img
 
   
-#把图片中像素>threshold的变为透明
-async def turn_white_to_transparent(img,threshold=250):
+#把图片中像素>threshold的变为透明,深色的地方都转为白色
+def turn_white_to_transparent(img,threshold=250):
+    #print('turn_white_to_transparent----')
+    if len(img.shape) == 2:
+      img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGBA)
+    elif img.shape[2] == 3:
+      img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
+        
+    cv2.imshow('img',img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+      
     #转换为NumPy数组格式的图像数据
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
     thresh_rgba = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGBA)
     
     mask = thresh_rgba[:, :, 0] > threshold
-    img[mask] = [0, 0, 0, 0]
+    img[np.where(mask)] = [0, 0, 0, 0]  #白色的地方转为透明
     img[np.where(~mask)] = [255, 255, 255, 255]  #其余都设为白色
-    cv2.imwrite(png_path, img)
-    
+
     return img
     
   
-async def save_note():
-    # 保存为MusicXML文件
-    #s.write("musicxml.pdf", path)
-    s.write("musicxml.png", path)
-    
-    #png=await pdf_to_png()
-    
-    s.show('text')
-    return png
-
-
-'''
-while True:
-    key = input("Press 'c' to add a C4 note, 'e' to add an E4 note, or 'q' to quit: ")
-    if key == 'q':
-        break
-    elif key == 'c':
-        s.append(note.Note("C4"))
-    elif key == 'e':
-        s.append(note.Note("E4"))
-        
-    # 保存为MusicXML文件
-    path = os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "test.xml"))
+def make_opaque_to_white(png):
+  alpha = png[:, :, 3]
+  alpha[alpha != 0] = 255
+  png[png[:, :, 3] != 0] = [255, 255, 255, 255] 
+  return png
+  
+  
+def invert_alpha_channel(img):
+  alpha_channel = img[:, :, 3]
+  #alpha_channel = cv2.bitwise_not(alpha_channel)
+  reversed_alpha_channel = 255 - alpha_channel
+  # 创建一个不带透明通道的空白图像
+  new_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
+  # 将原图的 RGB 通道和反转后的透明通道合并到新图像
+  new_img[:, :, :3] = img[:, :, :3]
+  new_img = cv2.cvtColor(new_img, cv2.COLOR_BGR2BGRA)
+  new_img[:, :, 3] = reversed_alpha_channel 
+  return new_img
+  
+  
+  
+ 
+def save_note():
+    '''
+    # 先存为pdf，再转为png的情况：
     s.write("musicxml.pdf", path)
-    pdf_path=os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "test.pdf"))
-    # 打开PDF文件
-    #subprocess.call(('open', pdf_path))
-
-    #pdf转png
-    pdf = fitz.open(pdf_path)
-    page = pdf.load_page(0)
-    png_path="output_sheets/output.png"
-    #pix = page.get_pixmap()
-    dpi = 350  # 设置输出的分辨率(不设置的话会超级模糊!)
-    scale = dpi / 72  # 计算缩放比例
-    mat = fitz.Matrix(scale, scale)  # 创建矩阵对象
-    pix = page.get_pixmap(matrix=mat)  # 使用矩阵对象进行缩放
-    pix.save(png_path)
+    png=pdf_to_png()
+    png=turn_white_to_transparent(png)
+    cv2.imwrite(png_path, png)
+    '''
     
     
-    png = plt.imread(png_path)
-    plt.imshow(png)
-    plt.axis('off')
-    plt.show()
+    '''报错 music21.base.Music21ObjectException: cannot support showing in this format yet: ttt.png
+    并不是因为不能转png,而是"musicxml.png"这个不是文件名,而是表示将score对象s写入到
+    MusicXML格式的文件中,并生成一个同名的png格式的图像文件啊啊啊啊！！！！！！！
+    是可以直接生成png的啊啊啊啊啊！！！！！！！
+    '''
+    '''
+    但！是！我怀疑music21生成的png有问题！！！！其他png都能正常深色转白色、保留原本透明度，
+    就只有music21生成的png会连背景透明部分也变白啊啊啊啊最后还是得用pdf转png再转换颜色！！！！
+    '''
+    png=s.write("musicxml.png", path)
     
-    s.show('text')
-'''
+    b='output_sheets/bbbb.png'
+    p='output_sheets/test-1.png'
+    #p='output_sheets/output.png'
+    p2='output_sheets/test-2.png'
+    #p='output_sheets/xxx.png'
+    png_path='output_sheets/lalala.png'
+    #img = cv2.imread(p)
+    #cv2.imwrite(b, img)
+    
+    '''
+    png_2 = cv2.imread(p, cv2.IMREAD_UNCHANGED)
+    png_3 = cv2.imread(p2, cv2.IMREAD_UNCHANGED)
+    cv2.imshow('poooo',png_2)
+    cv2.imshow('pwwww',png_3)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    print('111',png_2.shape[2],'222',png_3.shape[2])
+    '''
+    png_2=make_opaque_to_white(png_2)
+    #png_2=invert_alpha_channel(png_2)
+    cv2.imwrite(b, png_2)
+    
+    #png_2=turn_white_to_transparent(png_2,190)
+    #cv2.imwrite(png_path, png_2)
+    #s.show('text')
 
 
 
