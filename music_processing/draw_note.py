@@ -18,6 +18,7 @@ nest_asyncio.apply()
 s = stream.Score()
 path = os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "test.xml"))
 pdf_path=os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "test.pdf"))
+png_path_0="output_sheets/test-1.png"
 png_path="output_sheets/output.png"
 
 def add_note(note_name): #添加音符
@@ -69,21 +70,7 @@ def make_opaque_to_white(png):
   alpha = png[:, :, 3]
   alpha[alpha != 0] = 255
   png[png[:, :, 3] != 0] = [255, 255, 255, 255] 
-  return png
-  
-  
-def invert_alpha_channel(img):
-  alpha_channel = img[:, :, 3]
-  #alpha_channel = cv2.bitwise_not(alpha_channel)
-  reversed_alpha_channel = 255 - alpha_channel
-  # 创建一个不带透明通道的空白图像
-  new_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
-  # 将原图的 RGB 通道和反转后的透明通道合并到新图像
-  new_img[:, :, :3] = img[:, :, :3]
-  new_img = cv2.cvtColor(new_img, cv2.COLOR_BGR2BGRA)
-  new_img[:, :, 3] = reversed_alpha_channel 
-  return new_img
-  
+  return png  
   
   
  
@@ -95,8 +82,6 @@ def save_note():
     png=turn_white_to_transparent(png)
     cv2.imwrite(png_path, png)
     '''
-    
-    
     '''报错 music21.base.Music21ObjectException: cannot support showing in this format yet: ttt.png
     并不是因为不能转png,而是"musicxml.png"这个不是文件名,而是表示将score对象s写入到
     MusicXML格式的文件中,并生成一个同名的png格式的图像文件啊啊啊啊！！！！！！！
@@ -104,35 +89,17 @@ def save_note():
     '''
     '''
     但！是！我怀疑music21生成的png有问题！！！！其他png都能正常深色转白色、保留原本透明度，
-    就只有music21生成的png会连背景透明部分也变白啊啊啊啊最后还是得用pdf转png再转换颜色！！！！
+    就只有music21生成的png会连背景透明部分也变白啊啊啊啊！！！！
+    用cv2.imread(png_path)不带cv2.IMREAD_UNCHANGED参数读取，再cv2.imshow()时
+    其他图透明处都显示为白色，就它是黑的！但透明通道print出来看上去和其他图又是一样的不知道
+    到底怎么回事！！！！
     '''
     png=s.write("musicxml.png", path)
+    png=cv2.imread(png_path_0, cv2.IMREAD_UNCHANGED)
     
-    b='output_sheets/bbbb.png'
-    p='output_sheets/test-1.png'
-    #p='output_sheets/output.png'
-    p2='output_sheets/test-2.png'
-    #p='output_sheets/xxx.png'
-    png_path='output_sheets/lalala.png'
-    #img = cv2.imread(p)
-    #cv2.imwrite(b, img)
+    png=make_opaque_to_white(png)
+    cv2.imwrite(png_path, png)
     
-    '''
-    png_2 = cv2.imread(p, cv2.IMREAD_UNCHANGED)
-    png_3 = cv2.imread(p2, cv2.IMREAD_UNCHANGED)
-    cv2.imshow('poooo',png_2)
-    cv2.imshow('pwwww',png_3)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    print('111',png_2.shape[2],'222',png_3.shape[2])
-    '''
-    png_2=make_opaque_to_white(png_2)
-    #png_2=invert_alpha_channel(png_2)
-    cv2.imwrite(b, png_2)
-    
-    #png_2=turn_white_to_transparent(png_2,190)
-    #cv2.imwrite(png_path, png_2)
-    #s.show('text')
 
 
 
