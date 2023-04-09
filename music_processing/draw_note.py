@@ -14,6 +14,8 @@ import numpy as np
 import nest_asyncio
 nest_asyncio.apply()
 os.environ["PATH"] += os.pathsep + '/usr/local/opt/lilypond/bin'
+#不加gs的话lilypond把ly转pdf时会报错！
+os.environ["PATH"] += os.pathsep + '/usr/local/opt/gs/bin'
 os.environ["lilypondPath"] = "/usr/local/opt/lilypond/bin"
 os.environ['LILYPOND'] = '/usr/local/opt/lilypond/bin'
 mscore_path = "/Applications/MuseScore 4.app/Contents/MacOS/mscore"
@@ -22,6 +24,7 @@ s = stream.Score()
 #s.append(note.Note("C"))
 xml_path = os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "output.xml"))
 pdf_path=os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "output.pdf"))
+pdf_path_0="output_sheets/output"
 #musicxml_path="output_sheets/test.musicxml"
 musicxml_path=os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "output.musicxml"))
 #png_path_0="output_sheets/test-1.png"
@@ -29,6 +32,7 @@ png_path_0="output_sheets/output.png"
 #png_path="output_sheets/output.png"
 png_path="output_sheets/output-1.png"
 #png_path = os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "output.png"))
+lilypond_path = 'output_sheets/output.ly'  
 
 def add_note(note_name): #添加音符
   print('add_note--',note_name)
@@ -91,7 +95,40 @@ def save_note():
     
     png=make_opaque_to_white(png)
     cv2.imwrite(png_path, png)
-
+    subprocess.run(['musicxml2ly', musicxml_path, '-o', lilypond_path])
+    
+    
+    
+    score = converter.parse(musicxml_path)
+    
+    #参数设置文档:https://lilypond.org/doc/v2.25/Documentation/snippets/editorial-annotations_003a-_30b0_30ea_30c3_30c9_7dda_003a-_30ea_30ba_30e0_306e_5f37_8abf_3068_97f3_7b26_306e_540c_671f
+    '''
+    隐藏谱线这个设置没用！！！：\override Staff.StaffSymbol.line-count = #0
+    
+    要用：\hide Staff.StaffSymbol  （这个只藏线）
+    或者：
+    \Staff   （*注意是在\Staff而不是\Score下！！！！）
+    \remove Staff_symbol_engraver   （这个会把小节分隔号也藏了）
+    啊啊啊啊啊
+    隐藏小节分隔号：\hide Staff.BarLine
+    '''
+    '''
+    如果是musicxml转ly生成的lily文件,可以在里面\layout {\context {}}里改设置
+    '''
+    lilypond_settings = r'''
+    \version "2.24.1"
+    {
+      \hide Staff.StaffSymbol
+    }
+    '''
+    # 将参数字符串写入一个单独的文件
+    with open('output_sheets/lilypond_settings.ly', 'w') as f:
+        f.write(lilypond_settings)
+    # 调用 LilyPond 程序，并传递设置参数文件作为参数
+    subprocess.run(['lilypond', '-o', 'output.ly', '-fpdf', 'lilypond_settings.ly', 'output'], cwd='output_sheets')
+    
+    
+    result = subprocess.run(['lilypond', '-fpdf', '-o', pdf_path_0, lilypond_path])
   
     #【】
     '''
@@ -155,10 +192,9 @@ def save_note():
                 staff.systemStaffLines = False
     
     # musicxml转ly
-    lilypond_path = 'output_sheets/output.ly'  
     subprocess.run(['musicxml2ly', musicxml_path, '-o', lilypond_path])
     # ly转pdf *problem报错
-    subprocess.run(['lilypond', '-fpdf', '-o', 'output_sheets/output.ly', lilypond_path])
+    subprocess.run(['lilypond', '-fpdf', '-o', pdf_path, lilypond_path])
     '''
     
     
