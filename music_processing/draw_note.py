@@ -89,6 +89,8 @@ def make_opaque_to_white(png):
  
 def save_note():
   
+    #【】直接自己写lily文件
+  
     #【】直接用music生成png的方法：（这样生成的png宽度不定，会导致随着音符增加而变长）
     png=s.write("musicxml.png", xml_path)
     png=cv2.imread(png_path, cv2.IMREAD_UNCHANGED)
@@ -115,21 +117,13 @@ def save_note():
     '''
     如果是musicxml转ly生成的lily文件,可以在里面\layout {\context {}}里改设置
     '''
-    lilypond_settings = r'''
-    \version "2.24.1"
-    {
-      \hide Staff.StaffSymbol
-    }
-    '''
-    # 将参数字符串写入一个单独的文件
-    with open('output_sheets/lilypond_settings.ly', 'w') as f:
-        f.write(lilypond_settings)
-    # 调用 LilyPond 程序，并传递设置参数文件作为参数
-    subprocess.run(['lilypond', '-o', 'output.ly', '-fpdf', 'lilypond_settings.ly', 'output'], cwd='output_sheets')
     
     
     result = subprocess.run(['lilypond', '-fpdf', '-o', pdf_path_0, lilypond_path])
-  
+
+    #如果报错打不开目录,可以试试直接cwd指定目录
+    subprocess.run(['lilypond', '-fpdf', 'lilypond_settings_2.ly'], cwd='output_sheets')
+
     #【】
     '''
     png=s.write("musicxml", musicxml_path)
