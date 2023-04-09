@@ -21,7 +21,7 @@ nest_asyncio.apply()
 才能用, 不然会报错RuntimeError: This event loop is already running！！！！
 '''
 
-png_path="output_sheets/output.png"
+png_path="output_sheets/output-1.png"
 #png_path="output_sheets/test-1.png"
 background_color=(50, 0, 0)
 
@@ -145,7 +145,6 @@ def redraw_surface(text_list):
 
   
 async def keyboard_event():
-  print('running')
   global scroll_position
   
   text_list=[] #显示的文字
