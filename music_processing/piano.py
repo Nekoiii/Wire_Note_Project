@@ -21,6 +21,7 @@ nest_asyncio.apply()
 才能用, 不然会报错RuntimeError: This event loop is already running！！！！
 '''
 
+text_list=[] #显示的文字
 png_path="output_sheets/output-1.png"
 #png_path="output_sheets/test-1.png"
 background_color=(50, 0, 0)
@@ -69,9 +70,15 @@ def play_audio(path,key):
  
 def play_audio_async_threadsafe(file_name,key):
     threading.Thread(target=play_audio, args=(file_name, key)).start()
+    
+def add_note_and_reload(note_name):
+    draw_note.add_note(note_name)
+    print('add_note--rrrrrr')
+    reload_img()
+    redraw_surface(text_list)
 def add_note_async_threadsafe(note_name):
     #***只传一个参数时, args=(note_name,)中要加逗号把它变成一个元组,不然就会报错 xxx() takes 1 positional argument but 2 were given
-    threading.Thread(target=draw_note.add_note, args=(note_name,)).start()
+    threading.Thread(target=add_note_and_reload, args=(note_name,)).start()
 
     
 def reload_img():
@@ -145,9 +152,9 @@ def redraw_surface(text_list):
 
   
 async def keyboard_event():
-  global scroll_position
+  global scroll_position,text_list
   
-  text_list=[] #显示的文字
+  #text_list=[] #显示的文字
   if_quited=False  #判断是否退出。不然pygame.quit()后再执行pygame.event.get()会报错error: video system not initialized
   while not if_quited:
     for event in pygame.event.get():

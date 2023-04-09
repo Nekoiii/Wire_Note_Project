@@ -15,12 +15,12 @@
     \context { \Score
         autoBeaming = ##f
         }
-
     }
-PartPcdThreeThreefaFiveThreeOnedThreeTwocSixcOnebbOneTwoZeroFiveNineThreeFourThreeTwoeFoureSeveneVoiceOne = 
-\relative c' {
+PartPZeroNineOneceFivefeTwoThreefcfEighteaaOneZeroNineNineSevenFourbOneccSixbadTwoVoiceOne = 
+\relative d' {
     \clef "treble" \numericTimeSignature\time 4/4 | % 1
-    c4 \bar "|."
+    d4 e4 g4 f4 | % 2
+    e4 d4 c4 \bar "|."
     }
 
 
@@ -33,16 +33,12 @@ PartPcdThreeThreefaFiveThreeOnedThreeTwocSixcOnebbOneTwoZeroFiveNineThreeFourThr
             
             \context Staff << 
                 \mergeDifferentlyDottedOn\mergeDifferentlyHeadedOn
-                \context Voice = "PartPcdThreeThreefaFiveThreeOnedThreeTwocSixcOnebbOneTwoZeroFiveNineThreeFourThreeTwoeFoureSeveneVoiceOne" {  \PartPcdThreeThreefaFiveThreeOnedThreeTwocSixcOnebbOneTwoZeroFiveNineThreeFourThreeTwoeFoureSeveneVoiceOne }
+                \context Voice = "PartPZeroNineOneceFivefeTwoThreefcfEighteaaOneZeroNineNineSevenFourbOneccSixbadTwoVoiceOne" {  \PartPZeroNineOneceFivefeTwoThreefcfEighteaaOneZeroNineNineSevenFourbOneccSixbadTwoVoiceOne }
                 >>
             >>
         
         >>
-    \layout {
-  \context {
-    \Staff
-    \remove "Staff_symbol_engraver"
-  }}
+    \layout {}
     % To create MIDI output, uncomment the following line:
     %  \midi {\tempo 4 = 100 }
     }

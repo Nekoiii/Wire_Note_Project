@@ -34,6 +34,10 @@ png_path="output_sheets/output-1.png"
 #png_path = os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "output.png"))
 lilypond_path = 'output_sheets/output.ly'  
 
+ 
+
+
+
 def add_note(note_name): #添加音符
   print('add_note--',note_name)
   global s
@@ -99,13 +103,13 @@ def save_note():
     cv2.imwrite(png_path, png)
     subprocess.run(['musicxml2ly', musicxml_path, '-o', lilypond_path])
     
-    
+    print('add_note--sssssssss')
     
     score = converter.parse(musicxml_path)
     
     #参数设置文档:https://lilypond.org/doc/v2.25/Documentation/snippets/editorial-annotations_003a-_30b0_30ea_30c3_30c9_7dda_003a-_30ea_30ba_30e0_306e_5f37_8abf_3068_97f3_7b26_306e_540c_671f
     '''
-    隐藏谱线这个设置没用！！！：\override Staff.StaffSymbol.line-count = #0
+    隐藏谱线这个设置没用或者是我写的地方不对！！！：\override Staff.StaffSymbol.line-count = #0
     
     要用：\hide Staff.StaffSymbol  （这个只藏线）
     或者：
@@ -119,10 +123,10 @@ def save_note():
     '''
     
     
-    result = subprocess.run(['lilypond', '-fpdf', '-o', pdf_path_0, lilypond_path])
+    #result = subprocess.run(['lilypond', '-fpdf', '-o', pdf_path_0, lilypond_path])
 
     #如果报错打不开目录,可以试试直接cwd指定目录
-    subprocess.run(['lilypond', '-fpdf', 'lilypond_settings_2.ly'], cwd='output_sheets')
+    #subprocess.run(['lilypond', '-fpdf', 'lilypond_settings_2.ly'], cwd='output_sheets')
 
     #【】
     '''
