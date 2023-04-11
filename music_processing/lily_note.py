@@ -8,6 +8,7 @@ https://lilypond.org/doc/v2.21/Documentation/notation/visibility-of-objects.ja.h
 #站内搜索:https://www.google.com/search?q=site%3Alilypond.org+%5Crelative&sxsrf=APwXEdcdQE7HPa2MyEzZy_3G9waN-y3hEw%3A1681026704587&ei=kG4yZJ6vI8ulhwPcoobwCw&ved=0ahUKEwiet9a8qJz-AhXL0mEKHVyRAb4Q4dUDCA8&uact=5&oq=site%3Alilypond.org+%5Crelative&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQA0oECEEYAVDxAViWGWD4G2gCcAB4AIABZYgBuwGSAQMxLjGYAQCgAQKgAQHAAQE&sclient=gws-wiz-serp
 
 参考表:https://lilypond.org/doc/v2.24/Documentation/notation/cheat-sheet.ja.html
+颜色表:
 部件名字:https://lilypond.org/doc/v2.22/Documentation/learning/objects-and-interfaces.ja.html
 
 
@@ -54,6 +55,7 @@ cis dis eis fis
 '''
 
 # *lily居然可以直接变颜色！！！！
+# 但找了半天发现变不了background的color,只能额外画个有颜色的盒子叠在底下。所以没办法直接生成透明背景曲谱了qvq
 settings = r'''
 \layout {
 \hide Staff.StaffSymbol 
@@ -62,8 +64,6 @@ settings = r'''
 %Staff.BarLine=#white
 }
 '''
-
-
 
 closing_brace=r'''
 }
@@ -76,9 +76,8 @@ def creat_lily(notes,file_name):
   #print('file_content',file_content)
   with open('output_sheets/lily_output.ly', 'w') as f:
       f.write(file_content)
-  subprocess.run(['lilypond', '-fpdf', 'lily_output.ly'], cwd='output_sheets')
+  #subprocess.run(['lilypond', '-fpdf', 'lily_output.ly'], cwd='output_sheets')
   subprocess.run(['lilypond', '--png', 'lily_output.ly'], cwd='output_sheets')
-
 
 
 

@@ -22,6 +22,9 @@ cis dis eis fis
 %\override NoteHead.color = #white
 %\override Staff.Clef.color = #white
 %Staff.BarLine=#white
+  \background {
+    \fill-color #black
+  }
 }
 
 }

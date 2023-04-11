@@ -4,7 +4,7 @@
 
 \header {
     encodingsoftware =  "music21 v.7.3.3"
-    encodingdate =  "2023-04-09"
+    encodingdate =  "2023-04-11"
     }
 
 #(set-global-staff-size 20.0)
@@ -16,11 +16,10 @@
         autoBeaming = ##f
         }
     }
-PartPZeroNineOneceFivefeTwoThreefcfEighteaaOneZeroNineNineSevenFourbOneccSixbadTwoVoiceOne = 
-\relative d' {
+PartPNineeTwoThreecThreebZeroTwoEightOneEightFiveZeroaSixcSevendSevenNineebOneFourFourTwoFourfaZerocVoiceOne = 
+\relative c' {
     \clef "treble" \numericTimeSignature\time 4/4 | % 1
-    d4 e4 g4 f4 | % 2
-    e4 d4 c4 \bar "|."
+    c4 d4 e4 \bar "|."
     }
 
 
@@ -33,7 +32,7 @@ PartPZeroNineOneceFivefeTwoThreefcfEighteaaOneZeroNineNineSevenFourbOneccSixbadT
             
             \context Staff << 
                 \mergeDifferentlyDottedOn\mergeDifferentlyHeadedOn
-                \context Voice = "PartPZeroNineOneceFivefeTwoThreefcfEighteaaOneZeroNineNineSevenFourbOneccSixbadTwoVoiceOne" {  \PartPZeroNineOneceFivefeTwoThreefcfEighteaaOneZeroNineNineSevenFourbOneccSixbadTwoVoiceOne }
+                \context Voice = "PartPNineeTwoThreecThreebZeroTwoEightOneEightFiveZeroaSixcSevendSevenNineebOneFourFourTwoFourfaZerocVoiceOne" {  \PartPNineeTwoThreecThreebZeroTwoEightOneEightFiveZeroaSixcSevendSevenNineebOneFourFourTwoFourfaZerocVoiceOne }
                 >>
             >>
         

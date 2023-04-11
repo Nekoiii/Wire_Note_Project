@@ -12,6 +12,8 @@ import pyaudio
 import threading
 from keys_map import keys_map
 import draw_note
+import lily_note
+
 import nest_asyncio
 nest_asyncio.apply()
 '''***注: 
@@ -23,7 +25,6 @@ nest_asyncio.apply()
 
 text_list=[] #显示的文字
 png_path="output_sheets/output-1.png"
-#png_path="output_sheets/test-1.png"
 background_color=(50, 0, 0)
 
 
@@ -46,7 +47,7 @@ scroll_surface = pygame.Surface((screen_w, max_y))
 
 
 def play_audio(path,key):
-    print('play_audio--')
+    #print('play_audio--')
     CHUNK = 1024    #CHUNK指定每次从音频流中读取和处理的音频样本数。它是一个缓冲区的大小，用于控制每次处理的数据量。一般可用 1024 或 2048 。值太小，播放音频将会更加实时，但可能会导致音频出现卡顿或者声音质量差的问题。值太大，音频播放将更加平滑，但会增加延迟，可能会导致应用程序的响应性下降。
     wf = wave.open(path, 'rb')
     data = wf.readframes(CHUNK)
@@ -56,7 +57,6 @@ def play_audio(path,key):
     CHANNELS = wf.getnchannels()
     RATE = wf.getframerate()
     
-    print(keys_map[key],end=' ')
     sys.stdout.flush() 
     # 打开音频流。output=True表示音频输出
     stream = p.open(format=FORMAT,
@@ -184,9 +184,8 @@ async def keyboard_event():
                 scroll_position = max_y - screen_h
             redraw_scroll()
           
-          
         elif key in keys_map.keys():       #按下琴键 
-          note_name=keys_map[key]
+          note_name=keys_map[key]['note_name']
           #png=await draw_note.add_note(note_name) #添加音符
           add_note_async_threadsafe(note_name)
           #播放音频
@@ -197,7 +196,7 @@ async def keyboard_event():
             play_audio_async_threadsafe(fileName,key)
             
           #绘制
-          text_list.append(keys_map[key])
+          text_list.append(keys_map[key]['note_name'])
           redraw_surface(text_list)
   
         

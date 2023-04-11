@@ -23,7 +23,7 @@ keys_map = {
     pygame.K_MINUS: 'A#4'
 }
 
-note_mapping = {
+keys_map = {
     pygame.K_t: {'note_name': 'C4', 'lily_note': 'c'},
     pygame.K_y: {'note_name': 'D4', 'lily_note': 'd'},
     pygame.K_u: {'note_name': 'E4', 'lily_note': 'e'},
