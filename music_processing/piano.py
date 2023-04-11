@@ -10,9 +10,9 @@ import pygame
 import asyncio
 import pyaudio
 import threading
-from keys_map import keys_map
-import draw_note
-import lily_note
+from constants.keys_map import keys_map
+import draw_notes_with_music21
+import draw_notes_with_lily
 
 import nest_asyncio
 nest_asyncio.apply()
@@ -23,7 +23,7 @@ nest_asyncio.apply()
 才能用, 不然会报错RuntimeError: This event loop is already running！！！！
 '''
 
-text_list=[] #显示的文字
+lily_notes=[] #写入ly文件的音符们
 png_path="output_sheets/output-1.png"
 background_color=(50, 0, 0)
 
@@ -71,14 +71,16 @@ def play_audio(path,key):
 def play_audio_async_threadsafe(file_name,key):
     threading.Thread(target=play_audio, args=(file_name, key)).start()
     
-def add_note_and_reload(note_name):
-    draw_note.add_note(note_name)
+    
+
+def add_note_music21_and_reload(note_name):
+    draw_notes_with_music21.add_note(note_name)
     print('add_note--rrrrrr')
     reload_img()
-    redraw_surface(text_list)
-def add_note_async_threadsafe(note_name):
+    redraw_surface(lily_notes)
+def add_note_music21_async_threadsafe(note_name):
     #***只传一个参数时, args=(note_name,)中要加逗号把它变成一个元组,不然就会报错 xxx() takes 1 positional argument but 2 were given
-    threading.Thread(target=add_note_and_reload, args=(note_name,)).start()
+    threading.Thread(target=add_note_music21_and_reload, args=(note_name,)).start()
 
     
 def reload_img():
@@ -105,7 +107,7 @@ def redraw_scroll():
   pygame.display.update()
 
 
-def redraw_surface(text_list):
+def redraw_surface(lily_notes):
   global scroll_surface,screen,max_y
   # 清空窗口并绘制背景色(不然图片移动时不会恢复底色)
   screen.fill(background_color)
@@ -119,7 +121,7 @@ def redraw_surface(text_list):
   y=y0
   # 将列表分成每10个元素一组，组内用逗号分隔pygame
   #*注: pygame默认字体无法识别换行符\n,所以只能一行行计算坐标显示！
-  grouped_items = [text_list[i:i+items_per_line] for i in range(0, len(text_list), items_per_line)]
+  grouped_items = [lily_notes[i:i+items_per_line] for i in range(0, len(lily_notes), items_per_line)]
   grouped_items = [', '.join(group) for group in grouped_items]
   text_surfaces = []
   for item in grouped_items:
@@ -139,7 +141,7 @@ def redraw_surface(text_list):
   
 
   #绘制图片
-  if len(text_list)>0:
+  if len(lily_notes)>0:
     scroll_surface.blit(pygame.transform.scale
                 (image, (scaled_w, scaled_h)), 
                 (0.5*(screen_w-scaled_w), y))
@@ -152,9 +154,9 @@ def redraw_surface(text_list):
 
   
 async def keyboard_event():
-  global scroll_position,text_list
+  global scroll_position,lily_notes
+  scroll_step=100  #上下滚动窗口时每次滚多少
   
-  #text_list=[] #显示的文字
   if_quited=False  #判断是否退出。不然pygame.quit()后再执行pygame.event.get()会报错error: video system not initialized
   while not if_quited:
     for event in pygame.event.get():
@@ -163,13 +165,12 @@ async def keyboard_event():
         pygame.quit()
         
       if event.type == pygame.KEYDOWN: #按下键盘
-        print('KEYDOWN--',event.key)
+        #print('KEYDOWN--',event.key)
         key = event.key
-        scroll_step=100  #上下滚动窗口时每次滚多少
+        
         if(key == pygame.K_ESCAPE):    #esc键退出
           if_quited=True
           pygame.quit()
-        
         #*problem: 下滚窗口时文字显示会不全,不知道哪里出问题了
         elif key ==pygame.K_UP:    #上下滚动窗口
             reload_img()
@@ -186,22 +187,23 @@ async def keyboard_event():
           
         elif key in keys_map.keys():       #按下琴键 
           note_name=keys_map[key]['note_name']
-          #png=await draw_note.add_note(note_name) #添加音符
-          add_note_async_threadsafe(note_name)
+          
+          #添加音符,并重新生成png图片
+          #add_note_music21_async_threadsafe(note_name)#这个是利用music21生成曲谱的方法
+          
           #播放音频
           basic_path = 'audios/piano_keys/'
           fileName = basic_path+str(note_name)+".wav"
           if os.path.exists(fileName):            
-            #threading.Thread(target=play_audio, args=(fileName,key)).start()
             play_audio_async_threadsafe(fileName,key)
             
           #绘制
-          text_list.append(keys_map[key]['note_name'])
-          redraw_surface(text_list)
+          lily_notes.append(keys_map[key]['note_name'])
+          redraw_surface(lily_notes)
   
         
           
-      elif event.type == pygame.KEYUP:
+      elif event.type == pygame.KEYUP: #放开键盘
         break
         #print('KEYUP--')
 

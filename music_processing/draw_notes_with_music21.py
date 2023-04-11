@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-画曲谱
+利用 music21 画曲谱
 """
 import os
 import asyncio
