@@ -19,8 +19,11 @@ r'''
 '''
 """
 import os
+import cv2
 import subprocess
 import constants.lily_partials as lily_partials
+import process_note_img
+
 
 current_directory = os.getcwd()
 print(current_directory)
@@ -29,9 +32,10 @@ os.environ["PATH"] += os.pathsep + '/usr/local/opt/lilypond/bin'
 os.environ["PATH"] += os.pathsep + '/usr/local/opt/gs/bin'
 
 
+ly_path='output_sheets/lily_output.ly'
 
 
-def creat_lily(note_list,file_name):
+def create_lily(note_list,png_path):
   note_string = ' '.join(note_list)
   file_content=(
                 lily_partials.version
@@ -47,8 +51,10 @@ def creat_lily(note_list,file_name):
   with open('output_sheets/lily_output.ly', 'w') as f:
       f.write(file_content)
   #subprocess.run(['lilypond', '-fpdf', 'lily_output.ly'], cwd='output_sheets')
-  subprocess.run(['lilypond', '--png', 'lily_output.ly'], cwd='output_sheets')
-
+  png_name=png_path.split('.')[0]
+  subprocess.run(['lilypond', '--png', f'--output={png_name}','output_sheets/lily_output.ly'])
+  png=process_note_img.turn_white_to_transparent(png_path)
+  cv2.imwrite(png_path, png)
 
 
 

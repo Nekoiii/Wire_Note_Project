@@ -1,18 +1,11 @@
 
 \version "2.24.1"
 
-\paper {
-  % 设置底色为grey
-  bgcolor = #grey
-}
-
 \score {
   \new Staff {
 
 \fixed c'{
-c d e f
-c' d e f
-cis dis eis fis
+c d e d c c d e d c e c cis d e d c c c a g a c d e c
 }
 
 }
@@ -22,9 +15,6 @@ cis dis eis fis
 %\override NoteHead.color = #white
 %\override Staff.Clef.color = #white
 %Staff.BarLine=#white
-  \background {
-    \fill-color #black
-  }
 }
 
 }

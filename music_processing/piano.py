@@ -72,7 +72,7 @@ def play_audio_async_threadsafe(file_name,key):
     threading.Thread(target=play_audio, args=(file_name, key)).start()
     
     
-
+#用 music21 生成五线谱
 def add_note_music21_and_reload(note_name):
     draw_notes_with_music21.add_note(note_name)
     print('add_note--rrrrrr')
@@ -82,6 +82,14 @@ def add_note_music21_async_threadsafe(note_name):
     #***只传一个参数时, args=(note_name,)中要加逗号把它变成一个元组,不然就会报错 xxx() takes 1 positional argument but 2 were given
     threading.Thread(target=add_note_music21_and_reload, args=(note_name,)).start()
 
+#用 lilypond 生成五线谱
+def add_note_lily_and_reload(lily_notes):
+    draw_notes_with_lily.create_lily(lily_notes,png_path)
+    print('add_note--lilyyyyy')
+    reload_img()
+    redraw_surface(lily_notes)
+def add_note_lily_async_threadsafe(lily_notes):
+    threading.Thread(target=add_note_lily_and_reload, args=(lily_notes,)).start()
     
 def reload_img():
   global max_y
@@ -190,6 +198,8 @@ async def keyboard_event():
           
           #添加音符,并重新生成png图片
           #add_note_music21_async_threadsafe(note_name)#这个是利用music21生成曲谱的方法
+          add_note_lily_async_threadsafe(lily_notes)
+          
           
           #播放音频
           basic_path = 'audios/piano_keys/'
@@ -198,7 +208,7 @@ async def keyboard_event():
             play_audio_async_threadsafe(fileName,key)
             
           #绘制
-          lily_notes.append(keys_map[key]['note_name'])
+          lily_notes.append(keys_map[key]['lily_note'])
           redraw_surface(lily_notes)
   
         

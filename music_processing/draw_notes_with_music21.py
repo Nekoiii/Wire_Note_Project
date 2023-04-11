@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import cv2
 from pdf2image import convert_from_path
 import numpy as np
+from process_note_img import turn_white_to_transparent
+
 import nest_asyncio
 nest_asyncio.apply()
 os.environ["PATH"] += os.pathsep + '/usr/local/opt/lilypond/bin'
@@ -55,33 +57,10 @@ def pdf_to_png():
       img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGBA)
     elif img.shape[2] == 3:
       img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
-    #img=turn_white_to_transparent(img)
     return img
 
   
-#把图片中像素>threshold的变为透明,深色的地方都转为白色
-def turn_white_to_transparent(img,threshold=250):
-    #print('turn_white_to_transparent----')
-    if len(img.shape) == 2:
-      img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGBA)
-    elif img.shape[2] == 3:
-      img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
-        
-    cv2.imshow('img',img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
-      
-    #转换为NumPy数组格式的图像数据
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
-    thresh_rgba = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGBA)
-    
-    mask = thresh_rgba[:, :, 0] > threshold
-    img[np.where(mask)] = [0, 0, 0, 0]  #白色的地方转为透明
-    img[np.where(~mask)] = [255, 255, 255, 255]  #其余都设为白色
-
-    return img
     
   
 def make_opaque_to_white(png):
@@ -104,7 +83,7 @@ def save_note():
     cv2.imwrite(png_path, png)
     subprocess.run(['musicxml2ly', musicxml_path, '-o', lilypond_path])
     
-    print('add_note--sssssssss')
+    #print('add_note--sssssssss')
     
     score = converter.parse(musicxml_path)
     
@@ -148,17 +127,17 @@ def save_note():
     except subprocess.CalledProcessError as e:
         print("Command '{}' returned non-zero exit status {}".format(e.cmd, e.returncode))
 
-    png=cv2.imread(png_path, cv2.IMREAD_UNCHANGED)
+    #png=cv2.imread(png_path, cv2.IMREAD_UNCHANGED)
     
-    png=turn_white_to_transparent(png)
+    png=turn_white_to_transparent(png_path)
     cv2.imwrite(png_path, png)
     '''
   
     #【】先存为pdf，再转为png的方法：
     '''
     s.write("musicxml.pdf", xml_path)
-    png=pdf_to_png()
-    png=turn_white_to_transparent(png)
+    #png=pdf_to_png()
+    png=turn_white_to_transparent(png_path)
     cv2.imwrite(png_path, png)
     '''
     '''报错 music21.base.Music21ObjectException: cannot support showing in this format yet: ttt.png
