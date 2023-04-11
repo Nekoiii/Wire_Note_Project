@@ -20,6 +20,7 @@ os.environ["lilypondPath"] = "/usr/local/opt/lilypond/bin"
 os.environ['LILYPOND'] = '/usr/local/opt/lilypond/bin'
 mscore_path = "/Applications/MuseScore 4.app/Contents/MacOS/mscore"
 
+
 s = stream.Score()
 #s.append(note.Note("C"))
 xml_path = os.path.abspath(os.path.join(os.getcwd(), "output_sheets", "output.xml"))
@@ -107,7 +108,9 @@ def save_note():
     
     score = converter.parse(musicxml_path)
     
+    #lilypond参考文档:https://lilypond.org/doc/v2.21/Documentation/learning/absolute-note-names.ja.html
     #参数设置文档:https://lilypond.org/doc/v2.25/Documentation/snippets/editorial-annotations_003a-_30b0_30ea_30c3_30c9_7dda_003a-_30ea_30ba_30e0_306e_5f37_8abf_3068_97f3_7b26_306e_540c_671f
+    #https://www.google.com/search?q=site%3Alilypond.org+%5Crelative&sxsrf=APwXEdcdQE7HPa2MyEzZy_3G9waN-y3hEw%3A1681026704587&ei=kG4yZJ6vI8ulhwPcoobwCw&ved=0ahUKEwiet9a8qJz-AhXL0mEKHVyRAb4Q4dUDCA8&uact=5&oq=site%3Alilypond.org+%5Crelative&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQA0oECEEYAVDxAViWGWD4G2gCcAB4AIABZYgBuwGSAQMxLjGYAQCgAQKgAQHAAQE&sclient=gws-wiz-serp
     '''
     隐藏谱线这个设置没用或者是我写的地方不对！！！：\override Staff.StaffSymbol.line-count = #0
     
@@ -175,7 +178,7 @@ def save_note():
 
     
     #【】用lilypond隐藏谱线
-    #*problem:也没能成功
+    # 这个没能成功
     '''
     png=s.write("musicxml", musicxml_path)
     
@@ -198,7 +201,7 @@ def save_note():
     
     #【】用mscore生成png的方法：（这样能设置MuseScore中的参数。https://musescore.org/en/handbook/3/command-line-options）
     #*注意参数里大小写！！！！
-    #*problem:但没有用，并没能隐藏谱线    
+    # 这个也没能成功隐藏谱线    
     '''
     # 使用 musescore 命令将 MusicXML 转换为 PNG 图片，并设置参数隐藏线条
     cmd = [
