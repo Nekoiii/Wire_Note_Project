@@ -36,7 +36,13 @@ os.environ["PATH"] += os.pathsep + '/usr/local/opt/gs/bin'
 ly_path='output_sheets/lily_output.ly'
 
     
-async def create_lily(note_list,png_path):
+async def run_cmd(loop,cmd):
+  #proc=await asyncio.create_subprocess_exec(*cmd, loop=loop)
+  #await proc.communicate()
+  subprocess.run(cmd, check=True)
+    
+async def create_lily(loop,note_list,png_path):
+  print('nnnnnnn-2',note_list)
   note_string = ' '.join(note_list)
   file_content=(
                 lily_partials.version
@@ -48,20 +54,18 @@ async def create_lily(note_list,png_path):
                 +lily_partials.settings
                 +lily_partials.closing_brace
                 )
-  #print('file_content',file_content)
+
   with open('output_sheets/lily_output.ly', 'w') as f:
       f.write(file_content)
-  #subprocess.run(['lilypond', '-fpdf', 'lily_output.ly'], cwd='output_sheets')
   png_name=png_path.split('.')[0]
-  print('asssss-0')
+  cmd=['lilypond', '--png', f'--output={png_name}','output_sheets/lily_output.ly']
   try:
-    subprocess.run(['lilypond', '--png', f'--output={png_name}','output_sheets/lily_output.ly'])
+    #subprocess.run(['lilypond', '--png', f'--output={png_name}','output_sheets/lily_output.ly'])
+    await run_cmd(loop,cmd)
   except subprocess.CalledProcessError as e:
     print("Failed to run lilypond command:", e)
-  
-  print('asssss-1')
+    
   png=process_note_img.turn_white_to_transparent(png_path)
-  print('asssss-2')
   if png is not None:
     cv2.imwrite(png_path, png)
 

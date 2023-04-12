@@ -10,7 +10,6 @@ import numpy as np
 
 #把图片中像素>threshold的变为透明,深色的地方都转为白色
 def turn_white_to_transparent(png_path,threshold=250):
-    #print('turn_white_to_transparent----')
   
     try:
       img = cv2.imread(png_path, cv2.IMREAD_UNCHANGED)

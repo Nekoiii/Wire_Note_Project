@@ -42,28 +42,26 @@ pygame.display.update()
 x0,y0=50,50; #绘制时的初始坐标
 scroll_position = 0  # 当前窗口应该显示图片的位置
 max_y=screen_h   # 完整画面的高度
-# 在另一个更大的 Surface 上绘制, 以实现滚动效果
-scroll_surface = pygame.Surface((screen_w, max_y))
+scroll_surface = pygame.Surface((screen_w, max_y))# 在另一个更大的 Surface 上绘制, 以实现滚动效果
 
 
 def play_audio(path,key):
-    #print('play_audio--')
     CHUNK = 1024    #CHUNK指定每次从音频流中读取和处理的音频样本数。它是一个缓冲区的大小，用于控制每次处理的数据量。一般可用 1024 或 2048 。值太小，播放音频将会更加实时，但可能会导致音频出现卡顿或者声音质量差的问题。值太大，音频播放将更加平滑，但会增加延迟，可能会导致应用程序的响应性下降。
     wf = wave.open(path, 'rb')
     data = wf.readframes(CHUNK)
     global p # 创建播放器
-    # 获得语音文件的各个参数
-    FORMAT = p.get_format_from_width(wf.getsampwidth())
+    
+    FORMAT = p.get_format_from_width(wf.getsampwidth())# 获得语音文件的各个参数
     CHANNELS = wf.getnchannels()
     RATE = wf.getframerate()
     
     sys.stdout.flush() 
-    # 打开音频流。output=True表示音频输出
-    stream = p.open(format=FORMAT,
+    
+    stream = p.open(format=FORMAT,# 打开音频流
                     channels=CHANNELS,
                     rate=RATE,
                     frames_per_buffer=CHUNK,
-                    output=True)
+                    output=True) # output=True表示音频输出
     while len(data) > 0:
         stream.write(data)
         data = wf.readframes(CHUNK)
@@ -85,24 +83,16 @@ def add_note_music21_async_threadsafe(note_name):
 def add_note_lily_and_reload(lily_notes):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    print('asssss-00')
-    #await draw_notes_with_lily.create_lily(lily_notes,png_path)
-    #asyncio.run_coroutine_threadsafe(draw_notes_with_lily.create_lily(lily_notes,png_path), loop)
-    loop.run_until_complete(asyncio.gather(draw_notes_with_lily.create_lily(lily_notes,png_path)))
-    
-    
-    print('asssss-3')
+    loop.run_until_complete(asyncio.gather(draw_notes_with_lily.create_lily(loop,lily_notes,png_path)))
     reload_img()
     redraw_surface(lily_notes)
+    loop.close()
 def add_note_lily_async_threadsafe(lily_notes):
     threading.Thread(target=add_note_lily_and_reload, args=(lily_notes,)).start()
-    #task = asyncio.create_task(add_note_lily_and_reload(lily_notes))
-    #await asyncio.gather(task)
  
     
     
 def reload_img():
-  print('asssss-4')
   global max_y
   try:
     image = pygame.image.load(png_path)
@@ -228,6 +218,7 @@ def keyboard_event():
             
           #绘制
           lily_notes.append(keys_map[key]['lily_note'])
+          print('nnnnnnn-1',lily_notes)
           redraw_surface(lily_notes)
   
         
