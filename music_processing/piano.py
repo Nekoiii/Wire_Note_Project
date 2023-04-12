@@ -70,12 +70,12 @@ def play_audio(path,key):
  
 def play_audio_async_threadsafe(file_name,key):
     threading.Thread(target=play_audio, args=(file_name, key)).start()
+    #await loop.run_in_executor(None, play_audio, file_name, key)
     
     
 #用 music21 生成五线谱
 def add_note_music21_and_reload(note_name):
     draw_notes_with_music21.add_note(note_name)
-    print('add_note--rrrrrr')
     reload_img()
     redraw_surface(lily_notes)
 def add_note_music21_async_threadsafe(note_name):
@@ -84,14 +84,24 @@ def add_note_music21_async_threadsafe(note_name):
 
 #用 lilypond 生成五线谱
 def add_note_lily_and_reload(lily_notes):
-    draw_notes_with_lily.create_lily(lily_notes,png_path)
-    print('add_note--lilyyyyy')
+    print('asssss-00')
+    #await draw_notes_with_lily.create_lily(lily_notes,png_path)
+    asyncio.run_coroutine_threadsafe(
+      draw_notes_with_lily.create_lily(lily_notes,png_path),
+      loop
+    ).result()
+    print('asssss-3')
     reload_img()
     redraw_surface(lily_notes)
-def add_note_lily_async_threadsafe(lily_notes):
+async def add_note_lily_async_threadsafe(lily_notes):
     threading.Thread(target=add_note_lily_and_reload, args=(lily_notes,)).start()
+    #task = asyncio.create_task(add_note_lily_and_reload(lily_notes))
+    #await asyncio.gather(task)
+ 
+    
     
 def reload_img():
+  print('asssss-4')
   global max_y
   image = pygame.image.load(png_path)
   
@@ -115,13 +125,13 @@ def redraw_scroll():
   pygame.display.update()
 
 
-def redraw_surface(lily_notes):
+async def redraw_surface(lily_notes):
   global scroll_surface,screen,max_y
   # 清空窗口并绘制背景色(不然图片移动时不会恢复底色)
   screen.fill(background_color)
   scroll_surface.fill(background_color)
 
-  image,scaled_w,scaled_h=reload_img()
+  image,scaled_w,scaled_h= reload_img()
   #scroll_surface = pygame.Surface((screen_w, max_y))
 
   #输出字
@@ -198,7 +208,7 @@ async def keyboard_event():
           
           #添加音符,并重新生成png图片
           #add_note_music21_async_threadsafe(note_name)#这个是利用music21生成曲谱的方法
-          add_note_lily_async_threadsafe(lily_notes)
+          await add_note_lily_async_threadsafe(lily_notes)
           
           
           #播放音频
@@ -206,10 +216,11 @@ async def keyboard_event():
           fileName = basic_path+str(note_name)+".wav"
           if os.path.exists(fileName):            
             play_audio_async_threadsafe(fileName,key)
+            #asyncio.create_task(play_audio_async_threadsafe(fileName,key))
             
           #绘制
           lily_notes.append(keys_map[key]['lily_note'])
-          redraw_surface(lily_notes)
+          await redraw_surface(lily_notes)
   
         
           
