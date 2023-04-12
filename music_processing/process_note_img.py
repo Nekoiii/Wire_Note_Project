@@ -9,13 +9,11 @@ import numpy as np
 
 
 #把图片中像素>threshold的变为透明,深色的地方都转为白色
-def turn_white_to_transparent(png_path,threshold=250):
-  
+#*problem:
+def turn_white_to_transparent(png_path,threshold=250):  
     try:
       img = cv2.imread(png_path, cv2.IMREAD_UNCHANGED)
       if img is not None:
-          img= cv2.imread(png_path, cv2.IMREAD_UNCHANGED)
-
 
           if len(img.shape) == 2:
             img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGBA)
@@ -42,7 +40,7 @@ def turn_white_to_transparent(png_path,threshold=250):
       else:
           raise Exception("Failed to read image from file")
     except Exception as e:
-        print("Error reloading image:", str(e))
+        print("(--turn_white_to_transparent---)Error reloading image:", str(e))
       
       
 

@@ -37,12 +37,9 @@ ly_path='output_sheets/lily_output.ly'
 
     
 async def run_cmd(loop,cmd):
-  #proc=await asyncio.create_subprocess_exec(*cmd, loop=loop)
-  #await proc.communicate()
   subprocess.run(cmd, check=True)
     
 async def create_lily(loop,note_list,png_path):
-  print('nnnnnnn-2',note_list)
   note_string = ' '.join(note_list)
   file_content=(
                 lily_partials.version
@@ -57,15 +54,16 @@ async def create_lily(loop,note_list,png_path):
 
   with open('output_sheets/lily_output.ly', 'w') as f:
       f.write(file_content)
-  png_name=png_path.split('.')[0]
-  cmd=['lilypond', '--png', f'--output={png_name}','output_sheets/lily_output.ly']
+  orign_png_path='output_sheets/orign.png'
+  orign_png_name=orign_png_path.split('.')[0]
+  cmd=['lilypond', '--png', f'--output={orign_png_name}','output_sheets/lily_output.ly']
   try:
     #subprocess.run(['lilypond', '--png', f'--output={png_name}','output_sheets/lily_output.ly'])
     await run_cmd(loop,cmd)
   except subprocess.CalledProcessError as e:
     print("Failed to run lilypond command:", e)
     
-  png=process_note_img.turn_white_to_transparent(png_path)
+  png=process_note_img.turn_white_to_transparent(orign_png_path)
   if png is not None:
     cv2.imwrite(png_path, png)
 

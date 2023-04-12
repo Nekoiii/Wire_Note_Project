@@ -203,6 +203,8 @@ def keyboard_event():
           
         elif key in keys_map.keys():       #按下琴键 
           note_name=keys_map[key]['note_name']
+          lily_notes.append(keys_map[key]['lily_note'])
+          print('nnnnnnn-1',lily_notes)
           
           #添加音符,并重新生成png图片
           #add_note_music21_async_threadsafe(note_name)#这个是利用music21生成曲谱的方法
@@ -217,8 +219,6 @@ def keyboard_event():
             #asyncio.create_task(play_audio_async_threadsafe(fileName,key))
             
           #绘制
-          lily_notes.append(keys_map[key]['lily_note'])
-          print('nnnnnnn-1',lily_notes)
           redraw_surface(lily_notes)
   
         
