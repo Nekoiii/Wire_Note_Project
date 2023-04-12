@@ -13,6 +13,7 @@ def turn_white_to_transparent(png_path,threshold=250):
     #print('turn_white_to_transparent----')
     img= cv2.imread(png_path, cv2.IMREAD_UNCHANGED)
 
+
     if len(img.shape) == 2:
       img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGBA)
     elif img.shape[2] == 3:

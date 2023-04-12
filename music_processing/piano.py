@@ -70,7 +70,6 @@ def play_audio(path,key):
  
 def play_audio_async_threadsafe(file_name,key):
     threading.Thread(target=play_audio, args=(file_name, key)).start()
-    #await loop.run_in_executor(None, play_audio, file_name, key)
     
     
 #用 music21 生成五线谱
@@ -84,16 +83,18 @@ def add_note_music21_async_threadsafe(note_name):
 
 #用 lilypond 生成五线谱
 def add_note_lily_and_reload(lily_notes):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     print('asssss-00')
     #await draw_notes_with_lily.create_lily(lily_notes,png_path)
-    asyncio.run_coroutine_threadsafe(
-      draw_notes_with_lily.create_lily(lily_notes,png_path),
-      loop
-    ).result()
+    #asyncio.run_coroutine_threadsafe(draw_notes_with_lily.create_lily(lily_notes,png_path), loop)
+    loop.run_until_complete(asyncio.gather(draw_notes_with_lily.create_lily(lily_notes,png_path)))
+    
+    
     print('asssss-3')
     reload_img()
     redraw_surface(lily_notes)
-async def add_note_lily_async_threadsafe(lily_notes):
+def add_note_lily_async_threadsafe(lily_notes):
     threading.Thread(target=add_note_lily_and_reload, args=(lily_notes,)).start()
     #task = asyncio.create_task(add_note_lily_and_reload(lily_notes))
     #await asyncio.gather(task)
@@ -125,7 +126,7 @@ def redraw_scroll():
   pygame.display.update()
 
 
-async def redraw_surface(lily_notes):
+def redraw_surface(lily_notes):
   global scroll_surface,screen,max_y
   # 清空窗口并绘制背景色(不然图片移动时不会恢复底色)
   screen.fill(background_color)
@@ -171,7 +172,7 @@ async def redraw_surface(lily_notes):
 
 
   
-async def keyboard_event():
+def keyboard_event():
   global scroll_position,lily_notes
   scroll_step=100  #上下滚动窗口时每次滚多少
   
@@ -208,7 +209,7 @@ async def keyboard_event():
           
           #添加音符,并重新生成png图片
           #add_note_music21_async_threadsafe(note_name)#这个是利用music21生成曲谱的方法
-          await add_note_lily_async_threadsafe(lily_notes)
+          add_note_lily_async_threadsafe(lily_notes)
           
           
           #播放音频
@@ -220,7 +221,7 @@ async def keyboard_event():
             
           #绘制
           lily_notes.append(keys_map[key]['lily_note'])
-          await redraw_surface(lily_notes)
+          redraw_surface(lily_notes)
   
         
           
@@ -232,14 +233,15 @@ async def main():
     '''
     loop = asyncio.get_event_loop()
     loop.create_task(main())
-    u
+
     loop.run_until_complete(main())
     loop.close()'''
-    asyncio.create_task(keyboard_event())
+    #asyncio.create_task(keyboard_event())
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    asyncio.run(main())
+    #loop = asyncio.get_event_loop()
+    #asyncio.run(main())
+    keyboard_event()
 
 
 
