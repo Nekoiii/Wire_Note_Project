@@ -104,7 +104,12 @@ def add_note_lily_async_threadsafe(lily_notes):
 def reload_img():
   print('asssss-4')
   global max_y
-  image = pygame.image.load(png_path)
+  try:
+    image = pygame.image.load(png_path)
+  except pygame.error as e:
+    print("Unable to load image:", png_path)
+    print(e)
+    return None, None, None
   
   scaled_w=0.9*screen_w; #缩放图片
   img_w=image.get_width();
@@ -133,6 +138,8 @@ def redraw_surface(lily_notes):
   scroll_surface.fill(background_color)
 
   image,scaled_w,scaled_h= reload_img()
+  if image is None:
+    return
   #scroll_surface = pygame.Surface((screen_w, max_y))
 
   #输出字

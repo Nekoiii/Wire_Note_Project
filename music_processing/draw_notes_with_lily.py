@@ -54,11 +54,16 @@ async def create_lily(note_list,png_path):
   #subprocess.run(['lilypond', '-fpdf', 'lily_output.ly'], cwd='output_sheets')
   png_name=png_path.split('.')[0]
   print('asssss-0')
-  subprocess.run(['lilypond', '--png', f'--output={png_name}','output_sheets/lily_output.ly'])
+  try:
+    subprocess.run(['lilypond', '--png', f'--output={png_name}','output_sheets/lily_output.ly'])
+  except subprocess.CalledProcessError as e:
+    print("Failed to run lilypond command:", e)
+  
   print('asssss-1')
   png=process_note_img.turn_white_to_transparent(png_path)
   print('asssss-2')
-  cv2.imwrite(png_path, png)
+  if png is not None:
+    cv2.imwrite(png_path, png)
 
 
 
