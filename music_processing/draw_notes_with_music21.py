@@ -15,11 +15,9 @@ from process_note_img import turn_white_to_transparent
 
 import nest_asyncio
 nest_asyncio.apply()
-os.environ["PATH"] += os.pathsep + '/usr/local/opt/lilypond/bin'
-#不加gs的话lilypond把ly转pdf时会报错！
-os.environ["PATH"] += os.pathsep + '/usr/local/opt/gs/bin'
-os.environ["lilypondPath"] = "/usr/local/opt/lilypond/bin"
-os.environ['LILYPOND'] = '/usr/local/opt/lilypond/bin'
+
+#os.environ["lilypondPath"] = "/usr/local/opt/lilypond/bin"
+#os.environ['LILYPOND'] = '/usr/local/opt/lilypond/bin'
 mscore_path = "/Applications/MuseScore 4.app/Contents/MacOS/mscore"
 
 

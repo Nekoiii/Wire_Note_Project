@@ -12,13 +12,16 @@ https://lilypond.org/doc/v2.21/Documentation/notation/visibility-of-objects.ja.h
 颜色表:
 部件名字:https://lilypond.org/doc/v2.22/Documentation/learning/objects-and-interfaces.ja.html
 
-
 ly中注释:%
 
-r'''
-'''
 """
-import os
+'''
+lilypond要放进环境变量，或者在代码中指定
+os.environ["PATH"] += os.pathsep + '/usr/local/opt/lilypond/bin'
+os.environ["PATH"] += os.pathsep + '/usr/local/opt/gs/bin'
+如要用lilypond转换文件的功能,要把export PATH="/usr/local/opt/gs/bin:$PATH"也加进环境变量
+'''
+
 import cv2
 import asyncio
 import subprocess
@@ -26,18 +29,17 @@ import constants.lily_partials as lily_partials
 import process_note_img
 
 
-current_directory = os.getcwd()
-print(current_directory)
-
-os.environ["PATH"] += os.pathsep + '/usr/local/opt/lilypond/bin'
-os.environ["PATH"] += os.pathsep + '/usr/local/opt/gs/bin'
-
-
 ly_path='output_sheets/lily_output.ly'
+origin_png_path='output_sheets/origin.png'  #转换成白色前的原曲谱
+origin_png_name=origin_png_path.split('.')[0]
 
     
-async def run_cmd(loop,cmd):
-  subprocess.run(cmd, check=True)
+async def run_cmd(loop,cmd):  #执行命令栏命令
+  try:
+    subprocess.run(cmd, check=True)
+  except subprocess.CalledProcessError as e:
+    print("Failed to run command:", e)
+
     
 async def create_lily(loop,note_list,png_path):
   note_string = ' '.join(note_list)
@@ -51,19 +53,13 @@ async def create_lily(loop,note_list,png_path):
                 +lily_partials.settings
                 +lily_partials.closing_brace
                 )
-
-  with open('output_sheets/lily_output.ly', 'w') as f:
+  with open('output_sheets/lily_output.ly', 'w') as f: #创建ly文件
       f.write(file_content)
-  orign_png_path='output_sheets/orign.png'
-  orign_png_name=orign_png_path.split('.')[0]
-  cmd=['lilypond', '--png', f'--output={orign_png_name}','output_sheets/lily_output.ly']
-  try:
-    #subprocess.run(['lilypond', '--png', f'--output={png_name}','output_sheets/lily_output.ly'])
-    await run_cmd(loop,cmd)
-  except subprocess.CalledProcessError as e:
-    print("Failed to run lilypond command:", e)
-    
-  png=process_note_img.turn_white_to_transparent(orign_png_path)
+      
+  cmd=['lilypond', '--png', f'--output={origin_png_name}','output_sheets/lily_output.ly']
+  await run_cmd(loop,cmd)
+
+  png=process_note_img.turn_white_to_transparent(origin_png_path)
   if png is not None:
     cv2.imwrite(png_path, png)
 
