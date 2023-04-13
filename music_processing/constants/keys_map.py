@@ -8,22 +8,11 @@ import pygame
 
 #按键映射表
 keys_map = {
-    pygame.K_t: 'C4',
-    pygame.K_y: 'D4',
-    pygame.K_u: 'E4',
-    pygame.K_i: 'F4',
-    pygame.K_o: 'G4',
-    pygame.K_p: 'A4',
-    pygame.K_LEFTBRACKET: 'B4',
-    pygame.K_RIGHTBRACKET: 'C5',
-    pygame.K_6: 'C#4',
-    pygame.K_7: 'D#4',
-    pygame.K_9: 'F#4',
-    pygame.K_0: 'G#4',
-    pygame.K_MINUS: 'A#4'
-}
-
-keys_map = {
+    pygame.K_TAB: {'note_name': 'E3', 'lily_note': 'e,'},
+    pygame.K_q: {'note_name': 'F3', 'lily_note': 'f,'},
+    pygame.K_w: {'note_name': 'G3', 'lily_note': 'g,'},
+    pygame.K_e: {'note_name': 'A3', 'lily_note': 'a,'},
+    pygame.K_r: {'note_name': 'B3', 'lily_note': 'b,'},
     pygame.K_t: {'note_name': 'C4', 'lily_note': 'c'},
     pygame.K_y: {'note_name': 'D4', 'lily_note': 'd'},
     pygame.K_u: {'note_name': 'E4', 'lily_note': 'e'},
