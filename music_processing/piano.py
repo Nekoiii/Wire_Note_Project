@@ -200,6 +200,11 @@ def keyboard_event():
             if scroll_position > (max_y - screen_h):
                 scroll_position = max_y - screen_h
             redraw_scroll()
+        elif event.key ==pygame.K_LEFT:  #←键删除一个音
+          if lily_notes:   #可以直接用if来判断列表是否为空,不用加len()
+            lily_notes.pop()
+            add_note_lily_async_threadsafe(lily_notes)
+            redraw_surface(lily_notes)
           
         elif key in keys_map.keys():       #按下琴键 
           note_name=keys_map[key]['note_name']
