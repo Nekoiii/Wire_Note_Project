@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-
+键盘弹琴入口文件
 """
 import os
 import sys
@@ -23,8 +23,13 @@ nest_asyncio.apply()
 才能用, 不然会报错RuntimeError: This event loop is already running！！！！
 '''
 
+
+png_path="output_sheets/output-1.png"  #最终显示的png
+
+
+
+
 lily_notes=[] #写入ly文件的音符们
-png_path="output_sheets/output-1.png"
 background_color=(50, 0, 0)
 
 
@@ -114,8 +119,6 @@ def reload_img():
 def redraw_scroll():
   screen.fill(background_color)
 
-  #print("scroll_surface 高度为：", scroll_surface.get_height())
-  #return
   scroll_rect = pygame.Rect(0, scroll_position, screen_w, screen_h)
   screen.blit(scroll_surface.subsurface(scroll_rect), (0, 0))
   pygame.display.update()
@@ -130,7 +133,6 @@ def redraw_surface(lily_notes):
   image,scaled_w,scaled_h= reload_img()
   if image is None:
     return
-  #scroll_surface = pygame.Surface((screen_w, max_y))
 
   #输出字
   items_per_line = 10   # 设置每行显示的元素个数
@@ -221,7 +223,6 @@ def keyboard_event():
           fileName = basic_path+str(note_name)+".wav"
           if os.path.exists(fileName):            
             play_audio_async_threadsafe(fileName,key)
-            #asyncio.create_task(play_audio_async_threadsafe(fileName,key))
             
           #绘制
           redraw_surface(lily_notes)
@@ -232,18 +233,8 @@ def keyboard_event():
         break
         #print('KEYUP--')
 
-async def main():
-    '''
-    loop = asyncio.get_event_loop()
-    loop.create_task(main())
-
-    loop.run_until_complete(main())
-    loop.close()'''
-    #asyncio.create_task(keyboard_event())
 
 if __name__ == "__main__":
-    #loop = asyncio.get_event_loop()
-    #asyncio.run(main())
     keyboard_event()
 
 

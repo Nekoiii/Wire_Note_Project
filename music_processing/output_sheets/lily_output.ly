@@ -5,7 +5,7 @@
   \new Staff {
 
 \fixed c'{
-e e
+c c
 }
 
 }
