@@ -89,16 +89,6 @@ def save_note():
     #参数设置文档:https://lilypond.org/doc/v2.25/Documentation/snippets/editorial-annotations_003a-_30b0_30ea_30c3_30c9_7dda_003a-_30ea_30ba_30e0_306e_5f37_8abf_3068_97f3_7b26_306e_540c_671f
     #https://www.google.com/search?q=site%3Alilypond.org+%5Crelative&sxsrf=APwXEdcdQE7HPa2MyEzZy_3G9waN-y3hEw%3A1681026704587&ei=kG4yZJ6vI8ulhwPcoobwCw&ved=0ahUKEwiet9a8qJz-AhXL0mEKHVyRAb4Q4dUDCA8&uact=5&oq=site%3Alilypond.org+%5Crelative&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQA0oECEEYAVDxAViWGWD4G2gCcAB4AIABZYgBuwGSAQMxLjGYAQCgAQKgAQHAAQE&sclient=gws-wiz-serp
     '''
-    隐藏谱线这个设置没用或者是我写的地方不对！！！：\override Staff.StaffSymbol.line-count = #0
-    
-    要用：\hide Staff.StaffSymbol  （这个只藏线）
-    或者：
-    \Staff   （*注意是在\Staff而不是\Score下！！！！）
-    \remove Staff_symbol_engraver   （这个会把小节分隔号也藏了）
-    啊啊啊啊啊
-    隐藏小节分隔号：\hide Staff.BarLine
-    '''
-    '''
     如果是musicxml转ly生成的lily文件,可以在里面\layout {\context {}}里改设置
     '''
     

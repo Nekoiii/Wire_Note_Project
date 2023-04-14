@@ -39,6 +39,16 @@ notes_suffix=r'''
 
 # *lily居然可以直接变颜色！！！！
 # 但找了半天发现变不了background的color,只能额外画个有颜色的盒子叠在底下。所以没办法直接生成透明背景曲谱了qvq
+'''
+隐藏谱线这个设置没用或者是我写的地方不对！！！：\override Staff.StaffSymbol.line-count = #0
+
+要用：\hide Staff.StaffSymbol  （这个只藏线）
+或者：
+\Staff   （*注意是在\Staff而不是\Score下！！！！）
+\remove Staff_symbol_engraver   （这个会把小节分隔号也藏了）
+
+隐藏小节分隔号：\hide Staff.BarLine
+'''
 settings = r'''
 \layout {
 \hide Staff.StaffSymbol 

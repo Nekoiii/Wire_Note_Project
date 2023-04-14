@@ -15,18 +15,19 @@ https://lilypond.org/doc/v2.21/Documentation/notation/visibility-of-objects.ja.h
 ly中注释:%
 
 """
-'''
-lilypond要放进环境变量，或者在代码中指定
-os.environ["PATH"] += os.pathsep + '/usr/local/opt/lilypond/bin'
-os.environ["PATH"] += os.pathsep + '/usr/local/opt/gs/bin'
-如要用lilypond转换文件的功能,要把export PATH="/usr/local/opt/gs/bin:$PATH"也加进环境变量
-'''
-
+import os
 import cv2
 import asyncio
 import subprocess
 import constants.lily_partials as lily_partials
 import process_note_img
+
+'''
+lilypond要放进环境变量，或者在代码中指定
+如要用lilypond转换文件的功能,要把export PATH="/usr/local/opt/gs/bin:$PATH"也加进环境变量
+'''
+os.environ["PATH"] += os.pathsep + '/usr/local/opt/lilypond/bin'
+os.environ["PATH"] += os.pathsep + '/usr/local/opt/gs/bin'
 
 
 ly_path='output_sheets/lily_output.ly'

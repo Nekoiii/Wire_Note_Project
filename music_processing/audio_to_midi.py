@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-音频转midi
+音频转midi  *problem：失败了！music21的库不支持直接识别wav、mp3转midi！
+                    只有网页上才能识别-转换
 """
 
 import os

@@ -36,9 +36,9 @@ p = pyaudio.PyAudio()
 
 #设置窗口
 pygame.display.set_caption("Piano")
-font = pygame.font.Font(None, 36)
-screen_w=800;
-screen_h=600;
+font = pygame.font.Font(None, 46)
+screen_w=1200;
+screen_h=900;
 screen = pygame.display.set_mode((screen_w,screen_h))
 pygame.display.update() 
 x0,y0=50,50; #绘制时的初始坐标
@@ -48,10 +48,10 @@ scroll_surface = pygame.Surface((screen_w, max_y))# 在另一个更大的 Surfac
 
 #播放音频
 def play_audio(path,key):
+    global p
     CHUNK = 1024    #CHUNK指定每次从音频流中读取和处理的音频样本数。它是一个缓冲区的大小，用于控制每次处理的数据量。一般可用 1024 或 2048 。值太小，播放音频将会更加实时，但可能会导致音频出现卡顿或者声音质量差的问题。值太大，音频播放将更加平滑，但会增加延迟，可能会导致应用程序的响应性下降。
     wf = wave.open(path, 'rb')
     data = wf.readframes(CHUNK)
-    p = pyaudio.PyAudio()
     
     FORMAT = p.get_format_from_width(wf.getsampwidth())# 获得语音文件的各个参数
     CHANNELS = wf.getnchannels()
@@ -80,7 +80,8 @@ def add_note_music21_and_reload(note_name):
 def add_note_lily_and_reload(lily_notes):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(asyncio.gather(draw_notes_with_lily.create_lily(loop,lily_notes,png_path)))
+    loop.run_until_complete(asyncio.gather(draw_notes_with_lily.create_lily
+                                           (loop,lily_notes,png_path)))
     reload_img()
     redraw_surface(lily_notes)
     loop.close()
@@ -94,7 +95,7 @@ def reload_img():  #重新读取图片
     print(f"Unable to load image: {png_path}. Error: {e}")
     return None, None, None
 
-  scaled_w = 0.9 * screen_w   #缩放图片
+  scaled_w = 1 * screen_w   #缩放图片
   scaled_h = image.get_height() * scaled_w / image.get_width()  
   return(image,scaled_w,scaled_h)
 
@@ -122,7 +123,8 @@ def redraw_surface(lily_notes):  #改变了音符后的重新绘制
   y=y0
   # 将列表分成每10个元素一组, 再把组内每项用' - '分隔
   #*注: pygame默认字体无法识别换行符\n,所以只能一行行计算坐标显示！
-  grouped_items = [lily_notes[i:i+items_per_line] for i in range(0, len(lily_notes), items_per_line)]
+  grouped_items = [lily_notes[i:i+items_per_line] for i 
+                   in range(0, len(lily_notes), items_per_line)]
   grouped_items = ['  -  '.join(group) for group in grouped_items]
   text_surfaces = []  #字符的显示surface
   for item in grouped_items:
