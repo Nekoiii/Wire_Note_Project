@@ -23,14 +23,14 @@ wire_detection/detect_wires_1.py
 そして hough を使って、空の部分から直線を検出。  
 最後は一枚の事前に用意した音符のpng画像を、検出された直線の真ん中に置く。　  
 <br>
-![img-1_output_1](./素材/img-1_output_1.png)  
+![img-1_output_1](./素材/readme-imgs/img-1_output_1.png)  
 <br>
 でもパラメータの最適化についてまだ拙いので、効果は良くないです。  
 （＊パラメータの調整には関数に対して深い理解が必要であり、それも私の不足している部分です）  
 <br>
 それに背景の色がバラバラになると、空の部分を分別できなくなる。
 <br>
-![img-13_output_1](./素材/img-13_output_1.png)  
+![img-13_output_1](./素材/readme-imgs/img-13_output_1.png)  
 <br> 
 <br>
 ・音符の画像の生成：  
@@ -43,11 +43,11 @@ music_processing/piano.py  　
 <br>
 キーボードからの入力：  
 <br>
-![screenshot-1](./素材/screenshot-1.png) 
+![screenshot-1](./素材/readme-imgs/screenshot-1.png) 
 <br>
 出力：  
 <br>
-![screenshot-2](./素材/screenshot-2.png) 
+![screenshot-2](./素材/readme-imgs/screenshot-2.png) 
 <br>  
 <br>
 そして今はまだここで生成したpngを「架線識別」のところに連携していないままです。  
