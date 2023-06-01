@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import time
 import random
 
-keyword='电线杆'
+
 
 def get_images_from_baidu(keyword, page_num, save_dir):
   header = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'}
@@ -115,9 +115,10 @@ def get_images_from_baidu(keyword, page_num, save_dir):
 
 
 if __name__ == '__main__':
-    keyword = '电线杆'
-    save_dir = './imgs/powerLines'
-    page_num = 30
+    #keyword = '电线杆'
+    keyword='风景'
+    save_dir = './imgs/views'
+    page_num = 10
     get_images_from_baidu(keyword, page_num, save_dir)
     print('Got images successfully.')
 
