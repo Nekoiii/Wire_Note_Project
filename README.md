@@ -39,9 +39,17 @@ wire_detection/detect_wires_1.py
 そのため、まずはキーボードの入力を音符に変換し、PNG画像を生成することを試した：  
 music_processing/piano.py  　  
 （まだまだ青い部分が多いです：例えば速弾きすると、システムがクラッシュしてしまうとかw） 
+<br>
+<br>
+キーボードからの入力：  
+<br>
 ![screenshot-1](./素材/screenshot-1.png) 
+<br>
+出力：  
+<br>
 ![screenshot-2](./素材/screenshot-2.png) 
 <br>  
+<br>
 そして今はまだここで生成したpngを「架線識別」のところに連携していないままです。  
 
 
