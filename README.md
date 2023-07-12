@@ -1,4 +1,4 @@
-# musicalNotation
+# Wire Note Project
 
 <br> 🎼 ♪ ♫ ♩ ♬ ♭ ♮ ♯
 
