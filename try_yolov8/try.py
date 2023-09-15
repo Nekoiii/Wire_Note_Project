@@ -16,7 +16,7 @@ print(os.getcwd())
 
 IF_SHOW_BOXES = False
 
-# '♪', '♩', '♫', '♬', '♭', '♮', '♯', '𝄪', '𝄫''''𝄞', ',', '🎶, ', '🎶🎶, '🎶'
+# '♪', '♩', '♫', '♬', '♭', '♮', '♯', '𝄪', '𝄫''''𝄞', ',', '🎶,,  '🎶, ''🎶, '🎶🎶, '🎶'
 symbols_weights = [
     {'symbol': '♪', 'weight': 40},
     {'symbol': '♩', 'weight': 20},
@@ -43,7 +43,13 @@ weights = [w/total_weight for w in weights_int]
 # model = YOLO('yolov8m.pt')
 model = YOLO(os.path.join(base_path, 'best.pt'))
 
+
 cap = cv2.VideoCapture(video_path)
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+fps = int(cap.get(cv2.CAP_PROP_FPS))
+frame_size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+out = cv2.VideoWriter(os.path.join(base_path, 'output_video.mp4'), fourcc, fps, frame_size)
+
 while cap.isOpened():
   ret, frame = cap.read()
   if not ret:
@@ -90,10 +96,12 @@ while cap.isOpened():
         draw.text((x1, y1 - 5), class_name, font=font, fill=colors[class_name])
 
   frame = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+  out.write(frame)
   cv2.imshow('Movie', frame)
 
   if cv2.waitKey(1) == ord('q'):
     break
 
 cap.release()
+out.release()
 cv2.destroyAllWindows()
