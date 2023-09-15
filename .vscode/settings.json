@@ -3,7 +3,7 @@
   "prettier.printWidth": 800,
   "C_Cpp.errorSquiggles": "Enabled",
   "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
+    "editor.defaultFormatter": "ms-python.autopep8"
   },
   "python.formatting.provider": "none"
 }
