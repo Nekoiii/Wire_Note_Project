@@ -1,0 +1,10 @@
+# dataset root dir
+path: /Users/a/code/Wire_Note_Project/ttpla_dataset/data_original_size_v1/dataset_small
+
+train: images/train
+val: images/val
+test: images/test
+
+# Classes
+nc: 2
+names: ["cable", "tower_wooden"]
