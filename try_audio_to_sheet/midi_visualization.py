@@ -114,3 +114,11 @@ def show():
     pygame.display.flip()
 
   pygame.quit()
+
+
+def main():
+  return
+
+
+if __name__ == "__main__":
+  main()

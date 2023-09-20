@@ -20,7 +20,7 @@ import cv2
 import asyncio
 import subprocess
 import constants.lily_partials as lily_partials
-import process_note_img
+from process_note_img import turn_white_to_transparent
 
 '''
 lilypond要放进环境变量，或者在代码中指定
@@ -30,43 +30,44 @@ os.environ["PATH"] += os.pathsep + '/usr/local/opt/lilypond/bin'
 os.environ["PATH"] += os.pathsep + '/usr/local/opt/gs/bin'
 
 
-ly_path='output_sheets/lily_output.ly'
-origin_png_path='output_sheets/origin.png'  #转换成白色前的原曲谱
-origin_png_name=origin_png_path.split('.')[0]
+ly_path = 'output_sheets/lily_output.ly'
+origin_png_path = 'output_sheets/origin.png'  # origin sheet (before converting the notes' color to white)
+origin_png_name = origin_png_path.split('.')[0]
 
-    
-async def run_cmd(loop,cmd):  #执行命令栏命令
+
+async def run_cmd(loop, cmd):  # Execute a command-line command
   try:
     subprocess.run(cmd, check=True)
   except subprocess.CalledProcessError as e:
     print("Failed to run command:", e)
 
-    
-async def create_lily(loop,note_list,png_path):
-  note_string = ' '.join(note_list)
-  file_content=(
-                lily_partials.version
-                +lily_partials.beginning
-                +lily_partials.notes_prefix
-                +note_string
-                +lily_partials.notes_suffix
-                +lily_partials.closing_brace
-                +lily_partials.settings
-                +lily_partials.closing_brace
-                )
-  with open('output_sheets/lily_output.ly', 'w') as f: #创建ly文件
-      f.write(file_content)
-      
-  cmd=['lilypond', '--png', f'--output={origin_png_name}','output_sheets/lily_output.ly']
-  await run_cmd(loop,cmd)
 
-  png=process_note_img.turn_white_to_transparent(origin_png_path)
+async def create_lily(loop, note_list, png_path):
+  note_string = ' '.join(note_list)
+  file_content = (
+      lily_partials.version
+      + lily_partials.beginning
+      + lily_partials.notes_prefix
+      + note_string
+      + lily_partials.notes_suffix
+      + lily_partials.closing_brace
+      + lily_partials.settings
+      + lily_partials.closing_brace
+  )
+  with open('output_sheets/lily_output.ly', 'w') as f:  # Create .ly file
+    f.write(file_content)
+
+  cmd = ['lilypond', '--png', f'--output={origin_png_name}', 'output_sheets/lily_output.ly']
+  await run_cmd(loop, cmd)
+
+  png = turn_white_to_transparent(origin_png_path)
   if png is not None:
     cv2.imwrite(png_path, png)
 
 
+def main():
+  return
 
 
-
-
-
+if __name__ == "__main__":
+  main()
