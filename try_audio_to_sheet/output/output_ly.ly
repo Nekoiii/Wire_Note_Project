@@ -4,7 +4,7 @@
 
 \header {
     encodingsoftware =  "MuseScore 4.1.1"
-    encodingdate =  "2023-09-20"
+    encodingdate =  "2023-09-21"
     }
 
 \layout {\hide Staff.StaffSymbol 
@@ -13,8 +13,7 @@
 Staff.BarLine=#white
 Score.currentBarNumber=#white
 %Staff=#white
-%Score=#white
-StaffGroup.systemStartDelimiter=#white}
+%Score=#white}
     }
 PartPOneVoiceOne =  \relative bes {
     \clef "bass" \numericTimeSignature\time 4/4 \key bes \major | % 1

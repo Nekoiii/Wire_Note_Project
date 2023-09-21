@@ -2,6 +2,8 @@ import os
 import sys
 import subprocess
 import re
+import cv2
+
 
 current_file_path = os.path.abspath(__file__)
 current_dir = os.path.dirname(current_file_path)
@@ -11,6 +13,7 @@ sys.path.append(os.path.join(parent_dir, 'music_processing'))
 print('sys.path--  ',sys.path)
 
 import constants.lily_partials as lily_partials
+from process_note_img import turn_white_to_transparent
 
 base_path = '/Users/a/code/Wire_Note_Project/try_audio_to_sheet'
 midi_file_path = os.path.join(base_path, 'test_audio-1_basic_pitch.mid')
@@ -19,8 +22,9 @@ bg_path = os.path.join(base_path, 'bg.jpg')
 output_folder = os.path.join(base_path, 'output')
 output_xml = os.path.join(output_folder, 'output_xml.xml')
 output_ly = os.path.join(output_folder, 'output_ly.ly')
-output_png = os.path.join(output_folder, 'output_png.png')
+output_png_folder = os.path.join(output_folder, 'output_png_folder')
 os.makedirs(output_folder, exist_ok=True)
+os.makedirs(output_png_folder, exist_ok=True)
 
 LILYPOND_PATH = '/opt/homebrew/bin/lilypond'
 MUSESCORE_PATH = '/Applications/MuseScore 4.app/Contents/MacOS/mscore'
@@ -65,7 +69,18 @@ def main():
   midi_to_musicxml(midi_file_path, output_xml)
   musicxml_to_ly(output_xml, output_ly)
   add_settings_to_ly_file(output_ly,lily_partials.settings)
-  ly_to_png(output_ly, output_png)
+  ly_to_png(output_ly, output_png_folder)
+  
+  for _dirpath, _dirnames, filenames in os.walk(output_png_folder):
+    # print('dddd----',dirpath,'----', dirnames,'----', filenames)
+    for filename in filenames:
+      full_path = os.path.join(output_png_folder, filename)
+      # print('full_path---',full_path)
+      transparent_png = turn_white_to_transparent(full_path)
+      if transparent_png is not None:
+        
+        cv2.imwrite(full_path, transparent_png)
+
   return
 
 
