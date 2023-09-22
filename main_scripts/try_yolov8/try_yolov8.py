@@ -11,9 +11,15 @@ from PIL import Image, ImageDraw, ImageFont
 import seaborn as sns
 
 from symbols_data import symbols_weights
-from config import CLASSES
 
-from ..draw_somethings import draw_box_and_label
+import sys
+print('xxxx-1',sys.path)
+sys.path.append(sys.path[0]+"/../")
+sys.path.append(sys.path[0]+"/../../")
+print('xxxx-2',sys.path)
+from config import CLASSES,CLASSES_COLORS
+
+from draw_somethings import draw_box_and_label
 
 
 base_path = '/Users/a/code/Wire_Note_Project/try_yolov8/'
@@ -73,9 +79,6 @@ def main():
     boxes = np.array(result.boxes.xyxy.cpu(), dtype='int')
     classes = np.array(result.boxes.cls.cpu(), dtype='int')
 
-    # Define different colors for each class
-    colors = [(int(r*255), int(g*255), int(b*255)) for r, g, b in
-              sns.color_palette('pastel', len(CLASSES))]
 
     pil_img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
     draw = ImageDraw.Draw(pil_img)
@@ -85,7 +88,7 @@ def main():
       class_name = result.names[cls]
 
       if IF_SHOW_BOXES:
-        draw_box_and_label(draw, class_name, colors, x1, y1, x2, y2)
+        draw_box_and_label(draw, class_name, CLASSES_COLORS, x1, y1, x2, y2)
 
       # Draw symbols for class 'cable'
       if class_name == 'cable':

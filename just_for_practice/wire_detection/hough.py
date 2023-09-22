@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 import math
-import draw_somthing
+import main_scripts.draw_somethings.draw_something as draw_something
 
 def hough_line(img,gray,threshold=False,IF_SHOW=True):  
   
@@ -106,6 +106,6 @@ if __name__ == '__main__':
   gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
   lines=hough_line(img,gray)
   #hough_circle(img,gray)  #*本来想试试HoughCircles找有点弧度的电线的但效果不太好而且巨慢
-  draw_somthing.draw_lines(img,lines)
+  draw_something.draw_lines(img,lines)
 
 

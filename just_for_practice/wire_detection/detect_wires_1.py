@@ -10,7 +10,7 @@ import math
 import glob
 
 import hough  
-import draw_somthing
+import main_scripts.draw_somethings.draw_something as draw_something
 import watershed
 
         
@@ -61,7 +61,7 @@ def detect_wires_1(img_name,IF_SHOW=True):
   else:
       threshold = 100
   lines=hough.hough_line(img,img_gray,threshold,IF_SHOW)
-  img_with_lines=draw_somthing.draw_lines(img,lines,IF_SHOW) 
+  img_with_lines=draw_something.draw_lines(img,lines,IF_SHOW) 
   
   
   #在所有检测出的直线平均坐标、平均角度放上音符
@@ -125,7 +125,7 @@ def detect_wires_1(img_name,IF_SHOW=True):
     sheet=cv2.imread('../test_imgs/sheets/symphony.png', cv2.IMREAD_UNCHANGED)
     assert sheet is not None, "file could not be read, check with os.path.exists()"
     #img_with_sheet=draw_somthing.draw_sheet(img,sheet,avg_x,avg_y,angle,0.75 * avg_len,IF_SHOW) 
-    img_with_sheet=draw_somthing.draw_sheet(img,sheet,avg_x,avg_y,angle,-1,IF_SHOW) 
+    img_with_sheet=draw_something.draw_sheet(img,sheet,avg_x,avg_y,angle,-1,IF_SHOW) 
 
     
     output_img=np.vstack((

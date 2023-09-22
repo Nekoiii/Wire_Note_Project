@@ -11,7 +11,6 @@ import seaborn as sns
 
 import sys
 sys.path.append('/Users/a/code/Wire_Note_Project')
-
 from config import BASE_PATH,MIDI_PATH,BG_PATH,BGM_PATH
 
 # BASE_PATH = '/Users/a/code/Wire_Note_Project/try_audio_to_sheet'
