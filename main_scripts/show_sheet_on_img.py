@@ -10,10 +10,9 @@ from PIL import Image, ImageDraw, ImageFont
 import seaborn as sns
 
 import sys
-BASE_PATH='/Users/a/code/Wire_Note_Project'
-sys.path.append(BASE_PATH)
+sys.path.append('/Users/a/code/Wire_Note_Project')
 
-from config import MIDI_PATH
+from config import BASE_PATH,MIDI_PATH,BG_PATH,BGM_PATH
 
 mid = MidiFile(MIDI_PATH)
 print({MIDI_PATH})

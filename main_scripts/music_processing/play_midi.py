@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-播放midi
+Play midi file
 """
+import sys
+sys.path.append('/Users/a/code/Wire_Note_Project')
 
+from config import MIDI_PATH
 import pygame
 
-# 初始化 Pygame
-pygame.init()
 
-# 设置音频设备
-pygame.mixer.init()
+def play_midi(midi_path):
+  pygame.init()
+  pygame.mixer.init()
+  pygame.mixer.music.load(midi_path)
+  pygame.mixer.music.play()
 
-# 加载 MIDI 文件
-pygame.mixer.music.load('your_file.mid')
+  while pygame.mixer.music.get_busy():
+      pygame.time.Clock().tick(10)
 
-# 播放 MIDI 文件
-pygame.mixer.music.play()
+  pygame.quit()
 
-# 等待音乐播放完毕
-while pygame.mixer.music.get_busy():
-    pygame.time.Clock().tick(10)
 
-# 关闭 Pygame
-pygame.quit()
+if __name__ == "__main__":
+  play_midi(MIDI_PATH)

@@ -9,10 +9,15 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 import seaborn as sns
 
-base_path = '/Users/a/code/Wire_Note_Project/try_audio_to_sheet'
-midi_file_path = os.path.join(base_path, 'test_audio-1_basic_pitch.mid')
-music_path = os.path.join(base_path, 'test_audio-2.mp3')
-bg_path = os.path.join(base_path, 'bg.jpg')
+import sys
+sys.path.append('/Users/a/code/Wire_Note_Project')
+
+from config import BASE_PATH,MIDI_PATH,BG_PATH,BGM_PATH
+
+# BASE_PATH = '/Users/a/code/Wire_Note_Project/try_audio_to_sheet'
+# MIDI_PATH = os.path.join(BASE_PATH, 'test_audio-1_basic_pitch.mid')
+# BGM_PATH = os.path.join(BASE_PATH, 'test_audio-2.mp3')
+# BG_PATH = os.path.join(BASE_PATH, 'bg.jpg')
 
 note_to_char = {
     21: 'A0', 22: 'Bb0', 23: 'B0',
@@ -27,7 +32,7 @@ note_to_char = {
 }
 
 
-mid = MidiFile(midi_file_path)
+mid = MidiFile(MIDI_PATH)
 
 
 def midi_to_chars(mid):
@@ -49,10 +54,10 @@ def midi_to_chars(mid):
 
 
 
-def play_midi(midi_file_path):
+def play_midi(MIDI_PATH):
   pygame.mixer.init()
 
-  pygame.mixer.music.load(midi_file_path)
+  pygame.mixer.music.load(MIDI_PATH)
   pygame.mixer.music.play()
 
   # 由于播放是异步的，我们要等待音乐播放完毕
@@ -65,8 +70,7 @@ def play_midi(midi_file_path):
 
 
 # Show img and notes
-def draw_notes_on_image(bg,bg_width, bg_height, notes, note_to_char):
-  screen = pygame.display.set_mode((bg_width, bg_height))
+def draw_notes_on_image(bg,notes, note_to_char):
   pygame.display.set_caption('Music Visualization')
   font = ImageFont.load_default()
   font_size = 100
@@ -86,24 +90,25 @@ def draw_notes_on_image(bg,bg_width, bg_height, notes, note_to_char):
 
 def main():
   notes = midi_to_chars(mid)
-  bg = Image.open(bg_path)
+  bg = Image.open(BG_PATH)
   bg_width, bg_height = bg.size
   
   
-  play_midi(midi_file_path)
+  play_midi(MIDI_PATH)
   
-  bg_with_notes = draw_notes_on_image(bg,bg_width, bg_height, notes, note_to_char)
+  # Show img with notes
+  screen = pygame.display.set_mode((bg_width, bg_height))
+  pygame.display.set_caption('Music Visualization')
+  
+  bg_with_notes = draw_notes_on_image(bg,notes, note_to_char)
   # Convert PIL Image to Pygame Surface
   bg_pygame = pygame.image.fromstring(bg_with_notes.tobytes(), bg_with_notes.size, bg_with_notes.mode)
 
   # Play music
   pygame.mixer.init()
-  pygame.mixer.music.load(music_path)
+  pygame.mixer.music.load(BGM_PATH)
   pygame.mixer.music.play()
 
-  # Show img with notes
-  screen = pygame.display.set_mode((bg_width, bg_height))
-  pygame.display.set_caption('Music Visualization')
 
   running = True
   while running:
