@@ -47,7 +47,6 @@ def midi_to_chars(mid):
   return notes
 
 
-notes = midi_to_chars(mid)
 
 
 def play_midi(midi_file_path):
@@ -63,35 +62,37 @@ def play_midi(midi_file_path):
   pygame.mixer.quit()
 
 
-play_midi(midi_file_path)
 
 
-def show():
-
-  # Show img and notes
-  bg = Image.open(bg_path)
-  bg_width, bg_height = bg.size
+# Show img and notes
+def draw_notes_on_image(bg,bg_width, bg_height, notes, note_to_char):
   screen = pygame.display.set_mode((bg_width, bg_height))
   pygame.display.set_caption('Music Visualization')
   font = ImageFont.load_default()
   font_size = 100
   font = ImageFont.truetype("Arial.ttf", font_size)
+  draw = ImageDraw.Draw(bg)
 
-  def draw_notes_on_image(bg_path, notes, note_to_char):
-    bg = Image.open(bg_path)
-    draw = ImageDraw.Draw(bg)
+  x_offset = 10  # start drawing 10 pixels from the left
+  y_position = bg.height // 2  # middle of the image
 
-    x_offset = 10  # start drawing 10 pixels from the left
-    y_position = bg.height // 2  # middle of the image
+  for note, _ in notes:
+    char = note_to_char.get(note, '?')
+    draw.text((x_offset, y_position - font_size // 2), char, font=font, fill=(255, 255, 255))
+    x_offset += font_size + 5  # 5 pixels space between each character
 
-    for note, _ in notes:
-      char = note_to_char.get(note, '?')
-      draw.text((x_offset, y_position - font_size // 2), char, font=font, fill=(255, 255, 255))
-      x_offset += font_size + 5  # 5 pixels space between each character
+  return bg
 
-    return bg
 
-  bg_with_notes = draw_notes_on_image(bg_path, notes, note_to_char)
+def main():
+  notes = midi_to_chars(mid)
+  bg = Image.open(bg_path)
+  bg_width, bg_height = bg.size
+  
+  
+  play_midi(midi_file_path)
+  
+  bg_with_notes = draw_notes_on_image(bg,bg_width, bg_height, notes, note_to_char)
   # Convert PIL Image to Pygame Surface
   bg_pygame = pygame.image.fromstring(bg_with_notes.tobytes(), bg_with_notes.size, bg_with_notes.mode)
 
@@ -115,8 +116,6 @@ def show():
 
   pygame.quit()
 
-
-def main():
   return
 
 
