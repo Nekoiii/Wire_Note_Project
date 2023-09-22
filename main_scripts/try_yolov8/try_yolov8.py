@@ -13,6 +13,7 @@ import seaborn as sns
 from symbols_data import symbols_weights
 from config import CLASSES
 
+from ..draw_somethings import draw_box_and_label
 
 
 base_path = '/Users/a/code/Wire_Note_Project/try_yolov8/'
@@ -56,12 +57,6 @@ def draw_notes(draw, x1, y1, x2, y2):
   draw.text((center_x, center_y), symbol, font=font, fill=symbol_color)
 
 
-def draw_box_and_label(draw, class_name, colors, x1, y1, x2, y2):
-  color_index = CLASSES.index(class_name)
-  color = colors[color_index]
-  draw.rectangle([(x1, y1), (x2, y2)], outline=color, width=2)
-  font = ImageFont.load_default()
-  draw.text((x1, y1 - 5), class_name, font=font, fill=color)
 
 
 def main():
