@@ -13,6 +13,8 @@ import seaborn as sns
 from symbols_data import symbols_weights
 from config import CLASSES
 
+
+
 base_path = '/Users/a/code/Wire_Note_Project/try_yolov8/'
 video_path = os.path.join(base_path, '../assets/videos/sky-3.MOV')
 print('file exists?', os.path.exists(video_path))
