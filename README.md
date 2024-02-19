@@ -2,8 +2,8 @@
 
 <br> 🎼 ♪ ♫ ♩ ♬ ♭ ♮ ♯
 
-【メモ】
-Power Lines Dataset：https://github.com/R3ab/ttpla_dataset 　　
+【メモ】  
+Power Lines Dataset：https://github.com/R3ab/ttpla_dataset   
 モデル訓練：fine_tune_yolov8.ipynb
 
 <br>【目標（まだまだ遠いだが ww）】  
