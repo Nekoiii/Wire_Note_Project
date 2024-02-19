@@ -2,6 +2,10 @@
 
 <br> 🎼 ♪ ♫ ♩ ♬ ♭ ♮ ♯
 
+【メモ】
+Power Lines Dataset：https://github.com/R3ab/ttpla_dataset 
+モデル訓練：fine_tune_yolov8.ipynb
+
 <br>【目標（まだまだ遠いだが ww）】  
 ・画像から「架線」の部分を自動的に検出し、それを五線譜として扱い、その上に音符を絵描く。  
 ・キーボードからの入力で対応する音符の画像を生成し、その画像を「架線」に載せる。  
@@ -55,3 +59,9 @@ music_processing/piano.py 　
 <br>
 <br>
 そして今はまだここで生成した png を「架線識別」のところに連携していないままです。
+
+
+
+
+
+
